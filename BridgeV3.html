@@ -462,6 +462,25 @@
   .windNote{font:700 10px var(--mono);color:#8ea0ab;margin-top:8px;line-height:1.6}
 
 
+
+  /* v14 quality pass: live build check + tactile construction feedback */
+  .buildCheck{position:absolute;right:16px;bottom:58px;z-index:11;width:208px;background:#0a0f12;border:1px solid #3b474f;border-left:3px solid #62e1ae;box-shadow:6px 7px 0 rgba(0,0,0,.18);padding:9px 10px;font-family:var(--mono);pointer-events:none}
+  .buildCheck[hidden]{display:none!important}.buildCheckHead{display:flex;justify-content:space-between;gap:10px;align-items:center;padding-bottom:7px;margin-bottom:5px;border-bottom:1px solid #263038}.buildCheckHead b{font-size:8px;letter-spacing:.13em;color:#dce6e8}.buildCheckHead span{font-size:7px;letter-spacing:.08em;color:#627078}
+  .buildCheckRow{display:grid;grid-template-columns:8px 1fr auto;gap:7px;align-items:center;padding:4px 0;color:#7e8b92;font:800 8px var(--mono);letter-spacing:.06em}.buildCheckRow i{width:6px;height:6px;border:1px solid #4b5961;background:#20292e}.buildCheckRow b{font-size:8px;color:#b8c3c7;font-weight:900}.buildCheckRow.ok i{background:#62e1ae;border-color:#62e1ae;box-shadow:0 0 8px rgba(98,225,174,.35)}.buildCheckRow.ok b{color:#62e1ae}.buildCheckRow.warn i{background:#d7b94d;border-color:#d7b94d}.buildCheckRow.warn b{color:#d7b94d}.buildCheckReady{margin-top:6px;padding-top:6px;border-top:1px solid #263038;color:#6c7b82;font:900 8px var(--mono);letter-spacing:.1em}.buildCheckReady.ready{color:#62e1ae}
+  body.tutorial-mode .buildCheck{display:none!important}
+
+  /* v20 gameplay quality: live telemetry + safety frame + result achievements */
+  .testTelemetry{position:absolute;right:16px;bottom:58px;z-index:12;width:224px;background:#080d10;border:1px solid #3c4850;border-left:3px solid #5da9ff;box-shadow:7px 8px 0 rgba(0,0,0,.2);padding:10px 11px;font-family:var(--mono);pointer-events:none;overflow:hidden}
+  .testTelemetry[hidden]{display:none!important}.testTelemetry::after{content:'';position:absolute;left:0;right:0;height:1px;top:-2px;background:linear-gradient(90deg,transparent,rgba(93,169,255,.85),transparent);animation:telemetryScan 1.55s linear infinite}
+  @keyframes telemetryScan{from{transform:translateY(0)}to{transform:translateY(150px)}}
+  .telemetryHead{display:flex;align-items:center;justify-content:space-between;padding-bottom:7px;margin-bottom:7px;border-bottom:1px solid #29343b}.telemetryHead b{font:900 8px var(--mono);letter-spacing:.14em;color:#e4ebee}.telemetryMode{font:900 7px var(--mono);letter-spacing:.09em;color:#5da9ff;border:1px solid #315576;padding:3px 5px;background:#0b151d}.telemetryMode.dynamic{color:#e6c75e;border-color:#6f5b28;background:#18150c}
+  .telemetryProgress{height:5px;border:1px solid #2e3a42;background:#05090b;margin-bottom:8px;overflow:hidden}.telemetryProgress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#377baf,#67b7ef);transition:width .08s linear}
+  .telemetryRow{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center;padding:4px 0;color:#76858d;font:800 8px var(--mono);letter-spacing:.055em}.telemetryRow b{color:#c7d3d8;font:900 8px var(--mono);text-align:right}.telemetryRow b.warn{color:#e3c45b}.telemetryRow b.danger{color:#ef7c8c}.telemetryMiniBar{grid-column:1/3;height:3px;background:#151e23;border:1px solid #28333a;overflow:hidden;margin-top:-1px}.telemetryMiniBar i{display:block;height:100%;width:0;background:#62e1ae;transition:width .08s linear}.telemetryMiniBar i.warn{background:#d7b94d}.telemetryMiniBar i.danger{background:#ed6677}.telemetryFoot{margin-top:7px;padding-top:6px;border-top:1px solid #273139;display:flex;justify-content:space-between;color:#5f6d74;font:900 7px var(--mono);letter-spacing:.08em}.telemetryFoot strong{color:#9eabb0;font-weight:900}
+  .testDangerFrame{position:absolute;inset:0;z-index:9;pointer-events:none;opacity:0;transition:opacity .12s ease;box-shadow:inset 0 0 70px rgba(215,185,77,.24);border:1px solid rgba(215,185,77,.14)}.testDangerFrame.danger{box-shadow:inset 0 0 88px rgba(237,102,119,.3);border-color:rgba(237,102,119,.24)}
+  body.tutorial-mode .testTelemetry,body.tutorial-mode .testDangerFrame{display:none!important}
+  .achievementStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 2px}.achievement{border:1px solid #343f47;background:#0b1013;padding:8px 7px;min-width:0}.achievement b{display:block;color:#64727a;font:900 8px var(--mono);letter-spacing:.07em}.achievement span{display:block;margin-top:4px;color:#59666d;font:800 8px var(--mono);letter-spacing:.04em}.achievement.earned{border-color:#3f8068;background:#0e1714}.achievement.earned b{color:#62e1ae}.achievement.earned span{color:#9fcfbd}.achievement.missed{opacity:.58}
+  .engineeringGrade{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #354149;border-bottom:1px solid #354149;padding:9px 0;margin:10px 0;color:#738188;font:900 8px var(--mono);letter-spacing:.1em}.engineeringGrade strong{font:900 18px var(--mono);color:#62e1ae;letter-spacing:.03em}.engineeringGrade strong.gradeB{color:#d7b94d}.engineeringGrade strong.gradeC{color:#ed8b66}
+
   /* ===== TRUSS EDUCATION CENTER ===== */
   .educationScreen,.endingScreen{position:fixed;inset:0;z-index:4200;background:#080b0e;color:#dce5e9;font-family:var(--mono)}
   .educationScreen[hidden],.endingScreen[hidden]{display:none!important}
@@ -521,8 +540,8 @@
   .budgetRail.warn>i{background:var(--console-amber)}
   .budgetRail.bad>i{background:var(--console-red)}
   .stageBtn{position:relative}
-  .stageBtn.cleared::after{content:'✓';position:absolute;right:-5px;top:-7px;width:14px;height:14px;display:grid;place-items:center;background:#0b120e;border:1px solid var(--console-green);color:var(--console-green);font:900 9px var(--mono);line-height:1}
-  .stageBtn.cleared.active::after{background:#07110b;color:#bdf6cd;border-color:#bdf6cd}
+  .stageBtn.cleared::before{content:'✓';position:absolute;right:3px;top:3px;width:13px;height:13px;display:grid;place-items:center;box-sizing:border-box;background:#0b120e;border:1px solid var(--console-green);color:var(--console-green);font:900 8px/1 var(--mono);z-index:3;pointer-events:none}
+  .stageBtn.cleared.active::before{background:#07110b;color:#bdf6cd;border-color:#bdf6cd}
   .toolBtn kbd{position:absolute;right:4px;top:3px;color:#65727a;font:800 8px var(--mono);pointer-events:none}
   .toolBtn.active kbd{color:#8bdca6}
   .metric b{font-variant-numeric:tabular-nums}
@@ -812,6 +831,160 @@
   .clearTimeTag{display:block;margin-top:7px;color:#62e1ae;font:800 8px var(--mono);letter-spacing:.12em}
   @media(max-width:1180px){.stageClockMetric{min-width:96px!important}.stageClockMetric b{font-size:15px!important}.metric{padding-left:6px!important;padding-right:6px!important}}
 
+
+
+  /* v13 — event-driven dedicated tutorial stage */
+  .tutorialStepHidden{display:none!important}
+  body.tutorial-mode #infoPanel,
+  body.tutorial-mode #coachPanel,
+  body.tutorial-mode .legend,
+  body.tutorial-mode .stageStrip,
+  body.tutorial-mode .rightTools,
+  body.tutorial-mode #eduTopBtn,
+  body.tutorial-mode #scanBtn,
+  body.tutorial-mode #topToolsWrap{display:none!important}
+  body.tutorial-mode .hud .metric:not(:first-child){display:none!important}
+  body.tutorial-mode .hud{justify-content:center}
+  body.tutorial-mode .bottom{grid-template-columns:1fr!important;justify-items:center}
+  body.tutorial-mode .tools{justify-content:center;min-height:48px}
+  body.tutorial-mode .main{isolation:isolate}
+  body.tutorial-mode .modeBadge{top:14px!important;left:50%!important;transform:translateX(-50%);right:auto!important}
+  body.tutorial-mode #testBtn{margin-left:0}
+  body.tutorial-mode .viewControls{z-index:6150!important}
+  body.tutorial-mode .toolBtn,
+  body.tutorial-mode .viewBtn,
+  body.tutorial-mode #testBtn{z-index:6150}
+  body.tutorial-mode .stageTutorialDim{background:linear-gradient(90deg,rgba(5,8,10,.16),transparent 35%,transparent 65%,rgba(5,8,10,.1))}
+  .stageTutorialPanel{left:50%!important;right:auto!important;bottom:118px!important;width:min(520px,calc(100vw - 48px))!important;transform:translateX(-50%)!important}
+  .stageTutorialHead b::before{content:'GUIDED // ';color:#d7b94d}
+  .stageTutorialStatus{display:flex;align-items:center;gap:8px;color:#78868d;font:900 9px var(--mono);letter-spacing:.09em}
+  .stageTutorialStatus i{width:7px;height:7px;border:1px solid #62e1ae;background:#173229;box-shadow:0 0 0 3px rgba(98,225,174,.08)}
+  .stageTutorialStatus.done{color:#62e1ae}.stageTutorialStatus.done i{background:#62e1ae}
+  .stageTutorialActions{min-height:34px}
+  .tutorialAutoNote{color:#65737b;font:800 8.5px/1.45 var(--mono);letter-spacing:.05em;max-width:210px}
+  .tutorialFocus{position:relative!important;z-index:6200!important;outline:2px solid #62e1ae!important;outline-offset:4px!important;box-shadow:0 0 0 7px rgba(98,225,174,.11),3px 3px 0 rgba(0,0,0,.25)!important;animation:tutorialFocusPulse 1s ease-in-out infinite}
+  .tutorialFocusAmber{position:relative!important;z-index:6200!important;outline:2px solid #d7b94d!important;outline-offset:4px!important;box-shadow:0 0 0 7px rgba(215,185,77,.11)!important;animation:tutorialFocusPulse 1s ease-in-out infinite}
+  @keyframes tutorialFocusPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.18)}}
+  .tutorialCanvasMarker{width:34px!important;height:34px!important;border:2px solid #62e1ae!important;box-shadow:0 0 0 8px rgba(98,225,174,.09)!important}
+  .tutorialCanvasMarker::after{content:'';position:absolute;left:50%;top:50%;width:6px;height:6px;transform:translate(-50%,-50%);background:#62e1ae}
+  .tutorialStageBadge{position:absolute;right:18px;top:18px;z-index:26;border:1px solid #44515a;border-left:3px solid #d7b94d;background:#0a0f12;padding:9px 12px;color:#819098;font:800 9px var(--mono);letter-spacing:.08em;pointer-events:none}
+  .tutorialStageBadge b{display:block;color:#e9d06d;font-size:10px;margin-bottom:3px}
+
+  .creditScreen{position:fixed;inset:0;z-index:5100;display:grid;place-items:center;background:#080c10;color:#dce5e9;font-family:var(--mono)}
+  .creditScreen[hidden]{display:none!important}
+  .creditScreen::before{content:'';position:absolute;inset:0;opacity:.22;background-image:linear-gradient(rgba(98,225,174,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(98,225,174,.07) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+  .creditShell{position:relative;width:min(900px,calc(100vw - 72px));border:1px solid #3b474f;border-left:4px solid #62e1ae;background:#0b1014;padding:34px 38px 30px;box-shadow:12px 12px 0 rgba(0,0,0,.22)}
+  .creditKicker{font:900 9px var(--mono);letter-spacing:.18em;color:#62e1ae;margin-bottom:13px}
+  .creditShell h1{margin:0 0 20px;color:#f0f5f6;font:900 28px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .creditRule{height:1px;background:#334048;margin:0 0 23px}
+  .creditCopy{display:grid;gap:20px;color:#e1e8eb;font:750 15px/2.02 var(--mono);word-break:keep-all;letter-spacing:-.01em;text-shadow:0 1px 0 rgba(0,0,0,.55)}
+  .creditCopy p{margin:0}
+  .creditCopy strong{color:#ffffff;font-weight:900}
+  .creditSource{margin-top:24px;padding:14px 16px;border:1px solid #46535c;border-left:3px solid #d7b94d;background:#090d10;color:#aebbc1;font:800 10px/1.75 var(--mono);letter-spacing:.045em}.creditLink{display:inline-block;margin-top:10px;color:#62e1ae;text-decoration:none;border-bottom:1px solid rgba(98,225,174,.55);font:900 11px/1.6 var(--mono);letter-spacing:.02em}.creditLink:hover{color:#b9f7df;border-bottom-color:#b9f7df}
+  .creditActions{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:26px;padding-top:20px;border-top:1px solid #2d373e}
+  .creditNotice{color:#65737b;font:800 9px/1.5 var(--mono);letter-spacing:.06em}
+  .creditConfirm{appearance:none;border:1px solid #62e1ae;background:#62e1ae;color:#07100d;padding:13px 18px;border-radius:0;font:900 11px var(--mono);letter-spacing:.08em;cursor:pointer;box-shadow:3px 3px 0 #214d3d;white-space:nowrap}
+  .creditConfirm:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 #214d3d}.creditConfirm:active{transform:translate(3px,3px);box-shadow:0 0 0 #214d3d}
+
+
+  /* v18 — student-facing micro quality pass */
+  .stageFlash{position:absolute;left:50%;top:84px;z-index:75;min-width:300px;transform:translate(-50%,-14px);opacity:0;pointer-events:none;border:1px solid #40505a;border-left:3px solid #62e1ae;background:#091015;padding:10px 14px;box-shadow:7px 7px 0 rgba(0,0,0,.18);transition:opacity .16s ease,transform .16s ease;font-family:var(--mono)}
+  .stageFlash.show{opacity:1;transform:translate(-50%,0)}
+  .stageFlash b{display:block;color:#eef5f3;font:900 11px var(--mono);letter-spacing:.13em}.stageFlash span{display:block;margin-top:4px;color:#738189;font:800 8px var(--mono);letter-spacing:.1em}
+  .stageFlash::after{content:'';position:absolute;left:0;bottom:-1px;width:35%;height:1px;background:#62e1ae;box-shadow:0 0 10px rgba(98,225,174,.35)}
+  body.tutorial-mode .stageFlash{display:none!important}
+  .topMenuItem .stateChip{margin-left:auto;min-width:36px;padding:3px 5px;border:1px solid #3c4850;color:#77858c;text-align:center;font:900 8px var(--mono);letter-spacing:.06em;font-style:normal}
+  .topMenuItem .stateChip.on{border-color:#3d8268;color:#62e1ae;background:#0c1914}
+  .scoreBox b.counting{font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(98,225,174,.16)}
+  .resultGrid .scoreBox{position:relative;overflow:hidden}
+  .resultGrid .scoreBox::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,rgba(98,225,174,.55),transparent);transform:scaleX(0);transform-origin:left;transition:transform .55s ease}
+  .modal.show .resultGrid .scoreBox::after{transform:scaleX(1)}
+  #testBtn.testReady:not(.stop){animation:testReadyPulse 1.8s ease-in-out infinite}
+  @keyframes testReadyPulse{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),3px 3px 0 rgba(0,0,0,.22),0 0 0 rgba(98,225,174,0)!important}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),3px 3px 0 rgba(0,0,0,.22),0 0 14px rgba(98,225,174,.18)!important}}
+  @media (prefers-reduced-motion:reduce){#testBtn.testReady{animation:none!important}.stageFlash{transition:none!important}}
+
+
+  /* v19 — visual material & texture pass */
+  :root{
+    --plate-0:#080d11;--plate-1:#0d1419;--plate-2:#131c22;--plate-edge:#46535d;
+    --hairline:rgba(255,255,255,.045);--microgrid:rgba(98,225,174,.025)
+  }
+  .topbar,.bottom{
+    background-color:var(--plate-0)!important;
+    background-image:
+      linear-gradient(180deg,rgba(255,255,255,.035),transparent 32%),
+      repeating-linear-gradient(90deg,transparent 0 47px,rgba(255,255,255,.018) 47px 48px)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),inset 0 -1px 0 rgba(0,0,0,.55)!important;
+  }
+  .topbar::before,.bottom::after{content:'';position:absolute;left:0;right:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent 0,#2e3a42 8%,#62707a 50%,#2e3a42 92%,transparent 100%);opacity:.65}
+  .topbar::before{top:0}.bottom::after{bottom:0}
+  .metric{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.016),rgba(0,0,0,.04));}
+  .metric::after{content:'';position:absolute;left:10px;right:10px;bottom:-4px;height:1px;background:linear-gradient(90deg,transparent,#303b43,transparent)}
+  .metric b{text-shadow:0 1px 0 #000,0 0 10px rgba(230,240,244,.03)}
+
+  .leftPanel,.coach,.viewControls,.legend,.buildCheck,.toolsMenu,.stageTutorialPanel,.tutorialStageBadge,
+  .modal .card,.card,.resultCard,.hoverInspector{
+    background-color:#0b1115!important;
+    background-image:
+      linear-gradient(180deg,rgba(255,255,255,.026),transparent 42px),
+      repeating-linear-gradient(0deg,transparent 0 27px,rgba(255,255,255,.012) 27px 28px),
+      repeating-linear-gradient(90deg,transparent 0 27px,var(--microgrid) 27px 28px)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),inset 0 0 0 1px rgba(0,0,0,.3),5px 6px 0 rgba(0,0,0,.19)!important;
+  }
+  .leftPanel,.coach{border-top-color:#53616b!important;border-bottom-color:#303b43!important}
+  .panelTitle,.coachHead,.toolsMenuHead,.buildCheckHead{
+    background-image:linear-gradient(90deg,rgba(255,255,255,.022),transparent 72%);
+  }
+  .panelTitle::after,.coachHead::after{content:'';width:34px;height:1px;margin-left:auto;background:linear-gradient(90deg,currentColor,transparent);opacity:.18}
+  .goal,.coachBody{letter-spacing:.005em;text-shadow:0 1px 0 rgba(0,0,0,.7)}
+  .coachTip,.tutorialBox,.materialNote{
+    background-color:#0a1014!important;
+    background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.014) 0 1px,transparent 1px 7px)!important;
+  }
+  .legend{box-shadow:inset 0 1px 0 rgba(255,255,255,.04),3px 3px 0 rgba(0,0,0,.18)!important}
+  .legend .sw{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 0 rgba(0,0,0,.7)}
+
+  .iconBtn,.toolBtn,.stageBtn,.collapseBtn,.viewBtn,.presetBtn,.topMenuItem,.eduControlBtn,.eduTechBtn,.difficultyBtn{
+    background-color:#11181d!important;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.005) 42%,rgba(0,0,0,.10))!important;
+    border-top-color:#5a6670!important;border-left-color:#4b5760!important;border-right-color:#303940!important;border-bottom-color:#293138!important;
+    text-shadow:0 1px 0 rgba(0,0,0,.85);
+  }
+  .iconBtn:hover,.toolBtn:hover,.stageBtn:hover,.collapseBtn:hover,.viewBtn:hover,.presetBtn:hover,.topMenuItem:hover,.eduControlBtn:hover,.eduTechBtn:hover{
+    background-color:#172027!important;filter:none!important;border-top-color:#74828d!important;
+  }
+  .toolBtn.active,.stageBtn.active,.viewBtn.toggled,.iconBtn.isOn,.eduControlBtn.active{
+    background-image:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.015) 46%,rgba(0,0,0,.14))!important;
+  }
+  .toolBtn::after,.stageBtn::after,.iconBtn::after,.viewBtn::after{
+    opacity:.38!important;
+  }
+  .toolIcon{filter:drop-shadow(0 1px 0 rgba(0,0,0,.8));}
+  .primaryBtn,#testBtn,.titleStart,.creditConfirm{
+    background-image:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.02) 45%,rgba(0,0,0,.11))!important;
+    text-shadow:0 1px 0 rgba(255,255,255,.18);
+  }
+  .primaryBtn::before,#testBtn::before,.titleStart::before,.creditConfirm::before{content:'';position:absolute;left:5px;right:5px;top:4px;height:1px;background:rgba(255,255,255,.28);pointer-events:none}
+  .primaryBtn,#testBtn,.titleStart,.creditConfirm{position:relative;overflow:hidden}
+
+  .stageBtn{position:relative;background-image:linear-gradient(180deg,#161e24,#10161a)!important}
+  .stageBtn:not(.active)::before{content:'';position:absolute;left:4px;top:4px;width:3px;height:3px;background:#59646d;box-shadow:35px 0 0 #59646d,0 35px 0 #303940,35px 35px 0 #303940;opacity:.7}
+  .stageBtn.active::before{background:#d8ffe3;box-shadow:35px 0 0 #d8ffe3,0 35px 0 #6bc98c,35px 35px 0 #6bc98c}
+
+  .bar,.budgetRail,.eduBarTrack{background-image:repeating-linear-gradient(90deg,#090d10 0 8px,#0c1216 8px 10px)!important}
+  .bar>i,.budgetRailFill,.eduBarTrack i{box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 0 8px rgba(98,225,174,.08)}
+
+  .creditShell,.titleShell,.loadingShell,.endingShell{
+    background-color:#090e12!important;
+    background-image:
+      linear-gradient(180deg,rgba(255,255,255,.03),transparent 80px),
+      repeating-linear-gradient(0deg,transparent 0 31px,rgba(255,255,255,.012) 31px 32px),
+      repeating-linear-gradient(90deg,transparent 0 31px,rgba(98,225,174,.018) 31px 32px)!important;
+  }
+  .creditSource,.quizQ,.eduPanel,.eduViz{box-shadow:inset 0 1px 0 rgba(255,255,255,.025),3px 3px 0 rgba(0,0,0,.14)}
+
+  canvas{background:#a49cc3;image-rendering:auto}
+
 </style>
 </head>
 <body>
@@ -826,7 +999,7 @@
 <div class="pregameScreen" id="titleScreen" role="dialog" aria-label="TRUSS LAB 타이틀 화면">
   <div class="titleBlueprint"></div>
   <section class="titleShell">
-    <div class="titleCorner tl">SYS // TRUSS-LAB_10</div>
+    <div class="titleCorner tl">SYS // TRUSS-LAB_20</div>
     <div class="titleCorner br">STRUCTURAL SIMULATION CONSOLE<br>EDUCATIONAL BUILD</div>
     <div class="titleKicker">Bridge Engineering Arcade</div>
     <h1 class="gameTitle">TRUSS <span class="outline">LAB</span></h1>
@@ -845,6 +1018,23 @@
       <div class="difficultySummary" id="difficultySummary"><strong>EASY //</strong> BASE BUDGET +35% · VEHICLE LOAD -22% · DEFLECTION LIMIT +18%</div>
     </div>
     <div class="titleActions"><button class="titleStart" id="titleStartBtn">▶ START SIMULATION</button><button class="titleSecondary" id="titleEduBtn" hidden>TRUSS EDUCATION</button><span class="titleHint">교육용 모델 · 실제 교량 안전 판정용이 아닙니다</span></div>
+  </section>
+</div>
+
+<div class="creditScreen" id="creditScreen" hidden role="dialog" aria-modal="true" aria-label="교육용 프로젝트 안내 및 크레딧">
+  <section class="creditShell">
+    <div class="creditKicker">PROJECT NOTICE // EDUCATIONAL CREDIT</div>
+    <h1>TRUSS LAB // PROJECT CREDIT</h1>
+    <div class="creditRule"></div>
+    <div class="creditCopy">
+      <p>본 게임은 학생들이 교량 설계 및 건설 과정을 직접 체험하며 구조역학과 물리 법칙의 원리를 직관적으로 이해할 수 있도록 개발된 <strong>비영리 교육용 프로젝트</strong>입니다.</p>
+      <p>게임의 교량 설계·건설 시스템 및 게임 메커니즘은 Dry Cactus사의 <strong>「Poly Bridge」</strong>에서 영감을 받아 교육적 목적에 맞게 재구성하였습니다.</p>
+    </div>
+    <div class="creditSource">ORIGINAL ASSETS / UI / CODE // TRUSS LAB EDUCATIONAL PROJECT<br>INSPIRATION CREDIT // POLY BRIDGE · DRY CACTUS<br><a class="creditLink" href="https://store.steampowered.com/app/1062160/Poly_Bridge_2/" target="_blank" rel="noopener noreferrer">POLY BRIDGE 2 // STEAM STORE ↗</a></div>
+    <div class="creditActions">
+      <span class="creditNotice">이 안내를 확인한 뒤 튜토리얼 스테이지가 시작됩니다.</span>
+      <button class="creditConfirm" id="creditConfirmBtn">이를 확인하였습니다 →</button>
+    </div>
   </section>
 </div>
 
@@ -969,17 +1159,20 @@
 </div>
 
 
-<div class="stageTutorial" id="stageTutorial" hidden aria-label="Stage 01 건설 튜토리얼">
+<div class="stageTutorial" id="stageTutorial" hidden aria-label="TRUSS LAB 튜토리얼 스테이지">
   <div class="stageTutorialDim"></div>
   <div class="tutorialCanvasMarker" id="tutorialCanvasMarker" hidden></div>
   <section class="stageTutorialPanel" id="stageTutorialPanel">
-    <div class="stageTutorialHead"><b>STAGE 01 // BUILD TUTORIAL</b><span id="stageTutorialStep">01 / 07</span></div>
+    <div class="stageTutorialHead"><b>TUTORIAL STAGE</b><span id="stageTutorialStep">01 / 13</span></div>
     <div class="stageTutorialBody">
       <div class="tutorialMini" id="tutorialMini"></div>
-      <div class="stageTutorialCopy"><h3 id="stageTutorialTitle">자재를 선택하세요</h3><p id="stageTutorialText"></p></div>
+      <div class="stageTutorialCopy"><h3 id="stageTutorialTitle">입력을 기다리는 중</h3><p id="stageTutorialText"></p></div>
     </div>
     <div class="stageTutorialHint" id="stageTutorialHint"></div>
-    <div class="stageTutorialActions"><div class="tutorialDots" id="tutorialDots"></div><div style="display:flex;gap:7px"><button class="tutorialBtn skip" id="tutorialSkip">SKIP</button><button class="tutorialBtn" id="tutorialPrev">← BACK</button><button class="tutorialBtn next" id="tutorialNext">NEXT →</button></div></div>
+    <div class="stageTutorialActions">
+      <div><div class="stageTutorialStatus" id="tutorialStatus"><i></i><span>WAITING FOR INPUT</span></div><div class="tutorialAutoNote">정답 행동을 직접 수행하면 자동으로 다음 훈련으로 넘어갑니다.</div></div>
+      <button class="tutorialBtn skip" id="tutorialSkip">SKIP TUTORIAL</button>
+    </div>
   </section>
 </div>
 
@@ -1010,6 +1203,7 @@
             <button class="topMenuItem" id="measureBtn" title="두 관절 거리 측정 (R)"><i>↔</i><span><b>MEASURE</b><small>관절 간 거리 측정</small></span></button>
             <button class="topMenuItem" id="speedBtn" title="시험 속도"><i>1×</i><span><b>SIM SPEED</b><small>시험 재생 속도</small></span></button>
             <button class="topMenuItem" id="fullBtn" title="전체 화면"><i>⛶</i><span><b>FULLSCREEN</b><small>전체 화면 전환</small></span></button>
+            <button class="topMenuItem" id="sfxBtn" title="효과음 켜기/끄기"><i>♪</i><span><b>INTERACTION SFX</b><small>설치·시험 피드백 효과음</small></span><em class="stateChip on" id="sfxState">ON</em></button>
           </div>
           <div class="topToolsGroup dangerGroup">
             <span class="topToolsLabel">SYSTEM</span>
@@ -1050,7 +1244,26 @@
     </div>
 
     <div class="legend"><span><i class="sw t"></i>인장</span><span><i class="sw c"></i>압축</span><span><i class="sw l"></i>하중</span><span><i class="sw r"></i>반력</span></div>
-    <div class="toast" id="toast">메시지</div>
+    <div class="toast" id="toast">메시지</div><div class="stageFlash" id="stageFlash"><b>STAGE READY</b><span>STRUCTURAL WORKSPACE INITIALIZED</span></div>
+    <div class="buildCheck" id="buildCheck" aria-live="polite">
+      <div class="buildCheckHead"><b>BUILD CHECK</b><span>PRE-TEST</span></div>
+      <div class="buildCheckRow" id="checkRoad"><i></i><span>ROAD PATH</span><b>OPEN</b></div>
+      <div class="buildCheckRow" id="checkTruss"><i></i><span>TRUSS FRAME</span><b>WEAK</b></div>
+      <div class="buildCheckRow" id="checkBudget"><i></i><span>BUDGET</span><b>OK</b></div>
+      <div class="buildCheckReady" id="buildCheckReady">BUILD IN PROGRESS</div>
+    </div>
+    <div class="testTelemetry" id="testTelemetry" hidden aria-live="polite">
+      <div class="telemetryHead"><b>LIVE TEST TELEMETRY</b><span class="telemetryMode" id="telemetryMode">STATIC SOLVER</span></div>
+      <div class="telemetryProgress"><i id="telemetryProgressFill"></i></div>
+      <div class="telemetryRow"><span>VEHICLE PROGRESS</span><b id="telemetryProgressText">0%</b></div>
+      <div class="telemetryRow"><span>PEAK MEMBER LOAD</span><b id="telemetryStressText">0%</b><div class="telemetryMiniBar"><i id="telemetryStressBar"></i></div></div>
+      <div class="telemetryRow"><span>DECK / NODE DROP</span><b id="telemetryDeflText">0.0</b><div class="telemetryMiniBar"><i id="telemetryDeflBar"></i></div></div>
+      <div class="telemetryRow"><span>FRACTURES</span><b id="telemetryBrokenText">0</b></div>
+      <div class="telemetryRow" id="telemetryShipRow" hidden><span>VESSEL PASS</span><b id="telemetryShipText">0%</b></div>
+      <div class="telemetryFoot"><span>CONTACT</span><strong id="telemetryContact">ROAD CONTACT</strong></div>
+    </div>
+    <div class="testDangerFrame" id="testDangerFrame"></div>
+
 
     <div class="modal" id="introModal">
       <div class="card">
@@ -1136,13 +1349,21 @@ const stages = [
    deck:[[170,390],[310,390],[450,390],[590,390],[730,390],[870,390],[1010,390]], forbidden:[], vehicle:'CAR', bg:'valley'},
   {name:'STAGE 02', type:'TRUSS', title:'트러스교 · 하중 분산', goal:'도로를 직접 놓은 뒤 더 무거운 버스를 위해 연속 삼각형을 구성하세요. 중앙부는 필요하면 강화 도로로 보강할 수 있습니다.', tutorial:'① 버스는 1단계보다 무겁습니다. ② 긴 압축재 하나에 의존하지 말고 여러 개의 짧은 삼각형으로 힘을 나누세요. ③ 위험한 압축재는 길이를 줄이거나 강철로 바꿔 비교해 보세요.', budget:12000, load:23000, maxDefl:52,
    deck:[[150,340],[290,365],[430,390],[570,415],[710,440],[850,465],[990,490]], forbidden:[], vehicle:'BUS', bg:'slope'},
-  {name:'STAGE 03', type:'TRUSS', title:'트러스교 · 효율 설계', goal:'도로와 구조재 모두 NO BUILD ZONE을 피해 직접 건설하고 몬스터 트럭을 통과시키세요. 필요한 구간에는 강화 도로를 사용하세요.', tutorial:'① 중앙 NO BUILD ZONE을 피해 하중 경로를 우회시키세요. ② 목재로 기본 골격을 만들고 큰 힘이 걸리는 부재만 강철로 보강하세요. ③ 일부 부재가 끊어져도 남은 구조가 안정적이면 차량은 계속 진행합니다.', budget:15000, load:32000, maxDefl:58,
-   deck:[[145,405],[280,380],[415,350],[550,315],[685,280],[820,305],[955,335],[1085,365]], forbidden:[{x:505,y:350,w:180,h:250}], vehicle:'TRUCK', bg:'obstacle'},
+  {name:'STAGE 03', type:'TRUSS', title:'트러스교 · 항로 확보', goal:'중앙 선박 항로를 침범하지 않도록 도로와 구조재를 직접 건설하고, 몬스터 트럭과 통항 선박을 동시에 안전하게 통과시키세요.', tutorial:'① 중앙의 VESSEL NAVIGATION CHANNEL은 실제 배가 지나가는 항로이므로 어떤 자재도 침범할 수 없습니다. ② 항로 위쪽으로 충분한 통항 공간을 확보하면서 트러스 하중 경로를 구성하세요. ③ TEST를 누르면 트럭과 선박이 동시에 이동하므로 위·아래 동선을 모두 확인하세요.', budget:15000, load:32000, maxDefl:58,
+   deck:[[145,405],[280,380],[415,350],[550,315],[685,280],[820,305],[955,335],[1085,365]], forbidden:[{x:465,y:325,w:270,h:285,kind:'navigation'}], vehicle:'TRUCK', ship:{y:530,length:230,height:90,label:''}, bg:'obstacle'},
   {name:'STAGE 04', type:'CABLE', title:'케이블교 · 인장의 힘', goal:'긴 도로를 직접 연결한 뒤 강철 주탑과 케이블을 조합해 바닥판을 지지하세요. 케이블은 인장에만 효과적입니다.', tutorial:'① 강철로 주탑처럼 압축을 받는 골격을 세워보세요. ② 케이블은 길이 제한이 없고 인장에 강하므로 도로의 여러 지점을 주탑 쪽으로 연결하세요. ③ 케이블이 압축 상태가 되면 거의 역할을 못 한다는 점을 확인하세요.', budget:18000, load:28000, maxDefl:62,
    deck:[[130,390],[285,390],[440,390],[595,390],[750,390],[905,390],[1060,390]], forbidden:[], vehicle:'BUS', bg:'wide'},
   {name:'SANDBOX', type:'LAB', title:'자유 구조 실험실', goal:'예산 제한 없이 하중과 구조를 바꾸며 인장·압축·변형을 비교하세요.', tutorial:'하중 슬라이더와 예시 구조를 이용해 같은 형태에서 재료·높이·삼각형 수를 바꾸고 결과를 비교하세요. 일부 부재가 끊어진 뒤에도 남은 하중 경로가 차량을 지탱하는지 관찰해 보세요.', budget:999999, load:18000, maxDefl:95, sandbox:true,
    deck:[[130,390],[285,390],[440,390],[595,390],[750,390],[905,390],[1060,390]], forbidden:[], vehicle:'CAR', vehicleSkin:'#53aee6', bg:'wide'}
 ];
+
+const TUTORIAL_STAGE = {
+  name:'TUTORIAL', type:'TRAINING', title:'GUIDED BUILD LAB',
+  goal:'화면 조작부터 도로·트러스 건설, 관절 이동, TEST까지 직접 수행하며 조작을 익히는 전용 훈련 스테이지입니다.',
+  tutorial:'정답 행동을 직접 수행하면 다음 지시가 자동으로 열립니다.',
+  budget:99999, load:8000, maxDefl:90,
+  deck:[[280,390],[440,390],[600,390],[760,390],[920,390]], forbidden:[], vehicle:'CAR', bg:'valley', tutorialStage:true
+};
 
 const STAGE_BASE = stages.map(s=>({budget:s.budget,load:s.load,maxDefl:s.maxDefl}));
 const DIFFICULTY = {
@@ -1174,8 +1395,14 @@ applyDifficultyProfile();
 
 let W=1200,H=650,dpr=1, scaleX=1, scaleY=1;
 let stageIndex=0, stage=stages[0], nodes=[], members=[], history=[], redoHistory=[];
+const sessionClearedStages=new Set();
+// Stage-clear state is intentionally session-only. Remove legacy persisted clear flags.
+for(let i=0;i<4;i++)localStorage.removeItem('trusslab-best-'+i);
+localStorage.removeItem('trusslab-education-unlocked');
+let tutorialMode=false,tutorialStep=0,tutorialTransitioning=false,tutorialFlags={camera:false,rightClick:false,moved:false},tutorialDragStart=null,tutorialMoveTarget=null,tutorialTestRunning=false;
 let tool='road', selected=null, hoverNode=null, hoverMember=null, pointerWorld=null, stressMode=false, loadPathMode=false, measureMode=false, measureA=null, measureB=null, sim=null, anim=0, dragging=null;
 let currentAnalysis=null, lastFullAnalysis=null, totalCost=0, lastBroken=new Set();
+let buildFx=[],screenShake={power:0,until:0};
 let stageClock={elapsed:0,startedAt:0,running:false,finalMs:null,raf:0,pausedForResult:false};
 function formatStageTime(ms){
   ms=Math.max(0,Number(ms)||0);
@@ -1218,6 +1445,33 @@ function saveUIPref(key,value){try{localStorage.setItem('trusslab-ui-'+key,JSON.
 let gridVisible=readUIPref('grid',true), snapEnabled=readUIPref('snap',true), simSpeed=readUIPref('speed',1);
 if(![.5,1,1.5,2].includes(simSpeed))simSpeed=1;
 
+let sfxEnabled=readUIPref('sfx',true),audioCtx=null;
+function ensureAudio(){
+  if(!sfxEnabled)return null;
+  try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}catch(_){return null}
+}
+function playTone(freq=440,dur=.05,vol=.016,type='sine',delay=0,slide=0){
+  const ac=ensureAudio();if(!ac)return;
+  const t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+.02)
+}
+function playSfx(name){
+  if(!sfxEnabled)return;
+  if(name==='click'){playTone(530,.035,.008,'square');playTone(710,.025,.005,'sine',.018)}
+  else if(name==='select'){playTone(390,.045,.009,'triangle');playTone(620,.045,.008,'triangle',.03)}
+  else if(name==='node'){playTone(760,.05,.012,'sine');playTone(1040,.04,.008,'sine',.035)}
+  else if(name==='place'){playTone(310,.07,.012,'triangle');playTone(540,.06,.011,'triangle',.045);playTone(820,.035,.006,'sine',.085)}
+  else if(name==='test'){playTone(145,.11,.018,'triangle',0,85);playTone(290,.08,.009,'sine',.07)}
+  else if(name==='break'){playTone(190,.095,.02,'sawtooth',0,-95);playTone(92,.12,.011,'triangle',.03)}
+  else if(name==='success'){playTone(392,.10,.012,'triangle');playTone(523,.10,.012,'triangle',.09);playTone(659,.14,.012,'triangle',.18);playTone(784,.16,.009,'sine',.27)}
+  else if(name==='fail'){playTone(260,.12,.012,'triangle');playTone(196,.15,.012,'triangle',.09);playTone(130,.18,.012,'triangle',.19)}
+  else if(name==='stage'){playTone(440,.06,.009,'sine');playTone(660,.07,.009,'sine',.055)}
+}
+function updateSfxUI(){const b=$('#sfxBtn'),s=$('#sfxState');if(b)b.classList.toggle('isOn',sfxEnabled);if(s){s.textContent=sfxEnabled?'ON':'OFF';s.classList.toggle('on',sfxEnabled)}}
+function showStageFlash(title,sub='WORKSPACE READY'){
+  const el=$('#stageFlash');if(!el||tutorialMode||stage?.sandbox)return;
+  el.querySelector('b').textContent=title;el.querySelector('span').textContent=sub;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(showStageFlash.t);showStageFlash.t=setTimeout(()=>el.classList.remove('show'),1300);if(audioCtx)playSfx('stage')
+}
+
 function resize(){
   const r=canvas.getBoundingClientRect(); dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
   canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(r.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -1226,8 +1480,8 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 
-function worldToScreen(p){return {x:(W/2+(p.x-camera.x)*camera.zoom)*scaleX,y:(H/2+(p.y-camera.y)*camera.zoom)*scaleY};}
-function screenToWorld(x,y){const r=canvas.getBoundingClientRect();const sx=(x-r.left)/scaleX,sy=(y-r.top)/scaleY;return {x:camera.x+(sx-W/2)/camera.zoom,y:camera.y+(sy-H/2)/camera.zoom};}
+function worldToScreen(p){const r=canvas.getBoundingClientRect(),sx=r.width/W,sy=r.height/H;return {x:(W/2+(p.x-camera.x)*camera.zoom)*sx,y:(H/2+(p.y-camera.y)*camera.zoom)*sy};}
+function screenToWorld(x,y){const r=canvas.getBoundingClientRect(),sx=r.width/W,sy=r.height/H;const wx=(x-r.left)/Math.max(sx,1e-6),wy=(y-r.top)/Math.max(sy,1e-6);return {x:camera.x+(wx-W/2)/camera.zoom,y:camera.y+(wy-H/2)/camera.zoom};}
 function applyCamera(){ctx.translate(W/2,H/2);ctx.scale(camera.zoom,camera.zoom);ctx.translate(-camera.x,-camera.y)}
 function updateZoomText(){const z=$('#zoomText');if(z)z.textContent=`${Math.round(camera.zoom*100)}%`}
 function resetCamera(){camera={x:W/2,y:H/2,zoom:1};updateZoomText();draw()}
@@ -1248,9 +1502,59 @@ function segmentIntersectsRect(a,b,r){
   return segmentsIntersect(a,b,tl,tr)||segmentsIntersect(a,b,tr,br)||segmentsIntersect(a,b,br,bl)||segmentsIntersect(a,b,bl,tl);
 }
 function expandedRect(r,pad=0){return {x:r.x-pad,y:r.y-pad,w:r.w+pad*2,h:r.h+pad*2}}
+function pointInPolygon(p,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];const hit=((a.y>p.y)!==(b.y>p.y))&&(p.x<(b.x-a.x)*(p.y-a.y)/((b.y-a.y)||1e-9)+a.x);if(hit)inside=!inside;}return inside}
+function pointSegmentDistance(p,a,b){const vx=b.x-a.x,vy=b.y-a.y,den=vx*vx+vy*vy;if(den<1e-9)return dist(p,a);const t=clamp(((p.x-a.x)*vx+(p.y-a.y)*vy)/den,0,1),q={x:a.x+t*vx,y:a.y+t*vy};return dist(p,q)}
+function segmentSegmentDistance(a,b,c,d){if(segmentsIntersect(a,b,c,d))return 0;return Math.min(pointSegmentDistance(a,c,d),pointSegmentDistance(b,c,d),pointSegmentDistance(c,a,b),pointSegmentDistance(d,a,b))}
+function segmentIntersectsPolygon(a,b,poly,pad=0){if(pointInPolygon(a,poly)||pointInPolygon(b,poly))return true;for(let i=0;i<poly.length;i++){const c=poly[i],d=poly[(i+1)%poly.length];if(segmentsIntersect(a,b,c,d))return true;if(pad>0&&segmentSegmentDistance(a,b,c,d)<=pad)return true;}return false}
+function sampleCurve(points,t){
+  if(t<=points[0][0])return points[0][1];
+  for(let i=1;i<points.length;i++){
+    const [t1,v1]=points[i], [t0,v0]=points[i-1];
+    if(t<=t1){const u=(t-t0)/((t1-t0)||1e-9);return v0+(v1-v0)*u}
+  }
+  return points.at(-1)[1];
+}
+function shipGeometry(ship){
+  const Wv=(ship.length||230)*.9,Hv=(ship.height||90)*2.25;
+  const widthKeys=[
+    [-.99,.035],[-.94,.06],[-.88,.07],[-.80,.17],[-.72,.17],[-.68,.28],[-.58,.28],[-.53,.36],[-.34,.36],[-.30,.43],[-.05,.43],[.18,.38],[.29,.26],[.36,.02]
+  ];
+  const halfWidthAt=y=>Wv*sampleCurve(widthKeys,y/Hv);
+  const virtualLength=Wv*1.9;
+  const station01=s=>clamp(s/virtualLength,0,1);
+  const beamAtStation=s=>{
+    const u=station01(s);
+    const bow=Math.pow(Math.sin(Math.PI*clamp(u,0,1)),.58);
+    const stern=1-.18*Math.max(0,(u-.72)/.28);
+    return Wv*(.10+.90*bow)*stern;
+  };
+  const depthAt=y=>{
+    const yy=y/Hv;
+    if(yy<-.82)return virtualLength*.38;
+    if(yy<-.62)return virtualLength*.56;
+    if(yy<-.34)return virtualLength*.72;
+    if(yy<-.02)return virtualLength*.88;
+    return virtualLength;
+  };
+  const silhouette=(samples=56)=>{
+    const ys=[];for(let i=0;i<samples;i++)ys.push(-Hv*.99+(Hv*1.35)*(i/(samples-1)));
+    const left=ys.map(y=>[-halfWidthAt(y),y]);
+    const right=ys.slice().reverse().map(y=>[halfWidthAt(y),y]);
+    return [...left,...right];
+  };
+  return {Wv,Hv,virtualLength,halfWidthAt,depthAt,beamAtStation,station01,silhouette};
+}
+function navigationShipPolygons(r){
+  if(!stage.ship)return [];
+  const ship=stage.ship,cx=r.x+r.w*.5,cy=ship.y,sc=.94,geom=shipGeometry(ship);
+  const poly=geom.silhouette(50).map(([x,y])=>({x:cx+x*sc,y:cy+y*sc}));
+  return [poly];
+}
+function pointBlockedByForbidden(p){return stage.forbidden.some(r=>r.kind==='navigation'?navigationShipPolygons(r).some(poly=>pointInPolygon(p,poly)):pointInRect(p,r))}
+function segmentBlockedByForbidden(a,b,pad=0){return stage.forbidden.some(r=>r.kind==='navigation'?navigationShipPolygons(r).some(poly=>segmentIntersectsPolygon(a,b,poly,pad)):segmentIntersectsRect(a,b,expandedRect(r,pad)))}
 function connectionBlocked(a,b,mat=tool){
   const pad=(mat==='road'||mat==='roadHeavy')?(MAT[mat].roadWidth/2+2):0;
-  return stage.forbidden.some(r=>segmentIntersectsRect(a,b,expandedRect(r,pad)));
+  return segmentBlockedByForbidden(a,b,pad);
 }
 function nodeMoveKeepsClear(n,q){
   return members.filter(m=>m.user&&(m.a===n.id||m.b===n.id)).every(m=>{
@@ -1292,11 +1596,14 @@ function findRoadSegmentAtX(x,broken=new Set()){
 }
 
 function resetStage(idx=stageIndex){
+  if(tutorialMode)leaveTutorialVisualMode();
+  tutorialMode=false;
   stageIndex=idx; stage=stages[idx]; nodes=[]; members=[]; history=[]; redoHistory=[]; selected=null; sim=null; currentAnalysis=null; lastFullAnalysis=null; totalCost=0; stressMode=false; loadPathMode=false; measureMode=false; measureA=null; measureB=null; lastBroken=new Set(); $('#stressBtn')?.classList.remove('isOn'); $('#loadPathBtn')?.classList.remove('isOn'); $('#measureBtn')?.classList.remove('isOn'); updateMeasureTag?.(); hideInspector(); hoverNode=null; hoverMember=null; pointerWorld=null;
   stage.deck.forEach((p,i)=>nodes.push({id:i,x:p[0],y:p[1],deck:true,support:i===0?'pin':i===stage.deck.length-1?'roller':null,user:false,visible:i===0||i===stage.deck.length-1,activated:false}));
   updateHUD(); setCoach('start'); draw();
   $$('.stageBtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
   resetStageClock(!stage.sandbox);
+  if(!stage.sandbox)setTimeout(()=>showStageFlash(`${stage.name} // ${difficultyMode==='easy'?'EASY':'HARD'}`,stage.title.toUpperCase()),80);
 }
 
 function captureState(){
@@ -1350,20 +1657,109 @@ function triangleCount(){
 }
 function updateStageButtons(){
   $$('.stageBtn').forEach((b,i)=>{
-    const best=Number(localStorage.getItem('trusslab-best-'+i)||0);
-    b.classList.toggle('cleared',best>0);
-    b.title=best>0?`STAGE ${i+1} · 클리어 · BEST ${best}`:`STAGE ${i+1} · 미클리어`;
+    const cleared=sessionClearedStages.has(i);
+    b.classList.toggle('cleared',cleared);
+    b.title=cleared?`STAGE ${i+1} · 이번 실행에서 클리어`:`STAGE ${i+1}`;
     b.setAttribute('aria-label',b.title);
   });
 }
+function roadPathReady(){
+  if(!stage||!stage.deck?.length)return false;
+  const x0=stage.deck[0][0],x1=stage.deck.at(-1)[0];
+  for(let i=0;i<=10;i++)if(!findRoadSegmentAtX(x0+(x1-x0)*i/10,new Set()))return false;
+  return true;
+}
+function updateBuildCheck(){
+  const box=$('#buildCheck');if(!box)return;
+  if(stage?.sandbox||tutorialMode||sim){box.hidden=true;return}box.hidden=false;
+  const roadOK=roadPathReady();
+  const tri=triangleCount(),frameOK=tri>=2&&members.filter(m=>m.user&&!m.road).length>=4;
+  const budgetOK=totalCost<=stage.budget*2;
+  const set=(id,ok,good,bad)=>{const r=$(id);if(!r)return;r.className='buildCheckRow '+(ok?'ok':'warn');r.querySelector('b').textContent=ok?good:bad};
+  set('#checkRoad',roadOK,'CONNECTED','OPEN');
+  set('#checkTruss',frameOK,'BRACED',tri?`${tri} TRI`:'WEAK');
+  set('#checkBudget',budgetOK,'OK','OVER 200%');
+  const ready=roadOK&&frameOK&&budgetOK,el=$('#buildCheckReady');
+  if(el){el.textContent=ready?'READY // PRESS TEST':'BUILD IN PROGRESS';el.classList.toggle('ready',ready)}
+}
+function animateBuildFx(){if(!buildFx.length)return;draw();requestAnimationFrame(animateBuildFx)}
+function triggerBuildFx(a,b,mat){const wasEmpty=!buildFx.length;buildFx.push({a:{x:a.x,y:a.y},b:{x:b.x,y:b.y},mat,start:performance.now(),life:360});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
+function triggerNodeFx(p){const wasEmpty=!buildFx.length;buildFx.push({node:{x:p.x,y:p.y},start:performance.now(),life:300});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
+function kickShake(power=5,ms=180){screenShake.power=Math.max(screenShake.power,power);screenShake.until=Math.max(screenShake.until,performance.now()+ms)}
+function drawBuildFx(){
+  const now=performance.now();buildFx=buildFx.filter(f=>now-f.start<f.life);
+  for(const f of buildFx){const t=clamp((now-f.start)/f.life,0,1),fade=1-t;ctx.save();
+    if(f.node){ctx.strokeStyle=`rgba(98,225,174,${fade*.9})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(f.node.x,f.node.y,8+24*t,0,Math.PI*2);ctx.stroke();ctx.fillStyle=`rgba(240,216,75,${fade*.35})`;ctx.beginPath();ctx.arc(f.node.x,f.node.y,5+8*t,0,Math.PI*2);ctx.fill()}
+    else{const q=.12+.88*(1-Math.pow(1-t,3)),x=f.a.x+(f.b.x-f.a.x)*q,y=f.a.y+(f.b.y-f.a.y)*q;ctx.lineCap='round';ctx.lineWidth=f.mat==='cable'?4:(MAT[f.mat]?.roadWidth||9)+3;ctx.strokeStyle=`rgba(255,255,255,${fade*.32})`;ctx.beginPath();ctx.moveTo(f.a.x,f.a.y);ctx.lineTo(x,y);ctx.stroke();ctx.fillStyle=`rgba(98,225,174,${fade*.9})`;ctx.beginPath();ctx.arc(x,y,3+3*fade,0,Math.PI*2);ctx.fill()}
+    ctx.restore();
+  }
+}
+
+function drawInteractionReticle(){
+  if(!pointerWorld||sim||measureMode||tool==='delete')return;
+  let target=null,kind='GRID';
+  const n=findNode(pointerWorld,19);
+  if(n){target={x:n.x,y:n.y};kind=n.support?'SUPPORT':(n.deck?'ROAD NODE':'JOINT')}
+  else if(['wood','steel','cable','road','roadHeavy'].includes(tool)){
+    const dn=nearestDeckJoint(pointerWorld);if(dn){target={x:dn.x,y:dn.y};kind='ROAD GUIDE'}else target={x:snap(pointerWorld.x),y:snap(pointerWorld.y)};
+  }else if(tool==='move'&&hoverNode){target={x:hoverNode.x,y:hoverNode.y};kind='MOVE NODE'}
+  if(!target)return;
+  let valid=canPlace(target)||!!n;
+  if(selected&&['wood','steel','cable','road','roadHeavy'].includes(tool)&&dist(selected,target)>3)valid=valid&&!connectionBlocked(selected,target,tool);
+  const pulse=.5+.5*Math.sin(anim*.13);
+  ctx.save();
+  ctx.strokeStyle=valid?`rgba(98,225,174,${.48+.22*pulse})`:'rgba(237,102,119,.7)';ctx.lineWidth=1.4;ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(target.x,target.y,10+2*pulse,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(target.x-18,target.y);ctx.lineTo(target.x-7,target.y);ctx.moveTo(target.x+7,target.y);ctx.lineTo(target.x+18,target.y);ctx.moveTo(target.x,target.y-18);ctx.lineTo(target.x,target.y-7);ctx.moveTo(target.x,target.y+7);ctx.lineTo(target.x,target.y+18);ctx.stroke();
+  const label=`${kind} // ${Math.round(target.x)}, ${Math.round(target.y)}`;ctx.font='800 8px ui-monospace,monospace';const w=ctx.measureText(label).width+12;ctx.fillStyle='rgba(7,12,15,.78)';ctx.fillRect(target.x+14,target.y-24,w,16);ctx.fillStyle=valid?'rgba(171,239,210,.88)':'rgba(247,153,166,.92)';ctx.fillText(label,target.x+20,target.y-13);ctx.restore();
+}
+
+function updateTestTelemetry(){
+  const panel=$('#testTelemetry'),frame=$('#testDangerFrame');
+  if(!panel||!frame)return;
+  if(!sim||tutorialMode){panel.hidden=true;frame.style.opacity='0';frame.classList.remove('danger');return}
+  panel.hidden=false;
+  const dynamic=sim.mode==='collapse';
+  const mode=$('#telemetryMode');if(mode){mode.textContent=dynamic?'DYNAMIC PHYSICS':'STATIC SOLVER';mode.classList.toggle('dynamic',dynamic)}
+  let progress=clamp(sim.progress||0,0,1),ratio=sim.maxRatio||0,defl=sim.maxDefl||0,contact='ROAD CONTACT';
+  if(dynamic&&sim.physics){
+    const v=sim.physics.vehicle;
+    if(v){const x0=stage.deck[0][0],x1=stage.deck.at(-1)[0];progress=clamp((v.x-x0)/Math.max(1,x1-x0),0,1);contact=v.attached?'ROAD CONTACT':'AIRBORNE'}
+    defl=Math.max(defl,sim.physics.maxDrop||0);
+  }else if(sim.last?.ok){ratio=Math.max(ratio,sim.last.maxRatio||0);defl=Math.max(defl,sim.last.maxDefl||0)}
+  const pPct=Math.round(progress*100),stressPct=Math.round(ratio*100),deflPct=clamp(defl/Math.max(1,stage.maxDefl)*100,0,160);
+  const setText=(id,value,level='')=>{const el=$(id);if(!el)return;el.textContent=value;el.className=level};
+  $('#telemetryProgressFill').style.width=`${pPct}%`;setText('#telemetryProgressText',`${pPct}%`);
+  const stressLevel=stressPct>=100?'danger':stressPct>=80?'warn':'';setText('#telemetryStressText',`${stressPct}%`,stressLevel);
+  const sb=$('#telemetryStressBar');sb.style.width=`${clamp(stressPct,0,100)}%`;sb.className=stressLevel;
+  const deflLevel=deflPct>=100?'danger':deflPct>=72?'warn':'';setText('#telemetryDeflText',defl.toFixed(1),deflLevel);
+  const db=$('#telemetryDeflBar');db.style.width=`${clamp(deflPct,0,100)}%`;db.className=deflLevel;
+  setText('#telemetryBrokenText',String(sim.brokenCount||sim.broken?.size||0),(sim.brokenCount||sim.broken?.size||0)?'danger':'');
+  setText('#telemetryContact',contact,contact==='AIRBORNE'?'danger':'');
+  const shipRow=$('#telemetryShipRow');if(shipRow){shipRow.hidden=!stage.ship;if(stage.ship)setText('#telemetryShipText',`${Math.round(clamp(sim.shipProgress||0,0,1)*100)}%`)}
+  const hazard=Math.max(clamp(ratio,0,1.25),clamp(defl/Math.max(1,stage.maxDefl),0,1.25),dynamic ? .92 : 0);
+  frame.style.opacity=String(clamp((hazard-.68)*.72,0,.34));frame.classList.toggle('danger',hazard>=.98||dynamic);
+}
+
+function resultAchievements(success,s){
+  const underBudget=totalCost<=stage.budget, noFracture=(s.brokenCount||0)===0, stiff=(s.maxDefl||0)<=stage.maxDefl*.58;
+  const earned=[underBudget,noFracture,stiff].filter(Boolean).length;
+  const html=`<div class="achievementStrip">
+    <div class="achievement ${underBudget?'earned':'missed'}"><b>BUDGET DISCIPLINE</b><span>${underBudget?'WITHIN BASE BUDGET':'BASE BUDGET EXCEEDED'}</span></div>
+    <div class="achievement ${noFracture?'earned':'missed'}"><b>ZERO FRACTURE</b><span>${noFracture?'NO MEMBER BREAKS':'FRACTURE DETECTED'}</span></div>
+    <div class="achievement ${stiff?'earned':'missed'}"><b>STIFF DECK</b><span>${stiff?'LOW DEFLECTION':'DEFLECTION HIGH'}</span></div>
+  </div>`;
+  return {html,earned};
+}
+
 function updateHUD(){
-  totalCost=calcCost(); ui.stageName.textContent=stage.sandbox?stage.name:`${stage.name} · ${difficultyMode==='easy'?'EASY':'HARD'}`;ui.loadText.textContent=`${Math.round(stage.load/1000)} kN`;
+  totalCost=calcCost(); ui.stageName.textContent=tutorialMode?'TUTORIAL · TRAINING':(stage.sandbox?stage.name:`${stage.name} · ${difficultyMode==='easy'?'EASY':'HARD'}`);ui.loadText.textContent=`${Math.round(stage.load/1000)} kN`;
   ui.budgetText.textContent=stage.sandbox?`₩${totalCost.toLocaleString()} · 자유 설계`:`₩${totalCost.toLocaleString()} / ₩${stage.budget.toLocaleString()} (최대 ₩${(stage.budget*2).toLocaleString()})`; ui.budgetText.className=totalCost<=stage.budget?'good':totalCost<=stage.budget*2?'warn':'bad';
   if(ui.budgetRail&&ui.budgetRailFill){const cap=stage.sandbox?Math.max(totalCost,1):stage.budget*2;const pct=stage.sandbox?0:clamp(totalCost/cap*100,0,100);ui.budgetRailFill.style.width=`${pct}%`;ui.budgetRail.classList.toggle('warn',!stage.sandbox&&totalCost>stage.budget&&totalCost<=stage.budget*2);ui.budgetRail.classList.toggle('bad',!stage.sandbox&&totalCost>stage.budget*2);ui.budgetRail.style.opacity=stage.sandbox?'.25':'1'}
   updateStageButtons();
   ui.goalTitle.textContent=stage.title;ui.goalText.textContent=stage.goal;ui.bridgeTypeTag.textContent=stage.type;ui.triText.textContent=`${triangleCount()}개`;if(ui.tutorialText)ui.tutorialText.textContent=stage.tutorial||'';
   ui.test?.classList.toggle('testReady',stage.sandbox||totalCost<=stage.budget*2);
   if(!currentAnalysis){ui.stabilityText.textContent='분석 전';ui.stabilityBar.style.width='0%';ui.stressText.textContent='—'}
+  updateBuildCheck();
 }
 
 function setCoach(kind,data={}){
@@ -1384,7 +1780,7 @@ function setCoach(kind,data={}){
 function findNode(p,rad=18){let best=null,bd=rad;for(const n of nodes.filter(n=>n.visible||n.user)){ const d=dist(p,n);if(d<bd){bd=d;best=n}}return best}
 function findMember(p){let best=null,bd=13;for(const m of members.filter(m=>m.user)){const a=nodeById(m.a),b=nodeById(m.b);const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y;const t=clamp((wx*vx+wy*vy)/(vx*vx+vy*vy),0,1);const q={x:a.x+t*vx,y:a.y+t*vy};const d=dist(p,q);if(d<bd){bd=d;best=m}}return best}
 function nearestDeckJoint(p){let best=null,bd=24;for(const n of nodes.filter(n=>n.deck&&!n.support)){const d=dist(p,n);if(d<bd){bd=d;best=n}}return best}
-function canPlace(p){if(p.x<90||p.x>1110||p.y<105||p.y>585)return false;return !stage.forbidden.some(r=>pointInRect(p,r))}
+function canPlace(p){if(p.x<90||p.x>1110||p.y<105||p.y>585)return false;return !pointBlockedByForbidden(p)}
 function maxLengthForTool(){return MAT[tool]?.maxLen ?? 0}
 function updateModeBadge(){const snapText=snapEnabled?'스냅 ON':'스냅 OFF';if(measureMode)ui.modeBadge.textContent='MEASURE · 두 관절 선택 · 우클릭 초기화';else if(tool==='move')ui.modeBadge.textContent=`이동 모드 · 자유 관절 드래그 · ${snapText}`;else if(tool==='delete')ui.modeBadge.textContent='삭제 모드 · 부재/관절 클릭';else if(tool==='cable')ui.modeBadge.textContent=`케이블 · 길이 제한 없음 · 인장 전용 · ${snapText}`;else if(isRoadTool())ui.modeBadge.textContent=`ROAD BUILD · ${MAT[tool].name} · 실제 폭 ${MAT[tool].roadWidth}px · 한 부재 최대 ${MAT[tool].maxLen} · ${snapText}`;else ui.modeBadge.textContent=`${MAT[tool].name} · 최대 길이 ${MAT[tool].maxLen} · ${snapText}`}
 
@@ -1494,10 +1890,16 @@ function addConnection(target){
   const L=dist(selected,target), limit=maxLengthForTool(); if(Number.isFinite(limit)&&L>limit){toast(`${MAT[tool].name} 최대 길이는 ${limit}입니다`);return}
   if(connectionBlocked(selected,target,tool)){toast(isRoadTool()?'도로 폭이 건설 불가 구간과 겹칩니다':'건설 불가 구간을 통과하는 자재는 설치할 수 없습니다');return}
   const key=memberKey(selected.id,target.id);if(members.some(m=>memberKey(m.a,m.b)===key)){toast('이미 연결된 관절입니다');selected=null;draw();return}
+  if(tutorialMode&&tutorialCurrentStep()?.key==='roadComplete'&&!tutorialRoadGuideSegmentOK(selected,target)){
+    toast('TUTORIAL // 도로는 표시된 기준점 사이를 순서대로 연결하세요');
+    draw();
+    return;
+  }
   snapshot();
   const buildingRoad=isRoadTool(tool);
   if(buildingRoad){selected.roadNode=true;target.roadNode=true;selected.visible=true;target.visible=true;}
   members.push({id:'u'+cryptoRandom(),a:selected.id,b:target.id,mat:tool,user:true,road:buildingRoad});
+  triggerBuildFx(selected,target,tool);playSfx('place');
   // 연속 설치: 방금 연결한 관절을 다음 부재의 시작점으로 유지한다.
   selected=target;
   currentAnalysis=null;
@@ -1508,7 +1910,9 @@ function addConnection(target){
 }
 
 canvas.addEventListener('pointerdown',e=>{
-  if(sim||e.button===2)return; const p=screenToWorld(e.clientX,e.clientY);
+  if(sim||e.button===2)return;
+  if(tutorialMode&&!tutorialCanvasInputAllowed()){toast('현재 튜토리얼 단계에서는 건설 입력이 잠겨 있습니다');return;}
+  const p=screenToWorld(e.clientX,e.clientY);
   if(measureMode){
     const n=findNode(p,24);
     if(!n){toast('측정할 관절을 선택하세요');return;}
@@ -1526,7 +1930,9 @@ canvas.addEventListener('pointerdown',e=>{
   if(!n){
     const deckN=nearestDeckJoint(p);
     if(deckN){snapshot();deckN.visible=true;deckN.activated=true;n=deckN;toast('도로 관절을 활성화했습니다');}
-    else {let q={x:snap(p.x),y:snap(p.y)};if(!canPlace(q)){toast('이 위치에는 관절을 놓을 수 없습니다');return} snapshot();n={id:Math.max(-1,...nodes.map(x=>x.id))+1,x:q.x,y:q.y,user:true,visible:true,deck:false,roadNode:isRoadTool(),support:null};nodes.push(n);history.pop();}
+    else {
+      if(tutorialMode&&tutorialCurrentStep()?.key==='roadComplete'){toast('TUTORIAL // 점선 가이드의 도로 기준점만 클릭하세요');return}
+      let q={x:snap(p.x),y:snap(p.y)};if(!canPlace(q)){toast('이 위치에는 관절을 놓을 수 없습니다');return} snapshot();n={id:Math.max(-1,...nodes.map(x=>x.id))+1,x:q.x,y:q.y,user:true,visible:true,deck:false,roadNode:isRoadTool(),support:null};nodes.push(n);history.pop();triggerNodeFx(n);playSfx('node');}
   }
   addConnection(n);
 });
@@ -1539,6 +1945,7 @@ function deleteJoint(n){
 canvas.addEventListener('contextmenu',e=>{
   e.preventDefault();
   if(sim)return;
+  if(tutorialMode&&!['topChord','trussComplete','rightClick'].includes(tutorialCurrentStep()?.key))return;
   if(measureMode&&(measureA||measureB)){measureA=null;measureB=null;updateMeasureTag();toast('측정을 초기화했습니다');draw();return;}
   // 자재 연속 설치 중에는 우클릭이 '설치 종료/선택 해제'로 동작한다.
   if(selected && isBuildTool()){
@@ -1626,213 +2033,532 @@ function solve(A,b){
    It is intentionally educational/game-oriented rather than a design solver. */
 function createCollapsePhysics(reason,analysis=null,progress=0,brokenSeed=new Set()){
   const particles=new Map();
-  const activeIds=new Set([leftSupportId(),rightSupportId()]);members.forEach(m=>{if(!brokenSeed.has(m.id)){activeIds.add(m.a);activeIds.add(m.b)}});
+  const activeIds=new Set([leftSupportId(),rightSupportId()]);
+  members.forEach(m=>{if(!brokenSeed.has(m.id)){activeIds.add(m.a);activeIds.add(m.b)}});
+
+  // Lump a small portion of each member's mass into its end nodes. This makes
+  // long/heavy members carry more inertia instead of every joint behaving alike.
+  const nodeMass=new Map(nodes.map(n=>[n.id,.55]));
+  const density={wood:.010,steel:.017,cable:.0045,road:.030,roadHeavy:.047};
+  for(const m of members){
+    if(brokenSeed.has(m.id))continue;
+    const a=nodeById(m.a),b=nodeById(m.b);if(!a||!b)continue;
+    const mm=Math.max(.15,dist(a,b)*(density[m.mat]||.01));
+    nodeMass.set(m.a,(nodeMass.get(m.a)||.55)+mm*.5);
+    nodeMass.set(m.b,(nodeMass.get(m.b)||.55)+mm*.5);
+  }
+
   for(const n of nodes){
     let x=n.x,y=n.y;
     if(analysis?.ok){
       const i=analysis.index.get(n.id);
       if(i!=null){x+=analysis.U[2*i]*2.4;y+=analysis.U[2*i+1]*2.4;}
     }else if(!n.support){
-      // A tiny deterministic imperfection lets a perfect mechanism choose a
-      // natural falling direction instead of remaining numerically symmetric.
-      y+=Math.sin((n.id+1)*1.713)*1.8;
-      x+=Math.cos((n.id+2)*1.117)*.7;
+      // Tiny imperfection prevents a perfectly symmetric mechanism from
+      // unrealistically balancing forever.
+      y+=Math.sin((n.id+1)*1.713)*1.15;
+      x+=Math.cos((n.id+2)*1.117)*.45;
     }
-    const inactive=!activeIds.has(n.id);particles.set(n.id,{id:n.id,x,y,px:x,py:y,ox:n.x,oy:n.y,lockX:n.support==='pin'||inactive,lockY:!!n.support||inactive,invMass:(n.support==='pin'||inactive)?0:1});
+    const inactive=!activeIds.has(n.id),mass=Math.max(.35,nodeMass.get(n.id)||.55);
+    // Both red bridge-end supports are absolute anchors in the dynamic model.
+    // The right support is still described as a roller in the educational/static
+    // solver, but visually it must never drift during the game physics.
+    const locked=!!n.support||inactive;
+    particles.set(n.id,{id:n.id,x,y,px:x,py:y,ox:n.x,oy:n.y,mass,
+      lockX:locked,lockY:locked,invMass:locked?0:1/mass});
   }
 
-  const constraints=[];
+  const constraints=[],ropeChains=[];
   for(const m of members){
-    const a=nodeById(m.a),b=nodeById(m.b);
+    const a=nodeById(m.a),b=nodeById(m.b);if(!a||!b)continue;
     const rest=dist(a,b);
+    const mat=m.mat;
+    if(mat==='cable'){
+      // A cable is represented as a chain of small, gravity-affected particles.
+      // Each rope segment can pull when stretched but never pushes when slack,
+      // so the cable can sag, whip and drape like a real thread during collapse.
+      const pieces=clamp(Math.ceil(rest/34),3,14),ids=[m.a];
+      for(let i=1;i<pieces;i++){
+        const t=i/pieces,id=`rope:${m.id}:${i}`;
+        const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
+        const mass=Math.max(.08,rest*.0045/pieces);
+        particles.set(id,{id,x,y,px:x,py:y,ox:x,oy:y,mass,lockX:false,lockY:false,invMass:1/mass,ropeVirtual:true,ropeMemberId:m.id});
+        ids.push(id);
+      }
+      ids.push(m.b);
+      ropeChains.push({id:m.id,m,ids,segRest:rest/pieces,totalRest:rest,broken:brokenSeed.has(m.id),breakIndex:-1,tensionLimit:.13,damping:.045});
+      continue;
+    }
     constraints.push({id:m.id,m,a:m.a,b:m.b,rest,broken:brokenSeed.has(m.id),
-      stiffness:m.road?(m.mat==='roadHeavy'?.999:.993):(m.mat==='steel'?.985:m.mat==='wood'?.965:.90),
-      breakStrain:m.road?(m.mat==='roadHeavy'?.20:.13):(m.mat==='steel'?.072:m.mat==='wood'?.105:.20)});
+      stiffness:m.road?(mat==='roadHeavy'?.998:.989):(mat==='steel'?.982:mat==='wood'?.952:.88),
+      // Tension and compression are separated so slender compression members
+      // can buckle earlier than they tear in tension.
+      tensionLimit:m.road?(mat==='roadHeavy'?.105:.072):(mat==='steel'?.060:mat==='wood'?.082:.15),
+      compressionLimit:m.road?(mat==='roadHeavy'?.075:.050):(mat==='steel'?.036:mat==='wood'?.050:.01),
+      damping:m.road?.12:(mat==='steel'?.07:mat==='wood'?.10:.035)});
   }
+
+  // Two adjacent roadway pieces also get a weak 'bending' constraint between
+  // their outer joints. This is not a hidden structural member: it only models
+  // the rotational stiffness of the road deck during dynamic collapse.
+  const roadBends=[];
+  const byRoadNode=new Map();
+  for(const c of constraints){
+    if(!c.m.road||c.broken)continue;
+    if(!byRoadNode.has(c.a))byRoadNode.set(c.a,[]);if(!byRoadNode.has(c.b))byRoadNode.set(c.b,[]);
+    byRoadNode.get(c.a).push(c);byRoadNode.get(c.b).push(c);
+  }
+  for(const [mid,links] of byRoadNode){
+    if(links.length!==2)continue;
+    const c1=links[0],c2=links[1];
+    const a=c1.a===mid?c1.b:c1.a,b=c2.a===mid?c2.b:c2.a;
+    const pa=collapseParticle({particles},a),pb=collapseParticle({particles},b);
+    if(!pa||!pb)continue;
+    roadBends.push({mid,a,b,rest:Math.hypot(pb.x-pa.x,pb.y-pa.y),
+      stiffness:(c1.m.mat==='roadHeavy'&&c2.m.mat==='roadHeavy')?.22:.095,c1,c2});
+  }
+
   const broken=new Set(brokenSeed);
   const span=stage.deck.at(-1)[0]-stage.deck[0][0];
   const x=stage.deck[0][0]+clamp(progress,0,1)*span;
   const bodyLift=stage.vehicle==='TRUCK'?40:31;
   const y=deckYAt(clamp(x,stage.deck[0][0],stage.deck.at(-1)[0]),analysis,analysis?.ok?2.4:0)-bodyLift;
   const wheelR=stage.vehicle==='TRUCK'?14:(stage.vehicle==='BUS'?10.5:9.5);
-  return {reason,particles,constraints,broken,time:0,lastBreakTime:-9,dust:[],flashes:[],
-    gravity:760,vehicle:{x,y,vx:82*simSpeed,vy:0,angle:0,angularVel:0,rot:0,wheelR,attached:true,segmentId:null,bodyLift},
-    maxDrop:0,roadBreaks:0};
+  const vehicleMass=Math.max(0.7,stage.load/13000);
+  return {reason,particles,constraints,ropeChains,roadBends,broken,time:0,lastBreakTime:-9,dust:[],flashes:[],
+    gravity:760,airDrag:.996,vehicle:{x,y,vx:82*simSpeed,vy:0,angle:0,angularVel:0,rot:0,wheelR,
+      attached:true,segmentId:null,bodyLift,mass:vehicleMass},maxDrop:0,roadBreaks:0,roadLoadDamage:new Map()};
 }
 function collapseParticle(physics,id){return physics.particles.get(id)}
 function collapseConstraint(physics,id){return physics.constraints.find(c=>c.id===id)}
+function breakCollapseRope(physics,rope,index){
+  if(!rope||rope.broken)return;
+  rope.broken=true;rope.breakIndex=clamp(index,0,rope.ids.length-2);physics.broken.add(rope.id);physics.lastBreakTime=physics.time;
+  const a=collapseParticle(physics,rope.ids[rope.breakIndex]),b=collapseParticle(physics,rope.ids[rope.breakIndex+1]);
+  if(a&&b){
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;physics.flashes.push({x:mx,y:my,life:.28,max:.28});
+    for(let i=0;i<4;i++)physics.dust.push({x:mx,y:my,vx:(Math.random()-.5)*45,vy:-12-Math.random()*28,life:.45+Math.random()*.25,max:.7,r:.7+Math.random()*1.1});
+  }
+  lastBroken=new Set(physics.broken);if(sim)sim.broken=new Set(physics.broken);
+}
+function solveRopeChains(physics){
+  for(const rope of physics.ropeChains||[]){
+    for(let i=0;i<rope.ids.length-1;i++){
+      if(rope.broken&&i===rope.breakIndex)continue;
+      const a=collapseParticle(physics,rope.ids[i]),b=collapseParticle(physics,rope.ids[i+1]);if(!a||!b)continue;
+      const L=Math.hypot(b.x-a.x,b.y-a.y);
+      // Thread/rope has no compression stiffness: a slack segment simply folds.
+      if(L>rope.segRest)solveDistancePair(a,b,rope.segRest,.965);
+    }
+  }
+}
+function dampRopeVelocity(physics){
+  for(const rope of physics.ropeChains||[]){
+    for(let i=0;i<rope.ids.length-1;i++){
+      if(rope.broken&&i===rope.breakIndex)continue;
+      const a=collapseParticle(physics,rope.ids[i]),b=collapseParticle(physics,rope.ids[i+1]);if(!a||!b)continue;
+      const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,nx=dx/L,ny=dy/L;
+      const rel=((b.x-b.px)-(a.x-a.px))*nx+((b.y-b.py)-(a.y-a.py))*ny;
+      const wa=a.invMass,wb=b.invMass,ws=wa+wb;if(ws<=0)continue;
+      const imp=rel*rope.damping;
+      if(wa){a.px-=nx*imp*(wa/ws);a.py-=ny*imp*(wa/ws)}
+      if(wb){b.px+=nx*imp*(wb/ws);b.py+=ny*imp*(wb/ws)}
+    }
+  }
+}
+function evaluateRopeBreaks(physics){
+  for(const rope of physics.ropeChains||[]){
+    if(rope.broken||physics.time<.10)continue;
+    let worst=-1,worstStrain=0;
+    for(let i=0;i<rope.ids.length-1;i++){
+      const a=collapseParticle(physics,rope.ids[i]),b=collapseParticle(physics,rope.ids[i+1]);if(!a||!b)continue;
+      const strain=(Math.hypot(b.x-a.x,b.y-a.y)-rope.segRest)/Math.max(rope.segRest,1);
+      if(strain>worstStrain){worstStrain=strain;worst=i}
+    }
+    if(worstStrain>rope.tensionLimit)breakCollapseRope(physics,rope,worst);
+  }
+}
+
 function breakCollapseConstraint(physics,c,kind='strain'){
   if(!c||c.broken)return;
   c.broken=true;physics.broken.add(c.id);physics.lastBreakTime=physics.time;
   if(c.m.road)physics.roadBreaks++;
   const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);
   const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
-  physics.flashes.push({x:mx,y:my,life:.42,max:.42});
-  for(let i=0;i<7;i++){
-    const ang=-Math.PI*.9+(i/6)*Math.PI*.8;
-    const sp=35+Math.random()*55;
-    physics.dust.push({x:mx,y:my,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-20,life:.8+Math.random()*.45,max:1.25,r:1.5+Math.random()*2.2});
+  physics.flashes.push({x:mx,y:my,life:.34,max:.34});
+  for(let i=0;i<6;i++){
+    const ang=-Math.PI*.9+(i/5)*Math.PI*.8,sp=28+Math.random()*48;
+    physics.dust.push({x:mx,y:my,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-14,life:.65+Math.random()*.38,max:1.05,r:1.2+Math.random()*1.9});
   }
-  lastBroken=new Set(physics.broken);
-  if(sim)sim.broken=new Set(physics.broken);
+  lastBroken=new Set(physics.broken);if(sim)sim.broken=new Set(physics.broken);
 }
-function findCollapseRoadSegment(physics,x){
-  let best=null,bestD=Infinity;
+function findCollapseRoadSegment(physics,x,contactY=null,preferredId=null){
+  let best=null,bestScore=Infinity;
+  const intactRoads=[];
   for(const c of physics.constraints){
     if(!c.m.road||c.broken)continue;
-    const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);
-    const minX=Math.min(a.x,b.x)-8,maxX=Math.max(a.x,b.x)+8;
-    if(x<minX||x>maxX)continue;
-    const dx=b.x-a.x,dy=b.y-a.y;
-    const t=clamp(Math.abs(dx)<1e-5?.5:(x-a.x)/dx,0,1);
+    const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);if(!a||!b)continue;
+    intactRoads.push({c,a,b});
+    const minX=Math.min(a.x,b.x)-12,maxX=Math.max(a.x,b.x)+12;if(x<minX||x>maxX)continue;
+    const dx=b.x-a.x,dy=b.y-a.y,t=clamp(Math.abs(dx)<1e-5?.5:(x-a.x)/dx,0,1);
     const qx=a.x+dx*t,qy=a.y+dy*t;
-    const d=Math.abs(qx-x)+Math.abs(qy-guideDeckYAt(x))*.08;
-    if(d<bestD){bestD=d;best={c,a,b,t,x:qx,y:qy,angle:Math.atan2(dy,dx)}}
+    // Vehicle surface detection is road-only. Cables, wood and steel are never
+    // treated as drivable surfaces, even if they cross between car and deck.
+    let score=Math.abs(qx-x)*2;
+    if(contactY!=null){
+      const vertical=qy-contactY;
+      if(vertical<-18||vertical>165)continue;
+      score+=Math.abs(vertical);
+    }else score+=Math.abs(qy-guideDeckYAt(x))*.10;
+    if(c.id===preferredId)score-=18;
+    if(score<bestScore){bestScore=score;best={c,a,b,t,x:qx,y:qy,angle:Math.atan2(dy,dx),virtualGap:false}}
   }
-  return best;
+  if(best)return best;
+
+  // SMALL ROAD GAP TOLERANCE
+  // A real wheel can cross a narrow expansion gap even though the road meshes
+  // are not topologically joined. When there is no direct segment below the car,
+  // look for the nearest intact road end on each side and temporarily treat the
+  // space between them as a wheel-contact span. This does NOT add structural
+  // stiffness; it only prevents tiny visual gaps from making the vehicle fall.
+  if(contactY==null||intactRoads.length<2)return null;
+  const endpoints=[];
+  for(const r of intactRoads){
+    endpoints.push({p:r.a,c:r.c});
+    endpoints.push({p:r.b,c:r.c});
+  }
+  let left=null,right=null;
+  for(const e of endpoints){
+    if(e.p.x<=x&&(!left||e.p.x>left.p.x))left=e;
+    if(e.p.x>=x&&(!right||e.p.x<right.p.x))right=e;
+  }
+  if(!left||!right||left.p.id===right.p.id)return null;
+  const gapX=right.p.x-left.p.x;
+  const maxGap=clamp((physics.vehicle?.wheelR||10)*5.8,48,72);
+  if(gapX<=0||gapX>maxGap)return null;
+  const gapY=Math.abs(right.p.y-left.p.y);
+  if(gapY>30)return null;
+  const t=clamp((x-left.p.x)/Math.max(1,gapX),0,1);
+  const baseY=left.p.y+(right.p.y-left.p.y)*t;
+  const dip=Math.sin(Math.PI*t)*Math.min(4.5,gapX*.07);
+  const qy=baseY+dip;
+  const vertical=qy-contactY;
+  if(vertical<-20||vertical>42)return null;
+  return {
+    c:{id:`road-gap:${left.p.id}:${right.p.id}`,m:{road:true,mat:'road'},virtualGap:true},
+    a:left.p,b:right.p,t,x,
+    y:qy,
+    angle:Math.atan2(right.p.y-left.p.y,Math.max(1,gapX)),
+    virtualGap:true,gap:gapX
+  };
 }
+
+function structurallyBracedRoadNodes(physics){
+  const adj=new Map();
+  const add=(a,b)=>{if(!adj.has(a))adj.set(a,[]);adj.get(a).push(b)};
+  for(const c of physics.constraints){if(c.broken||c.m.road)continue;add(c.a,c.b);add(c.b,c.a)}
+  for(const rope of physics.ropeChains||[]){if(rope.broken)continue;add(rope.m.a,rope.m.b);add(rope.m.b,rope.m.a)}
+  const supports=new Set([leftSupportId(),rightSupportId()]);
+  const braced=new Set(supports);
+  // A road node counts as structurally supported only if a non-road path can
+  // reach an actual bridge-end anchor. Dangling decorative members do not help.
+  for(const n of nodes){
+    if(!(n.roadNode||n.support))continue;
+    const seen=new Set([n.id]),q=[n.id];let ok=supports.has(n.id);
+    while(q.length&&!ok){const u=q.shift();for(const v of adj.get(u)||[]){if(seen.has(v))continue;seen.add(v);if(supports.has(v)){ok=true;break}q.push(v)}}
+    if(ok)braced.add(n.id);
+  }
+  return braced;
+}
+function roadSupportSpanAtX(physics,x){
+  const braced=structurallyBracedRoadNodes(physics);
+  const roadIds=new Set();for(const c of physics.constraints){if(c.m.road&&!c.broken){roadIds.add(c.a);roadIds.add(c.b)}}
+  const pts=[...roadIds].map(id=>collapseParticle(physics,id)).filter(Boolean).sort((a,b)=>a.x-b.x);
+  const supports=pts.filter(p=>braced.has(p.id));
+  let left=null,right=null;for(const p of supports){if(p.x<=x)left=p;if(p.x>=x){right=p;break}}
+  if(!left)left=pts[0]||null;if(!right)right=pts.at(-1)||null;
+  if(!left||!right||right.x-left.x<20)return null;
+  return {left,right,L:Math.max(20,right.x-left.x),braced};
+}
+function applyRoadBendingDemand(physics,dt){
+  const v=physics.vehicle;if(!v.attached)return;
+  const span=roadSupportSpanAtX(physics,v.x);if(!span)return;
+  const L=span.L,a=clamp(v.x-span.left.x,0,L),b=L-a;
+  const P=stage.load/1000;
+  const reactionL=P*b/L,reactionR=P*a/L;
+  let worst=null,worstRatio=0;
+  for(const bend of physics.roadBends){
+    if(bend.c1.broken||bend.c2.broken)continue;
+    const p=collapseParticle(physics,bend.mid);if(!p||p.x<span.left.x-4||p.x>span.right.x+4)continue;
+    const z=clamp(p.x-span.left.x,0,L);
+    // Bending-moment proxy for a simply-supported beam under the vehicle's
+    // current point load. Demand therefore travels with the car instead of
+    // magically peaking at midspan before the vehicle reaches it.
+    const localMoment=z<=a?reactionL*z:reactionR*(L-z);
+    const heavy=bend.c1.m.mat==='roadHeavy'&&bend.c2.m.mat==='roadHeavy';
+    const cap=heavy?1750:950;
+    const ratio=localMoment/cap;
+    bend.momentDemand=ratio;
+    const old=physics.roadLoadDamage.get(bend.mid)||0;
+    const grow=ratio>0.62?(ratio-.62)*dt:-(.30*dt);
+    const dmg=clamp(old+grow,0,2);physics.roadLoadDamage.set(bend.mid,dmg);
+    // Visible elastic sag before fracture. It is small when the deck has short,
+    // well-braced panels and much stronger on a long unsupported straight deck.
+    if(p.invMass&&ratio>.35){
+      const flex=Math.min(85,(ratio-.35)*48)*dt;
+      p.y+=Math.max(0,flex);
+    }
+    if(dmg>worstRatio){worstRatio=dmg;worst=bend}
+  }
+  if(worst&&worstRatio>0.34&&physics.time-physics.lastBreakTime>.20){
+    const mid=collapseParticle(physics,worst.mid);
+    const c1=worst.c1,c2=worst.c2;
+    const d1=Math.abs(((collapseParticle(physics,c1.a)?.x||0)+(collapseParticle(physics,c1.b)?.x||0))/2-v.x);
+    const d2=Math.abs(((collapseParticle(physics,c2.a)?.x||0)+(collapseParticle(physics,c2.b)?.x||0))/2-v.x);
+    breakCollapseConstraint(physics,d1<d2?c1:c2,'bending-load');
+  }
+}
+
 function enforceCollapseLocks(physics){
   for(const p of physics.particles.values()){
-    const n=nodeById(p.id);
     if(p.lockX){p.x=p.ox;p.px=p.ox}
     if(p.lockY){p.y=p.oy;p.py=p.oy}
-    // Roller support: vertical position fixed, horizontal motion allowed but bounded.
-    if(n?.support==='roller')p.x=clamp(p.x,p.ox-95,p.ox+95);
   }
 }
+function solveDistancePair(a,b,rest,k){
+  let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);if(L<1e-6)return;
+  const diff=(L-rest)/L,wa=a.invMass,wb=b.invMass,ws=wa+wb;if(ws<=0)return;
+  const cx=dx*diff*k,cy=dy*diff*k;
+  if(wa){a.x+=cx*(wa/ws);a.y+=cy*(wa/ws)}
+  if(wb){b.x-=cx*(wb/ws);b.y-=cy*(wb/ws)}
+}
+
+function closestPointOnSegment(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,den=dx*dx+dy*dy;
+  const t=den<1e-9?0:clamp(((px-ax)*dx+(py-ay)*dy)/den,0,1);
+  return {x:ax+dx*t,y:ay+dy*t,t};
+}
+function collisionMemberRadius(mat){
+  if(mat==='cable')return 2.2;
+  if(mat==='steel')return 4.4;
+  if(mat==='wood')return 4.8;
+  return 4;
+}
+function resolveParticleRoadCollision(physics,p,roadC,extraRadius=4){
+  if(!p||p.invMass<=0||roadC.broken)return false;
+  if(p.id===roadC.a||p.id===roadC.b)return false;
+  const a=collapseParticle(physics,roadC.a),b=collapseParticle(physics,roadC.b);if(!a||!b)return false;
+  const q=closestPointOnSegment(p.x,p.y,a.x,a.y,b.x,b.y);
+  let nx=p.x-q.x,ny=p.y-q.y,dist=Math.hypot(nx,ny);
+  const roadRadius=(MAT[roadC.m.mat]?.roadWidth||16)*.5;
+  const minDist=roadRadius+extraRadius;
+  if(dist>=minDist)return false;
+  if(dist<1e-5){
+    const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1;
+    nx=-dy/L;ny=dx/L;
+    const oldSide=(p.py-(a.py+(b.py-a.py)*q.t))*ny+(p.px-(a.px+(b.px-a.px)*q.t))*nx;
+    if(oldSide<0){nx=-nx;ny=-ny}
+    dist=0;
+  }else{nx/=dist;ny/=dist}
+  const penetration=minDist-dist;
+  const wa=p.invMass,wbA=a.invMass*(1-q.t),wbB=b.invMass*q.t,ws=wa+wbA+wbB;
+  if(ws<=0)return false;
+  const push=penetration*.88;
+  p.x+=nx*push*(wa/ws);p.y+=ny*push*(wa/ws);
+  if(a.invMass){a.x-=nx*push*(wbA/ws);a.y-=ny*push*(wbA/ws)}
+  if(b.invMass){b.x-=nx*push*(wbB/ws);b.y-=ny*push*(wbB/ws)}
+  // Contact friction / impact damping by reducing normal and tangential motion.
+  const pvx=p.x-p.px,pvy=p.y-p.py;
+  const vn=pvx*nx+pvy*ny,tx=pvx-vn*nx,ty=pvy-vn*ny;
+  if(vn<0){
+    const bounce=.08,friction=.82;
+    const nvx=tx*friction-vn*bounce*nx,nvy=ty*friction-vn*bounce*ny;
+    p.px=p.x-nvx;p.py=p.y-nvy;
+  }
+  return true;
+}
+function solveMaterialRoadCollisions(physics){
+  const roads=physics.constraints.filter(c=>c.m.road&&!c.broken);
+  if(!roads.length)return;
+  // Node-vs-deck collision catches falling joints and gives them friction.
+  for(const p of physics.particles.values()){
+    const n=nodeById(p.id);if((!n&&!p.ropeVirtual)||n?.support)continue;
+    for(const r of roads)resolveParticleRoadCollision(physics,p,r,p.ropeVirtual?2.1:5.2);
+  }
+  // Body-vs-deck collision: sample along each non-road member so long members
+  // cannot visually tunnel straight through the roadway between their joints.
+  for(const c of physics.constraints){
+    if(c.broken||c.m.road)continue;
+    const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);if(!a||!b)continue;
+    const rad=collisionMemberRadius(c.m.mat);
+    for(const r of roads){
+      if(r.a===c.a||r.a===c.b||r.b===c.a||r.b===c.b)continue;
+      for(const t of [.2,.4,.6,.8]){
+        const sx=a.x+(b.x-a.x)*t,sy=a.y+(b.y-a.y)*t;
+        const proxy={id:-999999,x:sx,y:sy,px:a.px+(b.px-a.px)*t,py:a.py+(b.py-a.py)*t,invMass:a.invMass*(1-t)+b.invMass*t};
+        const beforeX=proxy.x,beforeY=proxy.y;
+        if(!resolveParticleRoadCollision(physics,proxy,r,rad))continue;
+        const dx=proxy.x-beforeX,dy=proxy.y-beforeY;
+        const wa=a.invMass*(1-t),wb=b.invMass*t,ws=wa+wb;
+        if(ws>0){
+          if(a.invMass){a.x+=dx*(wa/ws);a.y+=dy*(wa/ws);a.px+=dx*(wa/ws)*.35;a.py+=dy*(wa/ws)*.35}
+          if(b.invMass){b.x+=dx*(wb/ws);b.y+=dy*(wb/ws);b.px+=dx*(wb/ws)*.35;b.py+=dy*(wb/ws)*.35}
+        }
+      }
+    }
+  }
+}
+
+function dampConstraintVelocity(c,physics){
+  if(c.broken||!c.damping)return;
+  const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);if(!a||!b)return;
+  const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,nx=dx/L,ny=dy/L;
+  const avx=a.x-a.px,avy=a.y-a.py,bvx=b.x-b.px,bvy=b.y-b.py;
+  const rel=(bvx-avx)*nx+(bvy-avy)*ny,imp=rel*c.damping;
+  const wa=a.invMass,wb=b.invMass,ws=wa+wb;if(ws<=0)return;
+  if(wa){a.px-=nx*imp*(wa/ws);a.py-=ny*imp*(wa/ws)}
+  if(wb){b.px+=nx*imp*(wb/ws);b.py+=ny*imp*(wb/ws)}
+}
 function solveCollapseConstraints(physics){
-  for(let iter=0;iter<10;iter++){
+  for(let iter=0;iter<12;iter++){
     for(const c of physics.constraints){
       if(c.broken)continue;
-      const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);
-      let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);if(L<1e-6)continue;
-      // Cable carries tension only. If shorter than its rest length it goes slack.
-      if(c.m.mat==='cable'&&L<c.rest)continue;
-      const diff=(L-c.rest)/L;
-      const wa=a.invMass,wb=b.invMass,ws=wa+wb;if(ws<=0)continue;
-      const k=c.stiffness;
-      const cx=dx*diff*k,cy=dy*diff*k;
-      if(wa){a.x+=cx*(wa/ws);a.y+=cy*(wa/ws)}
-      if(wb){b.x-=cx*(wb/ws);b.y-=cy*(wb/ws)}
+      const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);if(!a||!b)continue;
+      solveDistancePair(a,b,c.rest,c.stiffness);
+    }
+    solveRopeChains(physics);
+    // Road bending stiffness is intentionally weak; it yields visibly before
+    // the axial members fail, giving a beam-like rather than rope-like deck.
+    for(const bend of physics.roadBends){
+      if(bend.c1.broken||bend.c2.broken)continue;
+      const a=collapseParticle(physics,bend.a),b=collapseParticle(physics,bend.b);if(!a||!b)continue;
+      solveDistancePair(a,b,bend.rest,bend.stiffness);
     }
     enforceCollapseLocks(physics);
   }
+  for(const c of physics.constraints)dampConstraintVelocity(c,physics);
+  dampRopeVelocity(physics);
 }
-function evaluateCollapseBreaks(physics){
-  // Axial strain failure for bars/cables/deck pieces.
+function evaluateCollapseBreaks(physics,dt=1/300){
+  evaluateRopeBreaks(physics);
   for(const c of physics.constraints){
-    if(c.broken||physics.time<.16)continue;
-    const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);
-    const L=Math.hypot(b.x-a.x,b.y-a.y);
-    const strain=(L-c.rest)/Math.max(c.rest,1);
+    if(c.broken||physics.time<.12)continue;
+    const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);if(!a||!b)continue;
+    const L=Math.hypot(b.x-a.x,b.y-a.y),strain=(L-c.rest)/Math.max(c.rest,1);
     if(c.m.mat==='cable'){
-      if(strain>c.breakStrain)breakCollapseConstraint(physics,c,'tension');
-    }else if(Math.abs(strain)>c.breakStrain){
-      breakCollapseConstraint(physics,c,'strain');
+      if(strain>c.tensionLimit)breakCollapseConstraint(physics,c,'tension');
+      continue;
+    }
+    if(strain>c.tensionLimit){breakCollapseConstraint(physics,c,'tension');continue}
+    if(strain<0){
+      // Simplified Euler-like slenderness penalty: longer compression members
+      // buckle at smaller shortening, especially wood.
+      const slender=clamp(c.rest/190,.65,2.25);
+      const limit=c.compressionLimit/slender;
+      if(-strain>limit)breakCollapseConstraint(physics,c,'buckling');
     }
   }
 
-  // A chain of road bars can be an exact mechanism without axial strain.
-  // Check every road joint, including player-created road nodes, for excessive
-  // hinge rotation or sag and break the more distorted adjacent road piece.
-  if(physics.time-physics.lastBreakTime>.34){
-    const byNode=new Map();
-    for(const c of physics.constraints){
-      if(!c.m.road||c.broken)continue;
-      if(!byNode.has(c.a))byNode.set(c.a,[]);if(!byNode.has(c.b))byNode.set(c.b,[]);
-      byNode.get(c.a).push(c);byNode.get(c.b).push(c);
-    }
+  // Deck joint rotation failure. This complements axial strain and prevents a
+  // road chain from behaving like infinitely flexible hinges.
+  if(physics.time-physics.lastBreakTime>.28){
     let worst=null,worstScore=0;
-    for(const [id,links] of byNode){
-      if(links.length<2)continue;
-      const p=collapseParticle(physics,id);if(!p)continue;
-      for(let i=0;i<links.length;i++)for(let j=i+1;j<links.length;j++){
-        const c1=links[i],c2=links[j];
-        const id1=c1.a===id?c1.b:c1.a,id2=c2.a===id?c2.b:c2.a;
-        const p1=collapseParticle(physics,id1),p2=collapseParticle(physics,id2);if(!p1||!p2)continue;
-        const v1x=p1.x-p.x,v1y=p1.y-p.y,v2x=p2.x-p.x,v2y=p2.y-p.y;
-        const l1=Math.hypot(v1x,v1y)||1,l2=Math.hypot(v2x,v2y)||1;
-        const ang=Math.acos(clamp((v1x*v2x+v1y*v2y)/(l1*l2),-1,1));
-        const hinge=Math.abs(Math.PI-ang),drop=p.y-p.oy;
-        const score=hinge/0.52+Math.max(0,drop-58)/78;
-        if(score>worstScore){worstScore=score;worst={c1,c2}}
-      }
+    for(const bend of physics.roadBends){
+      if(bend.c1.broken||bend.c2.broken)continue;
+      const p=collapseParticle(physics,bend.mid),a=collapseParticle(physics,bend.a),b=collapseParticle(physics,bend.b);if(!p||!a||!b)continue;
+      const v1x=a.x-p.x,v1y=a.y-p.y,v2x=b.x-p.x,v2y=b.y-p.y;
+      const l1=Math.hypot(v1x,v1y)||1,l2=Math.hypot(v2x,v2y)||1;
+      const ang=Math.acos(clamp((v1x*v2x+v1y*v2y)/(l1*l2),-1,1));
+      const hinge=Math.abs(Math.PI-ang),drop=Math.max(0,p.y-p.oy);
+      const heavy=bend.c1.m.mat==='roadHeavy'&&bend.c2.m.mat==='roadHeavy';
+      const score=hinge/(heavy?.68:.50)+drop/(heavy?118:86);
+      if(score>worstScore){worstScore=score;worst=bend}
     }
-    if(worst&&worstScore>1){
-      const pick=((physics.roadBreaks+Math.floor(physics.time*10))%2)?worst.c1:worst.c2;
-      breakCollapseConstraint(physics,pick,'hinge');
+    if(worst&&worstScore>1.22){
+      const c=(physics.roadBreaks%2)?worst.c1:worst.c2;breakCollapseConstraint(physics,c,'hinge');
     }
   }
 }
 function updateCollapseEffects(physics,dt){
-  for(const d of physics.dust){d.vy+=physics.gravity*.38*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.life-=dt}
+  for(const d of physics.dust){d.vy+=physics.gravity*.30*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.life-=dt}
   physics.dust=physics.dust.filter(d=>d.life>0);
-  for(const f of physics.flashes)f.life-=dt;
-  physics.flashes=physics.flashes.filter(f=>f.life>0);
+  for(const f of physics.flashes)f.life-=dt;physics.flashes=physics.flashes.filter(f=>f.life>0);
 }
 function stepCollapsePhysics(physics,dt){
-  dt=clamp(dt,0,.034);
-  const substeps=3,h=dt/substeps;
+  dt=clamp(dt,0,.030);
+  const substeps=5,h=dt/substeps;
   for(let s=0;s<substeps;s++){
     physics.time+=h;
-    const supportSeg=findCollapseRoadSegment(physics,physics.vehicle.x);
-    const loadA=supportSeg?.a?.id,loadB=supportSeg?.b?.id;
-    const vehicleExtra=260*clamp(stage.load/13000,.55,3.2);
-    const windAcc=clamp((stage.wind||0)/1000,-20,20)*5;
+    const contactY=physics.vehicle.y+physics.vehicle.bodyLift;
+    const seg=findCollapseRoadSegment(physics,physics.vehicle.x,contactY,physics.vehicle.segmentId);
+    const windAcc=clamp((stage.wind||0)/1000,-20,20)*4.0;
     for(const p of physics.particles.values()){
       if(p.invMass<=0)continue;
-      const vx=(p.x-p.px)*.995,vy=(p.y-p.py)*.995;
+      const vx=(p.x-p.px)*physics.airDrag,vy=(p.y-p.py)*physics.airDrag;
       p.px=p.x;p.py=p.y;
-      let ay=physics.gravity;
-      if(p.id===loadA||p.id===loadB)ay+=vehicleExtra*.5;
-      p.x+=vx+windAcc*h*h;
-      p.y+=vy+ay*h*h;
+      let ax=windAcc,ay=physics.gravity;
+      // Apply vehicle weight as force/mass and distribute it according to the
+      // wheel contact position on the current roadway segment.
+      if(seg){
+        const contactForce=physics.vehicle.mass*260;
+        if(p.id===seg.a.id)ay+=contactForce*(1-seg.t)/Math.max(.35,p.mass);
+        if(p.id===seg.b.id)ay+=contactForce*seg.t/Math.max(.35,p.mass);
+      }
+      p.x+=vx+ax*h*h;p.y+=vy+ay*h*h;
     }
-    enforceCollapseLocks(physics);
-    solveCollapseConstraints(physics);
-    evaluateCollapseBreaks(physics);
+    enforceCollapseLocks(physics);solveCollapseConstraints(physics);
+    // Physical contact pass after structural constraints: falling truss members
+    // collide with the built road instead of ghosting through it.
+    solveMaterialRoadCollisions(physics);enforceCollapseLocks(physics);applyRoadBendingDemand(physics,h);evaluateCollapseBreaks(physics,h);
   }
 
   const v=physics.vehicle;
   if(v.attached){
-    v.x+=v.vx*dt;
-    const seg=findCollapseRoadSegment(physics,v.x);
-    if(seg&&Math.abs(seg.angle)<1.18){
-      v.segmentId=seg.c.id;
-      v.y=seg.y-v.bodyLift;
-      v.angle+=(seg.angle*.78-v.angle)*clamp(dt*9,0,1);
-      v.rot+=(v.vx*dt)/v.wheelR;
-      // If the deck has fallen far below its original road line, the wheels lose contact.
-      const originalY=deckYAt(clamp(v.x,stage.deck[0][0],stage.deck.at(-1)[0]),null,0);
-      if(seg.y-originalY>135){v.attached=false;v.vy=70;v.angularVel=(seg.angle>=0?1:-1)*1.5;}
-    }else{
-      v.attached=false;v.vy=45;v.angularVel=(v.angle>=0?1:-1)*1.4;
-    }
+    const seg=findCollapseRoadSegment(physics,v.x,v.y+v.bodyLift,v.segmentId);
+    if(seg&&Math.abs(seg.angle)<1.10){
+      // Gravity along the deck changes the vehicle speed slightly; a steep
+      // downhill accelerates it and an uphill slows it.
+      const slopeAccel=physics.gravity*Math.sin(seg.angle)*.13;
+      const target=82*simSpeed;
+      v.vx+=slopeAccel*dt+(target-v.vx)*clamp(dt*1.7,0,1);
+      v.vx=clamp(v.vx,30*simSpeed,145*simSpeed);
+      v.x+=v.vx*dt;v.segmentId=seg.c.id;v.y=seg.y-v.bodyLift;
+      v.angle+=(seg.angle-v.angle)*clamp(dt*10,0,1);v.rot+=(v.vx*dt)/v.wheelR;
+      const originalY=guideDeckYAt(clamp(v.x,stage.deck[0][0],stage.deck.at(-1)[0]));
+      const verticalSpeed=Math.abs((seg.a.y-seg.a.py)*(1-seg.t)+(seg.b.y-seg.b.py)*seg.t)/Math.max(dt,.001);
+      if(seg.y-originalY>125||verticalSpeed>380){v.attached=false;v.vy=55;v.angularVel=seg.angle*1.3;}
+    }else{v.attached=false;v.vy=35;v.angularVel=(v.angle>=0?1:-1)*1.15;}
   }else{
-    v.vy+=physics.gravity*dt;
-    v.x+=v.vx*.86*dt;
-    v.y+=v.vy*dt;
-    v.angle+=v.angularVel*dt;
-    v.rot+=(v.vx*dt)/v.wheelR;
+    v.vy+=physics.gravity*dt;v.vx*=Math.pow(.996,dt*60);v.x+=v.vx*dt;v.y+=v.vy*dt;v.angle+=v.angularVel*dt;v.rot+=(v.vx*dt)/v.wheelR;
+    // If the car temporarily loses contact, cast downward for the actual road
+    // surface only. Crossing cables/wood/steel are ignored, so a short cable
+    // above the deck cannot steal the vehicle contact. The car can land back on
+    // a surviving roadway instead of falling forever after one missed frame.
+    const landing=findCollapseRoadSegment(physics,v.x,v.y+v.bodyLift,v.segmentId);
+    if(landing&&Math.abs(landing.angle)<1.05){
+      const gap=landing.y-(v.y+v.bodyLift);
+      if(gap>=-7&&gap<=22&&v.vy>=-25){
+        v.attached=true;v.segmentId=landing.c.id;v.y=landing.y-v.bodyLift;v.angle=landing.angle;v.vy=0;v.angularVel*=.22;
+        v.vx=Math.max(v.vx,34*simSpeed);
+      }
+    }
   }
 
-  let maxDrop=0;
-  for(const p of physics.particles.values())maxDrop=Math.max(maxDrop,p.y-p.oy);
-  physics.maxDrop=Math.max(physics.maxDrop,maxDrop);
-  updateCollapseEffects(physics,dt);
+  let maxDrop=0;for(const p of physics.particles.values())maxDrop=Math.max(maxDrop,p.y-p.oy);
+  physics.maxDrop=Math.max(physics.maxDrop,maxDrop);updateCollapseEffects(physics,dt);
 }
 function enterCollapseMode(s,reason,analysis,progress,now=performance.now()){
   s.mode='collapse';s.failReason='collapse';s.failed=true;s.collapseStart=now;s.lastTick=now;
   s.physics=createCollapsePhysics(reason,analysis,progress,s.broken||new Set());
   s.broken=s.physics.broken;s.last=null;s.maxDefl=Math.max(s.maxDefl||0,s.physics.maxDrop||0);
   stressMode=false;loadPathMode=false;lastFullAnalysis=null;currentAnalysis={ok:false};updateAnalysisUI(currentAnalysis);
-  ui.coach.innerHTML=`<strong>동적 붕괴 시뮬레이션 실행 중.</strong> 정적 트러스 해석이 안정된 해를 만들지 못해 중력, 관성, 부재 길이 제약을 사용하는 실시간 물리 모드로 전환했습니다.<div class="coachTip">관절이 회전하며 처지고, 과도한 변형이 생긴 연결부는 끊어집니다. 차량은 도로와 접촉을 잃으면 중력에 따라 낙하합니다.</div>`;
+  ui.coach.innerHTML=`<strong>동적 붕괴 시뮬레이션 실행 중.</strong> 정적 트러스 해석이 안정된 해를 만들지 못해 중력, 관성, 케이블 로프, 도로 휨을 사용하는 실시간 물리 모드로 전환했습니다.<div class="coachTip">관절이 회전하며 처지고, 과도한 변형이 생긴 연결부는 끊어집니다. 차량은 도로와 접촉을 잃으면 중력에 따라 낙하합니다.</div>`;
   toast('DYNAMIC COLLAPSE // 중력 기반 물리 시뮬레이션');
 }
 function startUnstableCollapse(){
-  const s={mode:'collapse',start:performance.now(),duration:0,progress:.02,maxRatio:0,maxDefl:0,worst:null,worstForce:0,failed:true,failReason:'collapse',last:null,broken:new Set(),brokenCount:0};
+  const s={mode:'collapse',start:performance.now(),duration:0,progress:.02,shipProgress:stage.ship?0:null,maxRatio:0,maxDefl:0,worst:null,worstForce:0,failed:true,failReason:'collapse',last:null,broken:new Set(),brokenCount:0};
   sim=s;enterCollapseMode(s,'unstable',null,.02,s.start);
-  ui.test.textContent='■ STOP';ui.test.classList.add('stop');requestAnimationFrame(tick);
+  ui.test.textContent='■ STOP';ui.test.classList.add('stop');updateTestTelemetry();requestAnimationFrame(tick);
 }
 function tickCollapse(now){
   const s=sim;if(!s||s.mode!=='collapse')return;
@@ -1841,6 +2567,8 @@ function tickCollapse(now){
   s.broken=s.physics.broken;s.brokenCount=s.broken.size;s.maxDefl=Math.max(s.maxDefl,s.physics.maxDrop);
   draw();
   const elapsed=(now-s.collapseStart)/1000;
+  if(stage.ship)s.shipProgress=clamp((now-s.start)/(4300/simSpeed),0,1);
+  updateTestTelemetry();
   const vehicleGone=s.physics.vehicle.y>H+150;
   const enoughTime=elapsed>3.15/Math.sqrt(simSpeed);
   if((vehicleGone&&elapsed>1.7)||elapsed>4.45/Math.sqrt(simSpeed)){
@@ -1848,16 +2576,17 @@ function tickCollapse(now){
   }
   requestAnimationFrame(tick);
 }
-function startSimulation(){
+function startSimulation(fromTutorial=false){
+  if(tutorialMode&&!fromTutorial){tutorialHandleAction('test');return}
   if(sim){stopSimulation();return}
   if(!stage.sandbox && totalCost>stage.budget*2){toast('기본 예산의 200%를 초과했습니다');setCoach('budget');return}
-  selected=null;lastBroken=new Set();
+  selected=null;lastBroken=new Set();playSfx('test');
   const probe=assemble(stage.deck[0][0]+1,lastBroken);
   if(!probe.ok){startUnstableCollapse();return}
-  sim={mode:'static',start:performance.now(),duration:6200/simSpeed,progress:0,maxRatio:0,maxDefl:0,worst:null,worstForce:0,failed:false,failReason:null,last:probe,broken:new Set(),brokenCount:0};
-  ui.test.textContent='■ STOP';ui.test.classList.add('stop');stressMode=true;requestAnimationFrame(tick);
+  sim={mode:'static',start:performance.now(),duration:6200/simSpeed,progress:0,shipProgress:stage.ship?0:null,maxRatio:0,maxDefl:0,worst:null,worstForce:0,failed:false,failReason:null,last:probe,broken:new Set(),brokenCount:0};
+  ui.test.textContent='■ STOP';ui.test.classList.add('stop');stressMode=true;updateTestTelemetry();requestAnimationFrame(tick);
 }
-function stopSimulation(){sim=null;ui.test.textContent='▶ TEST';ui.test.classList.remove('stop');draw()}
+function stopSimulation(){sim=null;ui.test.textContent='▶ TEST';ui.test.classList.remove('stop');updateBuildCheck();updateTestTelemetry();draw()}
 function tick(now){
   if(!sim)return;
   if(sim.mode==='collapse'){tickCollapse(now);return}
@@ -1865,6 +2594,7 @@ function tick(now){
   const raw=clamp((now-s.start)/s.duration,0,1);
   const p=raw<.12?(.5*(1-Math.cos(Math.PI*raw/.12))*.12):raw>.88?(.88+.5*(1-Math.cos(Math.PI*(raw-.88)/.12))*.12):raw;
   s.progress=p;
+  if(stage.ship)s.shipProgress=clamp((raw-.03)/.92,0,1);
   const x=stage.deck[0][0]+p*(stage.deck.at(-1)[0]-stage.deck[0][0]);
 
   let a=assemble(x,s.broken);
@@ -1876,7 +2606,7 @@ function tick(now){
     const brokenForce=a.forces.get(a.worst.id)?.force||0;
     s.maxRatio=Math.max(s.maxRatio,a.maxRatio);s.worst=a.worst;s.worstForce=brokenForce;
     s.broken.add(a.worst.id);s.brokenCount=s.broken.size;lastBroken=new Set(s.broken);
-    toast(`${MAT[a.worst.mat].name} 부재 파단 // 남은 하중 경로 재해석`);
+    toast(`${MAT[a.worst.mat].name} 부재 파단 // 남은 하중 경로 재해석`);kickShake(5.5,180);playSfx('break');
     const prior=a;
     a=assemble(x,s.broken);breakPass++;
     if(!a.ok){enterCollapseMode(s,'post-fracture-instability',prior,p,now);draw();requestAnimationFrame(tick);return}
@@ -1892,7 +2622,7 @@ function tick(now){
   if(!stage.sandbox && a.maxDefl>collapseDefl){enterCollapseMode(s,'excessive-deflection',a,p,now);draw();requestAnimationFrame(tick);return}
 
   currentAnalysis={ok:true,maxRatio:s.maxRatio,maxDefl:s.maxDefl,brokenCount:s.brokenCount};
-  updateAnalysisUI(currentAnalysis);draw();
+  updateAnalysisUI(currentAnalysis);updateTestTelemetry();draw();
   if(raw>=1){lastBroken=new Set(s.broken);finishSimulation(true);return}
   requestAnimationFrame(tick);
 }
@@ -1900,6 +2630,15 @@ function finishSimulation(success){
   const s=sim;if(!s)return;
   currentAnalysis={ok:success,maxRatio:s.maxRatio||0,maxDefl:s.maxDefl||0};updateAnalysisUI(currentAnalysis);
   ui.test.textContent='▶ TEST';ui.test.classList.remove('stop');
+  const telemetryPanel=$('#testTelemetry');if(telemetryPanel)telemetryPanel.hidden=true;const dangerFrame=$('#testDangerFrame');if(dangerFrame)dangerFrame.style.opacity='0';
+  if(tutorialTestRunning){
+    const wasSuccess=success;
+    tutorialTestRunning=false;
+    sim=null;draw();
+    if(wasSuccess){toast('TRAINING TEST PASSED // 차량 통과 확인');setTimeout(()=>finishTutorialStage(false),500)}
+    else {tutorialTransitioning=false;const panel=$('#stageTutorial');if(panel){panel.hidden=false;panel.style.display='';}const badge=$('#tutorialStageBadge');if(badge)badge.style.opacity='1';toast('TRAINING TEST FAILED // 구조를 확인하세요');renderStageTutorialStep()}
+    return;
+  }
   if(success){setCoach('success',s);showResult(true,s)}
   else if(s.failReason==='collapse'){
     ui.coach.innerHTML=`<strong>동적 붕괴가 발생했습니다.</strong> 정적 해석에서 불안정하거나 남은 하중 경로가 사라진 뒤, 중력 기반 물리 시뮬레이션에서 도로와 부재가 큰 회전·변형을 일으켰습니다.<div class="coachTip">삼각형을 닫고, 긴 압축재를 줄이며, 한 부재가 사라져도 다른 경로가 남도록 연결을 추가해보세요.</div>`;
@@ -1926,8 +2665,8 @@ const EDU_QUIZ=[
  {q:'아치교가 하중을 전달할 때 아치 리브에 주로 기대하는 힘은 무엇일까요?',a:1,opts:['인장','압축','순수 비틀림','부력'],ok:'아치는 하중을 주로 압축 흐름으로 양쪽 지점에 전달하며 지점에는 수평 추력이 생길 수 있습니다.'},
  {q:'구조적 여유도(redundancy)를 가장 잘 설명한 것은 무엇일까요?',a:2,opts:['모든 부재를 가장 비싼 재료로 만드는 것','부재를 가능한 한 적게 사용하는 것','일부 부재가 손상되어도 다른 하중 경로가 남도록 하는 것','차량 하중을 항상 0으로 만드는 것'],ok:'구조적 여유도는 일부 요소가 손상되더라도 대체 하중 경로가 남도록 하는 개념과 관련됩니다.'}
 ];
-function clearedStageCount(){let c=0;for(let i=0;i<4;i++)if(Number(localStorage.getItem('trusslab-best-'+i)||0)>0)c++;return c}
-function educationUnlocked(){return localStorage.getItem('trusslab-education-unlocked')==='1'||clearedStageCount()>0}
+function clearedStageCount(){return sessionClearedStages.size}
+function educationUnlocked(){return clearedStageCount()>0||localStorage.getItem('trusslab-education-complete')==='1'}
 function updateEducationAccess(){const unlocked=educationUnlocked(),t=$('#titleEduBtn'),g=$('#eduTopBtn');if(t){t.hidden=!unlocked;t.textContent=localStorage.getItem('trusslab-education-complete')==='1'?'TRUSS EDUCATION // COMPLETE':'TRUSS EDUCATION'}if(g)g.hidden=!unlocked}
 function prepareLoadingTruss(){
   const loading=$('#loadingScreen');
@@ -2156,6 +2895,13 @@ function renderMaterialCompare(mat){$$('[data-matcompare]').forEach(b=>b.classLi
 function bindQuiz(){$$('.quizQ').forEach(card=>{const qi=Number(card.dataset.q);if(quizCorrect.has(qi))return;card.querySelectorAll('.quizOpt').forEach(btn=>btn.onclick=()=>{const oi=Number(btn.dataset.opt),q=EDU_QUIZ[qi],fb=card.querySelector('.quizFeedback');card.querySelectorAll('.quizOpt').forEach(x=>x.classList.remove('wrong'));if(oi===q.a){quizCorrect.add(qi);try{localStorage.setItem('trusslab-education-quiz',JSON.stringify([...quizCorrect].sort((a,b)=>a-b)))}catch(_){};btn.classList.add('correct');card.classList.add('solved');card.querySelectorAll('.quizOpt').forEach(x=>x.disabled=true);fb.className='quizFeedback good';fb.textContent=q.ok}else{btn.classList.add('wrong');fb.className='quizFeedback bad';fb.textContent='다시 생각해 보세요. 앞의 모듈에서 어떤 힘과 하중 경로를 설명했는지 비교해 보세요.'}$('#quizCount').textContent=quizCorrect.size;$('#quizFinishBtn').disabled=quizCorrect.size!==6})});$('#quizFinishBtn')?.addEventListener('click',()=>{if(quizCorrect.size===6)completeEducationCourse()})}
 function completeEducationCourse(){localStorage.setItem('trusslab-education-complete','1');updateEducationAccess();$('#educationScreen').hidden=true;runLoadingSequence({title:'FINALIZING STRUCTURAL TRAINING',statuses:['[01] VERIFY QUIZ 6/6','[02] ARCHIVE COURSE DATA','[03] STRUCTURAL LITERACY CHECK','[04] GENERATE COMPLETION RECORD','[05] TRAINING COMPLETE'],duration:1750,hint:'CERTIFYING COURSE'},()=>{const e=$('#endingScreen');e.hidden=false;$('#endingStageCount').textContent=String(Math.max(1,clearedStageCount()))})}
 
+
+function animateResultCounters(){
+  const els=[...ui.resultCard.querySelectorAll('[data-count]')];if(!els.length)return;
+  const start=performance.now(),dur=620;els.forEach(e=>e.classList.add('counting'));
+  const frame=now=>{const t=clamp((now-start)/dur,0,1),eased=1-Math.pow(1-t,3);els.forEach(el=>{const v=Number(el.dataset.count)||0;el.textContent=String(Math.round(v*eased))});if(t<1)requestAnimationFrame(frame);else els.forEach(e=>e.classList.remove('counting'))};requestAnimationFrame(frame)
+}
+
 function showResult(success,s){
   const stageTimeMs=stage.sandbox?null:(success?finalizeStageClock():pauseStageClock(true));
   let bestTimeMs=null,newBest=false;
@@ -2170,12 +2916,15 @@ function showResult(success,s){
   const stiffness=collapsed?0:clamp(Math.round(100-(s.maxDefl||0)/stage.maxDefl*55),0,100);
   const tri=Math.min(100,triangleCount()*12+35);const score=Math.round(safety*.4+efficiency*.25+stiffness*.2+tri*.15);const stars=score>=88?'★★★':score>=72?'★★☆':'★☆☆';
   const stageClear=success&&!stage.sandbox&&stageIndex<4;
-  if(success){const key='trusslab-best-'+stageIndex;const best=Math.max(Number(localStorage.getItem(key)||0),score);localStorage.setItem(key,best);if(stageClear)localStorage.setItem('trusslab-education-unlocked','1');updateEducationAccess();updateStageButtons()}
+  const achievements=resultAchievements(success,s);
+  const gradeScore=score+(achievements.earned*3);
+  const grade=gradeScore>=96?'S':gradeScore>=86?'A':gradeScore>=72?'B':'C';
+  if(stageClear){sessionClearedStages.add(stageIndex);updateEducationAccess();updateStageButtons()}
   const eduButton=stageClear?'<button class="primaryBtn" id="goEducationBtn">교육 센터 가기 →</button>':'';
   const continueButton=success&&stageIndex<stages.length-1?'<button class="primaryBtn" id="nextStage">다음 스테이지 →</button>':'<button class="primaryBtn" id="retryStage">설계 계속하기</button>';
   const timePanel=success&&!stage.sandbox?`<div class="clearTimePanel"><div><span class="clearTimeLabel">CLEAR TIME // STAGE ${String(stageIndex+1).padStart(2,'0')}</span><strong class="clearTimeValue">${formatStageTime(stageTimeMs)}</strong><span class="clearTimeTag">${newBest?'NEW PERSONAL BEST // ':''}${difficultyMode.toUpperCase()} PROFILE</span></div><div><span class="clearTimeLabel">BEST CLEAR</span><strong class="clearTimeBest">${formatStageTime(bestTimeMs)}</strong><span class="clearTimeTag">SAVED LOCALLY</span></div></div>`:'';
-  ui.resultCard.innerHTML=`<h1>${stage.sandbox?(success?'EXPERIMENT COMPLETE':'DYNAMIC COLLAPSE'):(success?'MISSION CLEAR':'BRIDGE FAILED')}</h1><div class="sub">${stage.sandbox?`샌드박스 실험이 끝났습니다. 응력 색과 변형을 비교한 뒤 하중이나 구조를 바꿔 다시 시험해 보세요.`:(success?`차량이 끝까지 통과했습니다. ${s.brokenCount?`중간에 <strong style="color:#fff">${s.brokenCount}개 부재</strong>가 끊어졌지만 남은 구조가 하중을 전달했습니다. `:''}<strong style="color:#fff">${stars}</strong>${stageClear?`<br><br><strong style="color:#62e1ae">TRUSS EDUCATION UNLOCKED //</strong> 교육 센터에서 교량 형식과 하중 경로를 인터랙티브하게 학습할 수 있습니다.`:''}`:`중력 기반 동적 시뮬레이션에서 교량이 안정성을 잃어 차량이 정상적으로 통과하지 못했습니다. 구조 코치의 하중 경로 힌트를 보고 설계를 수정해보세요.`)}</div>${timePanel}<div class="resultGrid"><div class="scoreBox"><b>${safety}</b><span>안전성</span></div><div class="scoreBox"><b>${efficiency}</b><span>비용 효율</span></div><div class="scoreBox"><b>${stiffness}</b><span>강성</span></div><div class="scoreBox"><b>${triangleCount()}</b><span>삼각형 수</span></div></div><div class="sub">최대 하중률 <strong style="color:#fff">${Math.round((s.maxRatio||0)*100)}%</strong> · 최대 변형 <strong style="color:#fff">${(s.maxDefl||0).toFixed(1)}</strong> · 끊어진 부재 <strong style="color:#fff">${s.brokenCount||0}개</strong> · 비용 <strong style="color:#fff">₩${totalCost.toLocaleString()}</strong></div><div class="bigActions" style="margin-top:18px"><button class="iconBtn" id="closeResult">×</button>${eduButton}${continueButton}</div>`;
-  ui.result.classList.add('show');
+  ui.resultCard.innerHTML=`<h1>${stage.sandbox?(success?'EXPERIMENT COMPLETE':'DYNAMIC COLLAPSE'):(success?'MISSION CLEAR':'BRIDGE FAILED')}</h1><div class="sub">${stage.sandbox?`샌드박스 실험이 끝났습니다. 응력 색과 변형을 비교한 뒤 하중이나 구조를 바꿔 다시 시험해 보세요.`:(success?`차량이 끝까지 통과했습니다. ${s.brokenCount?`중간에 <strong style="color:#fff">${s.brokenCount}개 부재</strong>가 끊어졌지만 남은 구조가 하중을 전달했습니다. `:''}<strong style="color:#fff">${stars}</strong>${stageClear?`<br><br><strong style="color:#62e1ae">TRUSS EDUCATION UNLOCKED //</strong> 교육 센터에서 교량 형식과 하중 경로를 인터랙티브하게 학습할 수 있습니다.`:''}`:`중력 기반 동적 시뮬레이션에서 교량이 안정성을 잃어 차량이 정상적으로 통과하지 못했습니다. 구조 코치의 하중 경로 힌트를 보고 설계를 수정해보세요.`)}</div>${timePanel}${success&&!stage.sandbox?`<div class="engineeringGrade"><span>ENGINEERING GRADE // OPTIONAL OBJECTIVES ${achievements.earned}/3</span><strong class="${grade==='B'?'gradeB':grade==='C'?'gradeC':''}">${grade}</strong></div>${achievements.html}`:''}<div class="resultGrid"><div class="scoreBox"><b data-count="${safety}">0</b><span>안전성</span></div><div class="scoreBox"><b data-count="${efficiency}">0</b><span>비용 효율</span></div><div class="scoreBox"><b data-count="${stiffness}">0</b><span>강성</span></div><div class="scoreBox"><b data-count="${triangleCount()}">0</b><span>삼각형 수</span></div></div><div class="sub">최대 하중률 <strong style="color:#fff">${Math.round((s.maxRatio||0)*100)}%</strong> · 최대 변형 <strong style="color:#fff">${(s.maxDefl||0).toFixed(1)}</strong> · 끊어진 부재 <strong style="color:#fff">${s.brokenCount||0}개</strong> · 비용 <strong style="color:#fff">₩${totalCost.toLocaleString()}</strong></div><div class="bigActions" style="margin-top:18px"><button class="iconBtn" id="closeResult">×</button>${eduButton}${continueButton}</div>`;
+  ui.result.classList.add('show');animateResultCounters();playSfx(success?'success':'fail');
   const closeResult=()=>{ui.result.classList.remove('show');if(!success)resumeClockAfterFailedResult()};
   $('#closeResult').onclick=closeResult;
   $('#retryStage')?.addEventListener('click',closeResult);
@@ -2185,15 +2934,21 @@ function showResult(success,s){
 
 
 function draw(){
-  const r=canvas.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);ctx.save();ctx.scale(scaleX,scaleY);applyCamera();
-  drawBackground();drawForbidden();drawRoadAlignmentGuide();
+  const r=canvas.getBoundingClientRect();scaleX=r.width/W;scaleY=r.height/H;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);ctx.save();ctx.scale(scaleX,scaleY);applyCamera();
+  if(screenShake.until>performance.now()){const k=(screenShake.until-performance.now())/180;ctx.translate(Math.sin(anim*2.71)*screenShake.power*k,Math.cos(anim*3.17)*screenShake.power*k)}else screenShake.power=0;
+  drawBackground();drawForbidden();drawStageVessel();drawRoadAlignmentGuide();
   const physics=sim?.mode==='collapse'?sim.physics:null;
   const analysis=physics?null:(sim?.last?.ok?sim.last:(((stressMode||loadPathMode)&&lastFullAnalysis?.ok)?lastFullAnalysis:null));
   const deformScale=analysis?2.4:0;
   drawSupports();
+  drawTutorialBlueprint();
   if(loadPathMode&&analysis)drawLoadPath(analysis,deformScale);
 
   for(const m of members){
+    if(physics&&m.mat==='cable'){
+      const rope=physics.ropeChains?.find(r=>r.id===m.id);
+      if(rope){drawCollapseRope(physics,rope);continue}
+    }
     const a=nodeById(m.a),b=nodeById(m.b);let pa={x:a.x,y:a.y},pb={x:b.x,y:b.y};
     if(physics){const pA=collapseParticle(physics,a.id),pB=collapseParticle(physics,b.id);if(pA&&pB){pa={x:pA.x,y:pA.y};pb={x:pB.x,y:pB.y}}}
     else if(analysis){const ia=analysis.index.get(a.id),ib=analysis.index.get(b.id);pa={x:a.x+analysis.U[2*ia]*deformScale,y:a.y+analysis.U[2*ia+1]*deformScale};pb={x:b.x+analysis.U[2*ib]*deformScale,y:b.y+analysis.U[2*ib+1]*deformScale};}
@@ -2206,10 +2961,12 @@ function draw(){
     else if(analysis){const i=analysis.index.get(n.id);p={x:n.x+analysis.U[2*i]*deformScale,y:n.y+analysis.U[2*i+1]*deformScale}}
     drawNodeVisual(n,p);
   });
+  drawBuildFx();
 
   if(!physics){
     drawPlacementGuide();
     if(selected&&!sim){const p={x:selected.x,y:selected.y};ctx.save();ctx.setLineDash([7,8]);ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,25,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.x,p.y,31,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=6;ctx.stroke();ctx.restore();}
+    drawInteractionReticle();
     if(selected&&!sim)drawBuildPreview();
     if(measureMode&&(measureA||measureB))drawMeasurement();
   }
@@ -2259,12 +3016,12 @@ function drawMemberVisual(m,pa,pb,analysis){
     const base=f?(f.force>=0?mix('#c08c4a','#6aaeff',clamp(ratio,0,1)):mix('#a77639','#ff7387',clamp(ratio,0,1))):'#dfa45b';
     const edge=f?(f.force>=0?mix('#785735','#2f5f99',clamp(ratio,0,1)):mix('#6f4b2c','#9e4150',clamp(ratio,0,1))):'#8b6335';
     const hi=f?(f.force>=0?mix('#f5d59a','#d4ecff',clamp(ratio,0,1)):mix('#f3cc8d','#ffd8df',clamp(ratio,0,1))):'#f3cc8d';
-    drawBeam(pa,pb,7+clamp(ratio,0,1)*2.8,base,edge,hi,1.25);
+    drawBeam(pa,pb,7+clamp(ratio,0,1)*2.8,base,edge,hi,1.25,'wood');
   }else if(m.mat==='steel'){
     const base=f?(f.force>=0?mix('#b7bfca','#75bbff',clamp(ratio,0,1)):mix('#a8b0bb','#ff7d91',clamp(ratio,0,1))):'#cbd1da';
     const edge=f?(f.force>=0?mix('#626d7b','#2c5c94',clamp(ratio,0,1)):mix('#5c6570','#a83d4d',clamp(ratio,0,1))):'#677281';
     const hi=f?(f.force>=0?mix('#eef3f9','#d8efff',clamp(ratio,0,1)):mix('#eef3f9','#ffe3e8',clamp(ratio,0,1))):'#eef3f9';
-    drawBeam(pa,pb,8+clamp(ratio,0,1)*2.6,base,edge,hi,0.65);
+    drawBeam(pa,pb,8+clamp(ratio,0,1)*2.6,base,edge,hi,0.65,'steel');
   }else if(m.mat==='cable'){
     const base=f?(f.force>=0?mix('#e0c95c','#79bcff',clamp(ratio,0,1)):mix('#c3af5a','#ff7a90',clamp(ratio,0,1))):'#e4cf69';
     const edge=f?(f.force>=0?mix('#958336','#2c5e97',clamp(ratio,0,1)):mix('#958336','#a14152',clamp(ratio,0,1))):'#98863a';
@@ -2297,109 +3054,194 @@ function drawCollapseEffects(physics){
   for(const f of physics.flashes){const t=1-clamp(f.life/f.max,0,1);ctx.strokeStyle=`rgba(255,236,196,${(1-t)*.8})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(f.x,f.y,6+t*22,0,Math.PI*2);ctx.stroke()}
   ctx.restore();
 }
+function drawCollapseRope(physics,rope){
+  const pts=rope.ids.map(id=>collapseParticle(physics,id)).filter(Boolean);if(pts.length<2)return;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  for(let pass=0;pass<3;pass++){
+    ctx.beginPath();let started=false;
+    for(let i=0;i<pts.length-1;i++){
+      if(rope.broken&&i===rope.breakIndex){started=false;continue}
+      const a=pts[i],b=pts[i+1];
+      if(!started){ctx.moveTo(a.x,a.y);started=true}ctx.lineTo(b.x,b.y);
+    }
+    if(pass===0){ctx.strokeStyle='rgba(35,31,10,.16)';ctx.lineWidth=7}
+    else if(pass===1){ctx.strokeStyle='#8d7a34';ctx.lineWidth=4}
+    else{ctx.strokeStyle='#e4cf69';ctx.lineWidth=2.4}
+    ctx.stroke();
+  }
+  // A fine highlight emphasizes curvature and makes slack cable read as thread.
+  ctx.strokeStyle='rgba(255,250,215,.58)';ctx.lineWidth=.7;ctx.beginPath();
+  let started=false;for(let i=0;i<pts.length-1;i++){if(rope.broken&&i===rope.breakIndex){started=false;continue}const a=pts[i],b=pts[i+1];if(!started){ctx.moveTo(a.x,a.y);started=true}ctx.lineTo(b.x,b.y)}ctx.stroke();ctx.restore();
+}
 function drawDynamicVehicle(v){drawVehicleBody(v.x,v.y,v.angle,v.rot)}
 
+function texHash(a,b=0,c=0){
+  const n=Math.sin(a*12.9898+b*78.233+c*37.719)*43758.5453123;
+  return n-Math.floor(n);
+}
+function beamPoint(pa,pb,t,offset=0){
+  const [nx,ny]=normal(pa,pb);return {x:pa.x+(pb.x-pa.x)*t+nx*offset,y:pa.y+(pb.y-pa.y)*t+ny*offset};
+}
 function drawRoadBeam(pa,pb,w,reinforced=false){
-  strokeShadow(pa,pb,w+8,'rgba(33,28,40,.24)');
+  strokeShadow(pa,pb,w+9,'rgba(24,22,28,.28)');
   ctx.save();
-  ctx.lineCap='round';
+  ctx.lineCap='round';ctx.lineJoin='round';
+  const L=dist(pa,pb),[nx,ny]=normal(pa,pb);
   const grad=ctx.createLinearGradient(pa.x,pa.y,pb.x,pb.y);
-  if(reinforced){grad.addColorStop(0,'#45515b');grad.addColorStop(.48,'#66737c');grad.addColorStop(1,'#46525c');}else{grad.addColorStop(0,'#4f413b');grad.addColorStop(.48,'#625049');grad.addColorStop(1,'#4f433d');}
-  ctx.strokeStyle=reinforced?'#27323a':'#322a27'; ctx.lineWidth=w+4; line(pa,pb);
-  ctx.strokeStyle=grad; ctx.lineWidth=w; line(pa,pb);
-  const [nx,ny]=normal(pa,pb);
-  ctx.strokeStyle='rgba(248,239,225,.45)'; ctx.lineWidth=2;
-  line({x:pa.x+nx*3.2,y:pa.y+ny*3.2},{x:pb.x+nx*3.2,y:pb.y+ny*3.2});
-  ctx.strokeStyle=reinforced?'rgba(20,29,34,.45)':'rgba(31,24,23,.35)';
-  line({x:pa.x-nx*3.2,y:pa.y-ny*3.2},{x:pb.x-nx*3.2,y:pb.y-ny*3.2});
+  if(reinforced){grad.addColorStop(0,'#3d4851');grad.addColorStop(.28,'#59656e');grad.addColorStop(.53,'#6b7780');grad.addColorStop(.76,'#56626b');grad.addColorStop(1,'#39454e');}
+  else{grad.addColorStop(0,'#3b3532');grad.addColorStop(.26,'#504640');grad.addColorStop(.52,'#655750');grad.addColorStop(.76,'#4e443f');grad.addColorStop(1,'#39332f');}
+  ctx.strokeStyle=reinforced?'#202a30':'#282321';ctx.lineWidth=w+5;line(pa,pb);
+  ctx.strokeStyle=grad;ctx.lineWidth=w;line(pa,pb);
+
+  // top wearing surface
+  ctx.strokeStyle=reinforced?'rgba(224,232,235,.42)':'rgba(236,225,211,.34)';ctx.lineWidth=1.7;
+  line(beamPoint(pa,pb,0, w*.27),beamPoint(pa,pb,1,w*.27));
+  ctx.strokeStyle='rgba(0,0,0,.24)';ctx.lineWidth=1.5;
+  line(beamPoint(pa,pb,0,-w*.31),beamPoint(pa,pb,1,-w*.31));
+
+  // aggregate / wear texture, deterministic so it does not shimmer between frames
+  const specks=Math.min(28,Math.max(5,Math.floor(L/9)));
+  for(let i=0;i<specks;i++){
+    const t=(i+.55)/specks, j=(texHash(pa.x+pb.x,i,pa.y)-.5)*w*.56;
+    const q=beamPoint(pa,pb,t,j);
+    const r=.45+texHash(pb.x,i,pa.x)*.8;
+    ctx.fillStyle=texHash(i,pa.x,pb.y)>.5?(reinforced?'rgba(229,237,239,.18)':'rgba(232,215,197,.16)'):'rgba(15,17,19,.18)';
+    ctx.beginPath();ctx.arc(q.x,q.y,r,0,Math.PI*2);ctx.fill();
+  }
+
   if(reinforced){
-    const L=dist(pa,pb),count=Math.max(1,Math.floor(L/34));ctx.strokeStyle='rgba(220,232,236,.38)';ctx.lineWidth=1.2;
-    for(let i=1;i<count;i++){const t=i/count,x=pa.x+(pb.x-pa.x)*t,y=pa.y+(pb.y-pa.y)*t;line({x:x-nx*w*.34,y:y-ny*w*.34},{x:x+nx*w*.34,y:y+ny*w*.34})}
+    const count=Math.max(1,Math.floor(L/31));
+    ctx.lineWidth=1.15;
+    for(let i=1;i<count;i++){
+      const t=i/count,q=beamPoint(pa,pb,t,0);
+      ctx.strokeStyle=i%2?'rgba(218,229,233,.34)':'rgba(22,29,33,.38)';
+      line({x:q.x-nx*w*.34,y:q.y-ny*w*.34},{x:q.x+nx*w*.34,y:q.y+ny*w*.34});
+      ctx.fillStyle='rgba(230,235,237,.45)';ctx.beginPath();ctx.arc(q.x+nx*w*.22,q.y+ny*w*.22,1.1,0,Math.PI*2);ctx.fill();
+    }
+  }else if(L>54){
+    // faint expansion-joint scuffs on ordinary deck
+    const count=Math.max(1,Math.floor(L/72));ctx.strokeStyle='rgba(18,16,16,.26)';ctx.lineWidth=.8;
+    for(let i=1;i<=count;i++){const q=beamPoint(pa,pb,i/(count+1),0);line({x:q.x-nx*w*.30,y:q.y-ny*w*.30},{x:q.x+nx*w*.30,y:q.y+ny*w*.30})}
   }
   ctx.restore();
 }
 
-function drawBeam(pa,pb,w,base,edge,highlight,textureScale=1){
-  strokeShadow(pa,pb,w+8,'rgba(27,22,28,.2)');
+function drawBeam(pa,pb,w,base,edge,highlight,textureScale=1,kind='steel'){
+  strokeShadow(pa,pb,w+8,'rgba(22,20,26,.23)');
   ctx.save();
-  ctx.lineCap='round';
-  ctx.strokeStyle=edge; ctx.lineWidth=w+3.8; line(pa,pb);
+  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.strokeStyle=edge;ctx.lineWidth=w+3.8;line(pa,pb);
   const grad=ctx.createLinearGradient(pa.x,pa.y,pb.x,pb.y);
-  grad.addColorStop(0,shade(base,-10)); grad.addColorStop(.15,base); grad.addColorStop(.5,shade(base,6)); grad.addColorStop(.85,base); grad.addColorStop(1,shade(base,-8));
-  ctx.strokeStyle=grad; ctx.lineWidth=w; line(pa,pb);
-  const [nx,ny]=normal(pa,pb);
-  ctx.strokeStyle=highlight; ctx.lineWidth=Math.max(1.3,w*.18);
-  line({x:pa.x+nx*1.5,y:pa.y+ny*1.5},{x:pb.x+nx*1.5,y:pb.y+ny*1.5});
-  ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=Math.max(1,w*.12);
-  line({x:pa.x-nx*1.8,y:pa.y-ny*1.8},{x:pb.x-nx*1.8,y:pb.y-ny*1.8});
-  const L=dist(pa,pb);
-  if(textureScale>1 && L>38){
-    const count=Math.max(1,Math.floor(L/42));
-    ctx.strokeStyle='rgba(111,78,35,.18)'; ctx.lineWidth=1;
-    for(let i=1;i<count;i++){
-      const t=i/count; const x=pa.x+(pb.x-pa.x)*t, y=pa.y+(pb.y-pa.y)*t;
-      line({x:x-nx*w*.35,y:y-ny*w*.35},{x:x+nx*w*.35,y:y+ny*w*.35});
+  grad.addColorStop(0,shade(base,-12));grad.addColorStop(.14,base);grad.addColorStop(.46,shade(base,8));grad.addColorStop(.72,shade(base,2));grad.addColorStop(1,shade(base,-10));
+  ctx.strokeStyle=grad;ctx.lineWidth=w;line(pa,pb);
+  const [nx,ny]=normal(pa,pb),L=dist(pa,pb);
+
+  ctx.strokeStyle=highlight;ctx.lineWidth=Math.max(1.1,w*.16);
+  line(beamPoint(pa,pb,0,w*.18),beamPoint(pa,pb,1,w*.18));
+  ctx.strokeStyle='rgba(0,0,0,.16)';ctx.lineWidth=Math.max(.8,w*.11);
+  line(beamPoint(pa,pb,0,-w*.23),beamPoint(pa,pb,1,-w*.23));
+
+  if(kind==='wood'&&L>18){
+    // longitudinal grain follows the member instead of looking like generic stripes
+    const grains=3;
+    for(let g=0;g<grains;g++){
+      const off=(-.26+g*.26)*w;
+      ctx.strokeStyle=g===1?'rgba(255,225,171,.16)':'rgba(91,54,24,.18)';ctx.lineWidth=.65;
+      ctx.beginPath();
+      for(let i=0;i<=8;i++){
+        const t=i/8, wobble=(texHash(g,i,pa.x+pb.y)-.5)*1.2;
+        const q=beamPoint(pa,pb,t,off+wobble);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);
+      }
+      ctx.stroke();
     }
+    const knots=Math.min(2,Math.floor(L/92));
+    for(let k=0;k<knots;k++){
+      const t=.28+.42*texHash(pa.x,k,pb.y),q=beamPoint(pa,pb,t,(texHash(k,pb.x,pa.y)-.5)*w*.35);
+      ctx.save();ctx.translate(q.x,q.y);ctx.rotate(Math.atan2(pb.y-pa.y,pb.x-pa.x));ctx.strokeStyle='rgba(83,48,23,.32)';ctx.lineWidth=.7;ctx.beginPath();ctx.ellipse(0,0,3.4,1.5,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
+  }else if(kind==='steel'&&L>20){
+    // brushed steel catches light in short transverse scratches
+    const count=Math.min(18,Math.max(3,Math.floor(L/13)));
+    for(let i=1;i<count;i++){
+      const t=i/count,q=beamPoint(pa,pb,t,0),len=w*(.23+.18*texHash(i,pa.x,pb.y));
+      ctx.strokeStyle=i%3===0?'rgba(255,255,255,.20)':'rgba(25,31,36,.18)';ctx.lineWidth=.55;
+      line({x:q.x-nx*len,y:q.y-ny*len},{x:q.x+nx*len,y:q.y+ny*len});
+    }
+    ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=.55;
+    line(beamPoint(pa,pb,.06,0),beamPoint(pa,pb,.94,0));
   }
-  drawMemberEndCap(pa,w*.56,edge,highlight);
-  drawMemberEndCap(pb,w*.56,edge,highlight);
+  drawMemberEndCap(pa,w*.58,edge,highlight,kind);
+  drawMemberEndCap(pb,w*.58,edge,highlight,kind);
   ctx.restore();
 }
 
 function drawCable(pa,pb,base,edge,w){
   strokeShadow(pa,pb,w+5,'rgba(35,31,10,.15)');
-  ctx.save();
-  ctx.lineCap='round';
-  ctx.strokeStyle=edge; ctx.lineWidth=w+1.6; line(pa,pb);
-  ctx.strokeStyle=base; ctx.lineWidth=w; line(pa,pb);
-  const [nx,ny]=normal(pa,pb);
-  ctx.strokeStyle='rgba(255,250,215,.8)'; ctx.lineWidth=.9;
-  line({x:pa.x+nx*.7,y:pa.y+ny*.7},{x:pb.x+nx*.7,y:pb.y+ny*.7});
+  ctx.save();ctx.lineCap='round';
+  ctx.strokeStyle=edge;ctx.lineWidth=w+1.8;line(pa,pb);
+  ctx.strokeStyle=base;ctx.lineWidth=w;line(pa,pb);
+  const [nx,ny]=normal(pa,pb),L=dist(pa,pb);
+  ctx.strokeStyle='rgba(255,250,215,.72)';ctx.lineWidth=.75;line(beamPoint(pa,pb,0,.65),beamPoint(pa,pb,1,.65));
+  // subtle twisted-strand texture; stays restrained when zoomed out
+  if(L>28){
+    const count=Math.min(24,Math.max(4,Math.floor(L/14)));
+    for(let i=1;i<count;i++){
+      const t=i/count,q=beamPoint(pa,pb,t,0),phase=(i%2?1:-1)*w*.42;
+      ctx.strokeStyle=i%2?'rgba(255,244,191,.34)':'rgba(83,72,27,.28)';ctx.lineWidth=.55;
+      line({x:q.x-nx*phase,y:q.y-ny*phase},{x:q.x+nx*phase,y:q.y+ny*phase});
+    }
+  }
   ctx.restore();
 }
 
-function drawMemberEndCap(p,r,edge,hi){
+function drawMemberEndCap(p,r,edge,hi,kind='steel'){
   ctx.save();
-  ctx.beginPath();
-  ctx.arc(p.x,p.y,r,0,Math.PI*2);
-  ctx.fillStyle=edge;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(p.x,p.y,Math.max(2.2,r*.68),0,Math.PI*2);
-  ctx.fillStyle=shade(hi,-8);
-  ctx.fill();
+  const g=ctx.createRadialGradient(p.x-r*.28,p.y-r*.32,.4,p.x,p.y,r);
+  g.addColorStop(0,kind==='wood'?shade(hi,4):'#f6f8fa');g.addColorStop(.42,shade(hi,-6));g.addColorStop(1,edge);
+  ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  ctx.strokeStyle='rgba(20,20,24,.32)';ctx.lineWidth=.7;ctx.stroke();
+  if(kind==='steel'){
+    ctx.strokeStyle='rgba(48,54,60,.55)';ctx.lineWidth=.75;ctx.beginPath();ctx.moveTo(p.x-r*.35,p.y);ctx.lineTo(p.x+r*.35,p.y);ctx.stroke();
+  }else{
+    ctx.strokeStyle='rgba(98,59,28,.35)';ctx.lineWidth=.65;ctx.beginPath();ctx.arc(p.x,p.y,r*.45,0,Math.PI*1.45);ctx.stroke();
+  }
   ctx.restore();
 }
 
 function drawNodeVisual(n,p){
-  const size=n.support?9.5:(n.deck?9:8.2);
+  const size=n.support?9.8:(n.deck?9.2:8.3);
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,.18)';
-  ctx.shadowBlur=10;
-  ctx.shadowOffsetY=2;
+  ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=9;ctx.shadowOffsetY=2.2;
+  ctx.beginPath();ctx.arc(p.x,p.y,size+3.5,0,Math.PI*2);ctx.fillStyle='rgba(20,23,28,.52)';ctx.fill();
+  ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+
+  // dark retaining washer
+  const outer=ctx.createRadialGradient(p.x-2.5,p.y-3,1,p.x,p.y,size+2.1);
+  outer.addColorStop(0,'#78808a');outer.addColorStop(.48,'#4e555d');outer.addColorStop(1,'#24292e');
+  ctx.beginPath();ctx.arc(p.x,p.y,size+1.8,0,Math.PI*2);ctx.fillStyle=outer;ctx.fill();
+  ctx.strokeStyle='rgba(12,15,18,.8)';ctx.lineWidth=1.2;ctx.stroke();
+
+  const ring=ctx.createRadialGradient(p.x-size*.25,p.y-size*.3,.6,p.x,p.y,size);
+  if(n.support){ring.addColorStop(0,'#ff9eaa');ring.addColorStop(.34,'#ff6576');ring.addColorStop(.72,'#d52e4a');ring.addColorStop(1,'#791e32');}
+  else{ring.addColorStop(0,'#fff59a');ring.addColorStop(.3,'#ffe95d');ring.addColorStop(.68,'#e4be1c');ring.addColorStop(1,'#977514');}
+  ctx.beginPath();ctx.arc(p.x,p.y,size,0,Math.PI*2);ctx.fillStyle=ring;ctx.fill();
+  ctx.lineWidth=1.8;ctx.strokeStyle=selected?.id===n.id?'#ffffff':'rgba(51,46,50,.92)';ctx.stroke();
+
+  // machined inner washer and bolt
+  const inner=ctx.createRadialGradient(p.x-1.8,p.y-2.2,.4,p.x,p.y,size*.62);
+  inner.addColorStop(0,'#fbfcfd');inner.addColorStop(.38,'#d6dbe0');inner.addColorStop(.72,'#9da3aa');inner.addColorStop(1,'#626970');
+  ctx.beginPath();ctx.arc(p.x,p.y,size*.60,0,Math.PI*2);ctx.fillStyle=inner;ctx.fill();
+  ctx.strokeStyle='rgba(45,49,54,.65)';ctx.lineWidth=.75;ctx.stroke();
+
+  // hex bolt head
   ctx.beginPath();
-  ctx.arc(p.x,p.y,size+3.8,0,Math.PI*2);
-  ctx.fillStyle='rgba(24,26,35,.42)';
-  ctx.fill();
-  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-  const ring=ctx.createRadialGradient(p.x-2,p.y-3,1,p.x,p.y,size+2.5);
-  if(n.support){
-    ring.addColorStop(0,'#ff8c96'); ring.addColorStop(.55,'#ef3557'); ring.addColorStop(1,'#8c243a');
-  }else{
-    ring.addColorStop(0,'#fff37d'); ring.addColorStop(.55,'#ffe200'); ring.addColorStop(1,'#c6a300');
-  }
-  ctx.beginPath(); ctx.arc(p.x,p.y,size+1.8,0,Math.PI*2); ctx.fillStyle='#4d4856'; ctx.fill();
-  ctx.beginPath(); ctx.arc(p.x,p.y,size,0,Math.PI*2); ctx.fillStyle=ring; ctx.fill();
-  ctx.lineWidth=2.2; ctx.strokeStyle=selected?.id===n.id?'#ffffff':'rgba(45,41,51,.95)'; ctx.stroke();
-  ctx.beginPath(); ctx.arc(p.x,p.y,size*.62,0,Math.PI*2); ctx.fillStyle='rgba(246,248,252,.9)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(p.x,p.y,size*.32,0,Math.PI*2); ctx.fillStyle='#7d7a87'; ctx.fill();
-  ctx.beginPath(); ctx.arc(p.x-1.5,p.y-2,size*.23,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fill();
-  if(hoverNode?.id===n.id&&!sim){
-    ctx.beginPath(); ctx.arc(p.x,p.y,size+8,0,Math.PI*2); ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=2; ctx.stroke();
-  }
-  if(dragging?.id===n.id){
-    ctx.beginPath(); ctx.arc(p.x,p.y,size+12,0,Math.PI*2); ctx.strokeStyle='rgba(155,228,58,.9)'; ctx.lineWidth=3; ctx.stroke();
-  }
+  for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3,x=p.x+Math.cos(a)*size*.30,y=p.y+Math.sin(a)*size*.30;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath();
+  const bolt=ctx.createLinearGradient(p.x-size*.3,p.y-size*.3,p.x+size*.3,p.y+size*.3);bolt.addColorStop(0,'#b9bec4');bolt.addColorStop(.5,'#70767d');bolt.addColorStop(1,'#4b5158');
+  ctx.fillStyle=bolt;ctx.fill();ctx.strokeStyle='rgba(30,34,38,.7)';ctx.lineWidth=.7;ctx.stroke();
+  ctx.strokeStyle='rgba(226,230,234,.48)';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(p.x-size*.16,p.y-size*.08);ctx.lineTo(p.x+size*.16,p.y+size*.08);ctx.stroke();
+
+  if(hoverNode?.id===n.id&&!sim){ctx.beginPath();ctx.arc(p.x,p.y,size+8,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,.58)';ctx.lineWidth=1.7;ctx.stroke();}
+  if(dragging?.id===n.id){ctx.beginPath();ctx.arc(p.x,p.y,size+12,0,Math.PI*2);ctx.strokeStyle='rgba(155,228,58,.9)';ctx.lineWidth=2.5;ctx.stroke();}
   ctx.restore();
 }
 
@@ -2480,6 +3322,25 @@ function drawBackground(){
   poly([[stage.deck.at(-1)[0]-44,voidTop+42],[stage.deck.at(-1)[0]-128,voidTop+90],[stage.deck.at(-1)[0]-92,voidTop+134],[stage.deck.at(-1)[0]-8,voidTop+84]],'rgba(255,255,255,.035)');
 
   [[40,420,.92],[118,390,.8],[1118,399,.96],[1048,414,.74],[284,264,.55],[988,268,.57],[101,448,.58],[1091,450,.56]].forEach(args=>drawPine(...args));
+  drawAmbientTexture();
+}
+
+function drawAmbientTexture(){
+  ctx.save();
+  // fixed film-grain / atmospheric flecks: deterministic to avoid frame shimmer
+  for(let i=0;i<54;i++){
+    const x=texHash(i,17,3)*W,y=texHash(i,31,9)*H;
+    const r=.35+texHash(i,44,6)*.75;
+    ctx.globalAlpha=y<360?.032:.055;
+    ctx.fillStyle=i%3===0?'#ffffff':'#554e67';
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+  }
+  // subtle horizontal atmospheric bands add depth without looking like a gradient-only backdrop
+  ctx.globalAlpha=1;
+  for(const y of [188,286,374]){
+    const g=ctx.createLinearGradient(0,y,0,y+14);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.025)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,y,W,14);
+  }
+  ctx.restore();
 }
 
 function drawCloud(x,y,s,a){
@@ -2586,7 +3447,213 @@ function drawGridOverlay(){
   for(let x=100;x<1120;x+=25){ctx.beginPath();ctx.moveTo(x,90);ctx.lineTo(x,600);ctx.stroke()}
   for(let y=100;y<600;y+=25){ctx.beginPath();ctx.moveTo(90,y);ctx.lineTo(1110,y);ctx.stroke()}
 }
-function drawForbidden(){for(const r of stage.forbidden){ctx.fillStyle='rgba(255,83,109,.12)';ctx.strokeStyle='rgba(255,83,109,.55)';ctx.setLineDash([8,7]);ctx.lineWidth=2;ctx.fillRect(r.x,r.y,r.w,r.h);ctx.strokeRect(r.x,r.y,r.w,r.h);ctx.setLineDash([]);ctx.fillStyle='rgba(255,130,145,.9)';ctx.font='700 12px sans-serif';ctx.fillText('NO BUILD ZONE · MEMBERS BLOCKED',r.x+14,r.y+24)}}
+function drawForbidden(){
+  for(const r of stage.forbidden){
+    if(r.kind==='navigation'||stage.ship){
+      drawNavigationChannel(r);
+      continue;
+    }
+    ctx.fillStyle='rgba(255,83,109,.12)';ctx.strokeStyle='rgba(255,83,109,.55)';ctx.setLineDash([8,7]);ctx.lineWidth=2;ctx.fillRect(r.x,r.y,r.w,r.h);ctx.strokeRect(r.x,r.y,r.w,r.h);ctx.setLineDash([]);ctx.fillStyle='rgba(255,130,145,.9)';ctx.font='700 12px sans-serif';ctx.fillText('NO BUILD ZONE · MEMBERS BLOCKED',r.x+14,r.y+24);
+  }
+}
+
+function drawNavigationChannel(r){
+  // 금지 구역은 배의 실제 정면 실루엣으로만 판정한다. 별도 박스/채움은 그리지 않는다.
+}
+
+function vesselTestProgress(){
+  if(!stage.ship||!sim)return null;
+  if(Number.isFinite(sim.shipProgress))return clamp(sim.shipProgress,0,1);
+  return 0;
+}
+
+function smoothstep01(t){t=clamp(t,0,1);return t*t*(3-2*t)}
+function smootherstep01(t){t=clamp(t,0,1);return t*t*t*(t*(t*6-15)+10)}
+
+function vesselMotionState(p,ship){
+  const geom=shipGeometry(ship);
+  // 0~0.46: 원근 접근, 0.46~1: 화면 평면을 통과하며 가상 종단면이 이동한다.
+  const approach=smootherstep01(clamp(p/.46,0,1));
+  const passage=smootherstep01(clamp((p-.46)/.54,0,1));
+  const focal=610, zFar=980, zNear=250;
+  const z=zFar+(zNear-zFar)*approach;
+  const proj=focal/(focal+z);
+  const nearProj=focal/(focal+zNear);
+  const scale=.56+.46*(proj/nearProj);
+  // 일정한 전진 속도처럼 보이되, 접근 종료 후에는 화면에서 위쪽으로 부드럽게 통과한다.
+  const yApproach=(ship.y+64)+(ship.y+14-(ship.y+64))*approach;
+  const travel=118*passage;
+  const heave=2.2*Math.exp(-2.6*p)*Math.sin(2*Math.PI*(1.55*p)+.45);
+  const y=yApproach-travel+heave;
+  const station=geom.virtualLength*passage;
+  return {approach,passage,z,scale,y,station,geom};
+}
+
+function drawStageVessel(){
+  if(!stage.ship)return;
+  const r=stage.forbidden.find(x=>x.kind==='navigation')||stage.forbidden[0];
+  if(!r)return;
+  const p=vesselTestProgress();
+  const cx=r.x+r.w*.5;
+  if(p===null){
+    drawFrontVessel(cx,stage.ship.y+8,stage.ship,.99,0,null,1);
+    return;
+  }
+  const st=vesselMotionState(p,stage.ship);
+  drawFrontVessel(cx,st.y,stage.ship,st.scale,st.passage,st.station,1);
+}
+
+function shipHexWindow(cx,cy,r){
+  ctx.beginPath();
+  for(let i=0;i<6;i++){
+    const a=Math.PI/6+i*Math.PI/3,px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;
+    if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py);
+  }
+  ctx.closePath();
+}
+
+function drawShipFrontCore(geom,fade=1){
+  const {Wv,Hv}=geom;
+  ctx.save();ctx.globalAlpha*=fade;
+
+  // 선체: 밝은 상부와 어두운 하부를 분리해 정면 볼륨을 만든다.
+  const hull=ctx.createLinearGradient(0,-Hv*.03,0,Hv*.40);
+  hull.addColorStop(0,'#f9f7fb');hull.addColorStop(.24,'#e7e3eb');hull.addColorStop(.70,'#c9c7d2');hull.addColorStop(1,'#9fa4b2');
+  poly([[-Wv*.43,-Hv*.015],[Wv*.43,-Hv*.015],[Wv*.395,Hv*.14],[Wv*.30,Hv*.23],[Wv*.11,Hv*.31],[0,Hv*.37],[-Wv*.11,Hv*.31],[-Wv*.30,Hv*.23],[-Wv*.395,Hv*.14]],hull,'rgba(250,244,250,.9)');
+  poly([[-Wv*.37,Hv*.13],[Wv*.37,Hv*.13],[Wv*.30,Hv*.25],[0,Hv*.38],[-Wv*.30,Hv*.25]],'#4e617a','rgba(43,52,67,.75)');
+  ctx.fillStyle='rgba(71,151,223,.55)';ctx.fillRect(-Wv*.23,Hv*.265,Wv*.46,Hv*.095);
+
+  // 선실의 뒤쪽 그림자.
+  ctx.fillStyle='rgba(77,67,83,.18)';ctx.fillRect(-Wv*.205,-Hv*.54,Wv*.41,Hv*.55);
+
+  // 3개의 데크/상부 구조물.
+  const cabinG=ctx.createLinearGradient(-Wv*.28,-Hv*.78,Wv*.28,-Hv*.02);
+  cabinG.addColorStop(0,'#fffafc');cabinG.addColorStop(.5,'#f1e9ee');cabinG.addColorStop(1,'#dacfd7');
+  poly([[-Wv*.20,-Hv*.02],[Wv*.20,-Hv*.02],[Wv*.20,-Hv*.33],[Wv*.345,-Hv*.33],[Wv*.345,-Hv*.56],[-Wv*.345,-Hv*.56],[-Wv*.345,-Hv*.33],[-Wv*.20,-Hv*.33]],cabinG,'rgba(255,245,249,.94)');
+  poly([[-Wv*.16,-Hv*.56],[Wv*.16,-Hv*.56],[Wv*.16,-Hv*.70],[-Wv*.16,-Hv*.70]],'#f7eef3','rgba(255,245,249,.94)');
+  poly([[-Wv*.12,-Hv*.70],[Wv*.12,-Hv*.70],[Wv*.12,-Hv*.82],[-Wv*.12,-Hv*.82]],'#f2e8ef','rgba(255,245,249,.94)');
+
+  // 조타실 유리.
+  const glass=ctx.createLinearGradient(0,-Hv*.82,0,-Hv*.66);
+  glass.addColorStop(0,'rgba(45,58,80,.96)');glass.addColorStop(1,'rgba(67,78,101,.88)');
+  ctx.fillStyle=glass;ctx.fillRect(-Wv*.105,-Hv*.795,Wv*.21,Hv*.075);
+  ctx.strokeStyle='rgba(227,241,255,.55)';ctx.lineWidth=1.2;
+  for(let i=-2;i<=2;i++){const x=i*Wv*.035;ctx.beginPath();ctx.moveTo(x,-Hv*.792);ctx.lineTo(x,-Hv*.722);ctx.stroke()}
+
+  // 두 개의 굴뚝과 금속 캡.
+  for(const sx of [-1,1]){
+    const x=sx*Wv*.105;
+    const fg=ctx.createLinearGradient(x-12,-Hv*.96,x+12,-Hv*.83);
+    fg.addColorStop(0,'#3b333d');fg.addColorStop(.45,'#75646b');fg.addColorStop(1,'#2d2932');
+    ctx.fillStyle=fg;ctx.fillRect(x-9,-Hv*.955,18,Hv*.135);
+    ctx.fillStyle='#ddd6dc';ctx.fillRect(x-11,-Hv*.955,22,5);
+    ctx.fillStyle='rgba(255,255,255,.32)';ctx.fillRect(x-6,-Hv*.94,4,Hv*.09);
+  }
+
+  // 파란 난간과 기둥.
+  const rail='#318fe7',railHi='#78c7ff',railDark='#1f5da8';
+  const railRows=[{y:-Hv*.565,w:Wv*.64,h:22},{y:-Hv*.335,w:Wv*.66,h:22}];
+  for(const row of railRows){
+    ctx.fillStyle=railDark;ctx.fillRect(-row.w*.5,row.y,row.w,5);
+    ctx.fillStyle=railHi;ctx.fillRect(-row.w*.5,row.y,row.w,2);
+    const count=10,step=row.w/(count-1);
+    for(let i=0;i<count;i++){
+      const xx=-row.w*.5+i*step;
+      const rg=ctx.createLinearGradient(xx-3,row.y,xx+3,row.y+row.h);
+      rg.addColorStop(0,railHi);rg.addColorStop(.42,rail);rg.addColorStop(1,railDark);
+      ctx.fillStyle=rg;ctx.fillRect(xx-3,row.y+4,6,row.h-4);
+    }
+  }
+
+  // 팔각 창문 4개.
+  for(const [wx,wy] of [[-Wv*.12,-Hv*.13],[Wv*.12,-Hv*.13],[-Wv*.12,Hv*.095],[Wv*.12,Hv*.095]]){
+    ctx.fillStyle='rgba(59,57,72,.96)';shipHexWindow(wx,wy,15);ctx.fill();
+    ctx.strokeStyle='rgba(253,238,244,.95)';ctx.lineWidth=3;ctx.stroke();
+    ctx.strokeStyle='rgba(120,168,212,.42)';ctx.lineWidth=1;shipHexWindow(wx-1.5,wy-1.5,10.5);ctx.stroke();
+  }
+
+  // 측면 구조물 / 조명.
+  const sideBox=ctx.createLinearGradient(0,-Hv*.02,0,Hv*.17);
+  sideBox.addColorStop(0,'#f8eef2');sideBox.addColorStop(1,'#d5c8cf');
+  ctx.fillStyle=sideBox;ctx.fillRect(-Wv*.405,-Hv*.005,Wv*.12,Hv*.18);ctx.fillRect(Wv*.285,-Hv*.005,Wv*.12,Hv*.18);
+  ctx.fillStyle='rgba(255,208,216,.55)';ctx.fillRect(-Wv*.39,Hv*.025,Wv*.08,Hv*.105);ctx.fillRect(Wv*.31,Hv*.025,Wv*.08,Hv*.105);
+
+  // 중앙 용골선과 리벳 느낌.
+  ctx.strokeStyle='rgba(79,68,79,.38)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-Hv*.54);ctx.lineTo(0,Hv*.33);ctx.stroke();
+  for(let yy=-Hv*.49;yy<Hv*.27;yy+=Hv*.095){ctx.fillStyle='rgba(90,79,90,.3)';ctx.beginPath();ctx.arc(0,yy,1.4,0,Math.PI*2);ctx.fill()}
+
+  // 갑판 하이라이트.
+  ctx.fillStyle='rgba(255,255,255,.68)';ctx.fillRect(-Wv*.30,-Hv*.61,Wv*.60,6);ctx.fillRect(-Wv*.31,-Hv*.385,Wv*.62,6);
+  ctx.restore();
+}
+
+function crossSectionHalfWidth(geom,y,station){
+  const maxFront=geom.halfWidthAt(y);
+  const beam=geom.beamAtStation(station)*.5;
+  const localDepth=geom.depthAt(y);
+  if(station>localDepth)return 0;
+  // 상부 구조일수록 길이가 짧으므로 station이 뒤로 갈수록 더 빨리 사라진다.
+  const remain=clamp(1-station/(localDepth||1),0,1);
+  const taper=.28+.72*Math.pow(Math.sin(Math.PI*clamp(geom.station01(station),0,1)),.45);
+  return Math.min(maxFront,beam)*(.72+.28*taper)*(.82+.18*remain);
+}
+
+function drawShipCrossSection(geom,station,progress){
+  const {Hv}=geom;
+  const yTop=-Hv*.96,yBot=Hv*.35,steps=44;
+  const left=[],right=[];
+  for(let i=0;i<=steps;i++){
+    const y=yTop+(yBot-yTop)*(i/steps);
+    const hw=crossSectionHalfWidth(geom,y,station);
+    if(hw>1){left.push([-hw,y]);right.push([hw,y])}
+  }
+  if(left.length<2)return;
+  const pts=[...left,...right.reverse()];
+  const cut=ctx.createLinearGradient(0,yTop,0,yBot);
+  cut.addColorStop(0,'#e4e3ec');cut.addColorStop(.42,'#c9cad6');cut.addColorStop(1,'#aeb4c2');
+  poly(pts,cut,'rgba(245,244,250,.95)');
+
+  // 실제 선박의 갑판 높이를 단면 내부에 그린다.
+  const decks=[-.70,-.56,-.33,-.02,.18];
+  for(const k of decks){
+    const y=Hv*k,hw=crossSectionHalfWidth(geom,y,station);
+    if(hw<5)continue;
+    ctx.strokeStyle='rgba(76,82,100,.38)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-hw*.88,y);ctx.lineTo(hw*.88,y);ctx.stroke();
+  }
+  // 중앙 샤프트/복도.
+  const midY=-Hv*.22,midHw=crossSectionHalfWidth(geom,midY,station);
+  if(midHw>8){ctx.fillStyle='rgba(91,94,111,.16)';ctx.fillRect(-Math.min(9,midHw*.22),-Hv*.62,Math.min(18,midHw*.44),Hv*.73)}
+  // 절단면 테두리 하이라이트.
+  ctx.strokeStyle=`rgba(255,255,255,${.3+.5*progress})`;ctx.lineWidth=1.2;poly(pts,null,ctx.strokeStyle);
+}
+
+function drawFrontVessel(x,y,ship,scale=1,pass=0,station=null,alpha=1){
+  const geom=shipGeometry(ship),{Wv,Hv}=geom;
+  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.globalAlpha=alpha;
+
+  // 수면 그림자/파문. 전체 캔버스 변환에는 영향을 주지 않는다.
+  ctx.save();ctx.globalAlpha=.14*(1-pass*.55);ctx.fillStyle='#283544';ctx.beginPath();ctx.ellipse(0,Hv*.39,Wv*.40,Wv*.08,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(209,229,244,.18)';ctx.lineWidth=1.4;
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(0,Hv*.40+i*7,Wv*(.42+i*.06),Wv*(.07+i*.014),0,0,Math.PI*2);ctx.stroke()}
+  ctx.restore();
+
+  if(pass<=.001||station===null){
+    drawShipFrontCore(geom,1);
+    ctx.restore();return;
+  }
+
+  // 배가 화면 평면을 통과할수록 전면은 사라지고 같은 위치의 가상 종단면이 나타난다.
+  const frontFade=clamp(1-pass*1.28,0,.95);
+  if(frontFade>0.02)drawShipFrontCore(geom,frontFade);
+  drawShipCrossSection(geom,station,pass);
+
+  // 단면 뒤에 남아 있는 외곽을 얇은 유령선으로 남겨 이동 방향을 읽기 쉽게 한다.
+  ctx.globalAlpha=.20*(1-pass);
+  const sil=geom.silhouette(48);
+  ctx.beginPath();sil.forEach(([px,py],i)=>i?ctx.lineTo(px,py):ctx.moveTo(px,py));ctx.closePath();
+  ctx.strokeStyle='rgba(230,239,248,.65)';ctx.lineWidth=1;ctx.stroke();
+  ctx.restore();
+}
 
 function drawRoadAlignmentGuide(){
   if(sim||!isRoadTool())return;
@@ -2607,21 +3674,27 @@ function drawRoadAlignmentGuide(){
 function drawSupports(){
   const ends=[{p:stage.deck[0],type:'pin'},{p:stage.deck.at(-1),type:'roller'}];
   for(const {p,type} of ends){
-    ctx.save();
-    ctx.shadowColor='rgba(0,0,0,.18)'; ctx.shadowBlur=8; ctx.shadowOffsetY=2;
-    ctx.fillStyle='#ef3557'; ctx.fillRect(p[0]-11,p[1]-11,22,22);
-    ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-    ctx.strokeStyle='#702638'; ctx.lineWidth=2.5; ctx.strokeRect(p[0]-11,p[1]-11,22,22);
-    ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(p[0]-9,p[1]-9,18,5);
-    if(type==='pin'){
-      poly([[p[0]-18,p[1]+13],[p[0]+18,p[1]+13],[p[0],p[1]+36]],'#4d4758','#2f2a35');
-      ctx.fillStyle='#6a6578'; ctx.fillRect(p[0]-22,p[1]+36,44,7);
-    }else{
-      poly([[p[0]-18,p[1]+13],[p[0]+18,p[1]+13],[p[0],p[1]+31]],'#4d4758','#2f2a35');
-      ctx.fillStyle='#6a6578'; ctx.fillRect(p[0]-24,p[1]+31,48,6);
-      ctx.fillStyle='#dcdbe3';
-      ctx.beginPath(); ctx.arc(p[0]-9,p[1]+40,5,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(p[0]+9,p[1]+40,5,0,Math.PI*2); ctx.fill();
+    const x=p[0],y=p[1];ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.24)';ctx.shadowBlur=9;ctx.shadowOffsetY=3;
+    const cap=ctx.createLinearGradient(x-12,y-12,x+12,y+12);cap.addColorStop(0,'#ff7788');cap.addColorStop(.5,'#ef3557');cap.addColorStop(1,'#a8233c');
+    ctx.fillStyle=cap;ctx.fillRect(x-11,y-11,22,22);ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    ctx.strokeStyle='#671b2d';ctx.lineWidth=2.2;ctx.strokeRect(x-11,y-11,22,22);
+    ctx.fillStyle='rgba(255,255,255,.28)';ctx.fillRect(x-9,y-9,18,3.5);
+    ctx.fillStyle='rgba(72,18,31,.4)';ctx.fillRect(x-9,y+6,18,2.5);
+
+    // bearing body
+    const bearing=ctx.createLinearGradient(x,y+12,x,y+40);bearing.addColorStop(0,'#6f747d');bearing.addColorStop(.5,'#4d525a');bearing.addColorStop(1,'#2f343a');
+    if(type==='pin')poly([[x-18,y+13],[x+18,y+13],[x,y+36]],bearing,'#24292f');
+    else poly([[x-18,y+13],[x+18,y+13],[x,y+31]],bearing,'#24292f');
+
+    // concrete/steel base plate with machined highlight
+    const baseY=type==='pin'?y+36:y+31,baseW=type==='pin'?44:48;
+    const plate=ctx.createLinearGradient(x-baseW/2,baseY,x+baseW/2,baseY+7);plate.addColorStop(0,'#555b64');plate.addColorStop(.48,'#858b93');plate.addColorStop(1,'#4e545c');
+    ctx.fillStyle=plate;ctx.fillRect(x-baseW/2,baseY,baseW,7);ctx.strokeStyle='#30353a';ctx.lineWidth=1;ctx.strokeRect(x-baseW/2,baseY,baseW,7);
+    for(const sx of [-1,1]){ctx.fillStyle='#30353a';ctx.beginPath();ctx.arc(x+sx*(baseW*.33),baseY+3.5,1.5,0,Math.PI*2);ctx.fill();}
+    if(type==='roller'){
+      for(const rx of [-10,10]){const rg=ctx.createRadialGradient(x+rx-1,y+39,1,x+rx,y+40,5);rg.addColorStop(0,'#ffffff');rg.addColorStop(.45,'#bfc5cb');rg.addColorStop(1,'#60676f');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x+rx,y+40,5,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#3e444b';ctx.stroke();}
+      ctx.fillStyle='rgba(40,45,50,.35)';ctx.fillRect(x-23,y+46,46,3);
     }
     ctx.restore();
   }
@@ -2655,53 +3728,57 @@ function drawVehicleBody(x,y,angle,rot){
 function drawCarVehicle(rot){
   ctx.save();
   ctx.beginPath();
-  ctx.moveTo(-31,6); ctx.lineTo(-26,-10); ctx.quadraticCurveTo(-16,-20,2,-20); ctx.quadraticCurveTo(16,-20,25,-11); ctx.lineTo(31,-5); ctx.lineTo(31,6); ctx.closePath();
-  ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#edf6fb';
-  poly([[-16,-10],[-6,-18],[7,-18],[11,-10]], '#edf6fb');
-  poly([[12,-10],[19,-14],[26,-10],[26,-6],[12,-6]], '#dceff7');
-  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(-24,-3,54,2.5);
-  ctx.fillStyle='#e5c363'; ctx.fillRect(24,-2,5,3.5);
-  ctx.fillStyle='#f2f2f2'; ctx.fillRect(-30,-1,4,3.5);
-  drawWheel(-18,8,9.5,rot); drawWheel(18,8,9.5,rot);
-  ctx.restore();
+  ctx.moveTo(-31,6);ctx.lineTo(-26,-10);ctx.quadraticCurveTo(-16,-20,2,-20);ctx.quadraticCurveTo(16,-20,25,-11);ctx.lineTo(31,-5);ctx.lineTo(31,6);ctx.closePath();ctx.fill();ctx.stroke();
+  const glass=ctx.createLinearGradient(-12,-18,18,-6);glass.addColorStop(0,'#eef9fd');glass.addColorStop(.55,'#b9d9e5');glass.addColorStop(1,'#7da8b8');
+  poly([[-16,-10],[-6,-18],[7,-18],[11,-10]],glass,'rgba(75,91,104,.35)');
+  poly([[12,-10],[19,-14],[26,-10],[26,-6],[12,-6]],'#c6e1ea','rgba(75,91,104,.35)');
+  ctx.fillStyle='rgba(255,255,255,.27)';ctx.fillRect(-24,-3,54,2.2);
+  ctx.strokeStyle='rgba(58,61,70,.45)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(1,-10);ctx.lineTo(2,5);ctx.moveTo(-15,-8);ctx.lineTo(-18,4);ctx.stroke();
+  ctx.fillStyle='rgba(40,43,50,.55)';roundRect(-3,-1,6,2,1);ctx.fill();
+  ctx.fillStyle='#e6c45d';ctx.fillRect(24,-2,5,3.5);ctx.fillStyle='#f5f5f4';ctx.fillRect(-30,-1,4,3.5);
+  ctx.fillStyle='rgba(38,42,47,.72)';ctx.fillRect(27,3,4,2);ctx.fillRect(-31,3,4,2);
+  drawWheel(-18,8,9.5,rot);drawWheel(18,8,9.5,rot);ctx.restore();
 }
 
 function drawBusVehicle(rot){
-  ctx.save();
-  roundRect(-38,-23,76,31,7); ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#f0efef'; ctx.fillRect(-38,-3,76,11);
-  ctx.fillStyle='#eef5fb';
-  for(let i=-28;i<24;i+=13){roundRect(i,-18,10,9,2); ctx.fill();}
-  ctx.fillStyle='#d9ecf4'; roundRect(23,-16,10,18,2); ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.22)'; ctx.fillRect(-33,-6,62,2.5);
-  ctx.strokeStyle='#6a6271'; ctx.lineWidth=1.4; ctx.strokeRect(-18,-28,36,4);
-  ctx.fillStyle='#ddb35d'; ctx.fillRect(-10,-29,20,2.4);
-  drawWheel(-22,9,10.5,rot); drawWheel(22,9,10.5,rot);
-  ctx.restore();
+  ctx.save();roundRect(-38,-23,76,31,7);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#ece9e9';ctx.fillRect(-38,-3,76,11);
+  const glass=ctx.createLinearGradient(0,-19,0,-7);glass.addColorStop(0,'#e8f7fb');glass.addColorStop(1,'#8cb7c6');
+  ctx.fillStyle=glass;
+  for(let i=-28;i<24;i+=13){roundRect(i,-18,10,9,2);ctx.fill();ctx.strokeStyle='rgba(72,84,93,.28)';ctx.lineWidth=.6;ctx.stroke();}
+  ctx.fillStyle='#bddce7';roundRect(23,-16,10,18,2);ctx.fill();ctx.strokeStyle='rgba(72,84,93,.34)';ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(-33,-6,62,2.5);
+  ctx.strokeStyle='rgba(62,58,68,.46)';ctx.lineWidth=.8;for(let x=-31;x<=18;x+=13){ctx.beginPath();ctx.moveTo(x,-18);ctx.lineTo(x,-4);ctx.stroke();}
+  ctx.strokeStyle='#6a6271';ctx.lineWidth=1.4;ctx.strokeRect(-18,-28,36,4);ctx.fillStyle='#ddb35d';ctx.fillRect(-10,-29,20,2.4);
+  ctx.fillStyle='#f6d05e';ctx.fillRect(34,-1,3,4);ctx.fillStyle='#d55e62';ctx.fillRect(-38,-1,3,4);
+  ctx.fillStyle='rgba(44,46,52,.55)';ctx.fillRect(-5,2,14,1.4);
+  drawWheel(-22,9,10.5,rot);drawWheel(22,9,10.5,rot);ctx.restore();
 }
 
 function drawTruckVehicle(rot){
-  ctx.save();
-  roundRect(-31,-18,62,24,6); ctx.fill(); ctx.stroke();
-  roundRect(-8,-33,26,16,5); ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#ddf0f8'; roundRect(-3,-29,15,9,2); ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(-26,-7,49,2.5);
-  ctx.fillStyle='#d6d8de'; ctx.fillRect(-34,1,68,5);
-  drawWheel(-20,9,14,rot); drawWheel(20,9,14,rot);
-  ctx.restore();
+  ctx.save();roundRect(-31,-18,62,24,6);ctx.fill();ctx.stroke();roundRect(-8,-33,26,16,5);ctx.fill();ctx.stroke();
+  const glass=ctx.createLinearGradient(-3,-29,12,-20);glass.addColorStop(0,'#edf9fc');glass.addColorStop(1,'#86b1c0');ctx.fillStyle=glass;roundRect(-3,-29,15,9,2);ctx.fill();ctx.strokeStyle='rgba(67,79,89,.32)';ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(-26,-7,49,2.5);
+  ctx.fillStyle='#d6d8de';ctx.fillRect(-34,1,68,5);ctx.fillStyle='#717780';ctx.fillRect(-32,3,64,2);
+  ctx.strokeStyle='rgba(45,49,55,.48)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(-8,-15);ctx.lineTo(-8,4);ctx.moveTo(19,-15);ctx.lineTo(19,4);ctx.stroke();
+  ctx.fillStyle='rgba(35,38,42,.72)';for(let x=-2;x<14;x+=4)ctx.fillRect(x,-15,2,4);
+  ctx.fillStyle='#f4d05d';ctx.fillRect(27,-3,4,4);ctx.fillStyle='#e8ecef';ctx.fillRect(-31,-3,4,4);
+  drawWheel(-20,9,14,rot);drawWheel(20,9,14,rot);ctx.restore();
 }
 
 function drawWheel(x,y,r,rot){
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.rotate(rot);
-  ctx.fillStyle='#2f2d36'; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#484550'; ctx.beginPath(); ctx.arc(0,0,r*.72,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#dde3ea'; ctx.beginPath(); ctx.arc(0,0,r*.37,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='#7a7f8a'; ctx.lineWidth=1.3;
-  for(let i=0;i<6;i++){const a=(Math.PI*2/6)*i; ctx.beginPath(); ctx.moveTo(Math.cos(a)*r*.18,Math.sin(a)*r*.18); ctx.lineTo(Math.cos(a)*r*.58,Math.sin(a)*r*.58); ctx.stroke();}
-  ctx.beginPath(); ctx.arc(0,0,r*.12,0,Math.PI*2); ctx.fillStyle='#8c9098'; ctx.fill();
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+  const tire=ctx.createRadialGradient(-r*.18,-r*.2,r*.12,0,0,r);tire.addColorStop(0,'#55545d');tire.addColorStop(.42,'#35343b');tire.addColorStop(1,'#1d1d22');
+  ctx.fillStyle=tire;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  // tire sidewall + tread notches
+  ctx.strokeStyle='rgba(8,8,10,.72)';ctx.lineWidth=1.15;ctx.beginPath();ctx.arc(0,0,r*.86,0,Math.PI*2);ctx.stroke();
+  for(let i=0;i<12;i++){const a=(Math.PI*2/12)*i,ri=r*.83,ro=r*.98;ctx.lineWidth=1.05;ctx.beginPath();ctx.moveTo(Math.cos(a-.06)*ri,Math.sin(a-.06)*ri);ctx.lineTo(Math.cos(a+.04)*ro,Math.sin(a+.04)*ro);ctx.stroke();}
+  const rim=ctx.createRadialGradient(-r*.12,-r*.15,1,0,0,r*.7);rim.addColorStop(0,'#f3f5f6');rim.addColorStop(.4,'#c2c7cc');rim.addColorStop(1,'#666c73');
+  ctx.fillStyle=rim;ctx.beginPath();ctx.arc(0,0,r*.66,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#3f444a';ctx.beginPath();ctx.arc(0,0,r*.48,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#c6cbd0';ctx.lineWidth=1.2;
+  for(let i=0;i<6;i++){const a=(Math.PI*2/6)*i;ctx.beginPath();ctx.moveTo(Math.cos(a)*r*.18,Math.sin(a)*r*.18);ctx.lineTo(Math.cos(a)*r*.46,Math.sin(a)*r*.46);ctx.stroke();}
+  ctx.beginPath();ctx.arc(0,0,r*.14,0,Math.PI*2);ctx.fillStyle='#9aa0a6';ctx.fill();ctx.strokeStyle='#555b61';ctx.lineWidth=.7;ctx.stroke();
   ctx.restore();
 }
 
@@ -2751,7 +3828,8 @@ async function toggleFullscreen(){try{if(!document.fullscreenElement)await docum
 // 화면 이동/확대축소: 휠은 마우스 위치를 기준으로 줌, 버튼/키보드는 카메라 이동
 canvas.addEventListener('wheel',e=>{e.preventDefault();zoomCamera(e.deltaY<0?1.12:.89,{x:e.clientX,y:e.clientY})},{passive:false});
 $('#panUp').onclick=()=>panCamera(0,-70); $('#panDown').onclick=()=>panCamera(0,70); $('#panLeft').onclick=()=>panCamera(-90,0); $('#panRight').onclick=()=>panCamera(90,0);
-$('#zoomIn').onclick=()=>zoomCamera(1.15); $('#zoomOut').onclick=()=>zoomCamera(.87); $('#resetView').onclick=resetCamera; $('#gridBtn').onclick=toggleGrid; $('#snapBtn').onclick=toggleSnap; $('#speedBtn').onclick=cycleSimSpeed; $('#fullBtn').onclick=toggleFullscreen; $('#scanBtn').onclick=scanStructure; $('#measureBtn').onclick=toggleMeasure;
+$('#zoomIn').onclick=()=>zoomCamera(1.15); $('#zoomOut').onclick=()=>zoomCamera(.87); $('#resetView').onclick=resetCamera; $('#gridBtn').onclick=toggleGrid; $('#snapBtn').onclick=toggleSnap; $('#speedBtn').onclick=cycleSimSpeed; $('#fullBtn').onclick=toggleFullscreen;
+$('#sfxBtn').onclick=()=>{sfxEnabled=!sfxEnabled;saveUIPref('sfx',sfxEnabled);updateSfxUI();if(sfxEnabled){ensureAudio();playSfx('select')}toast(sfxEnabled?'INTERACTION SFX // ON':'INTERACTION SFX // OFF')};updateSfxUI(); $('#scanBtn').onclick=scanStructure; $('#measureBtn').onclick=toggleMeasure;
 $('#infoCollapse').onclick=()=>{const p=$('#infoPanel');p.classList.toggle('collapsed');const c=p.classList.contains('collapsed');$('#infoCollapse').textContent=c?'›':'‹';$('#infoCollapse').title=c?'설명 펼치기':'설명 접기'};
 $('#coachCollapse').onclick=()=>{const p=$('#coachPanel');p.classList.toggle('collapsed');const c=p.classList.contains('collapsed');$('#coachCollapse').textContent=c?'‹':'›';$('#coachCollapse').title=c?'AI 코치 펼치기':'AI 코치 접기'};
 window.addEventListener('keydown',e=>{
@@ -2771,18 +3849,22 @@ window.addEventListener('keydown',e=>{
     if(k.toLowerCase()==='z' && !e.shiftKey){e.preventDefault();undoAction();return;}
     if(k.toLowerCase()==='y' || (k.toLowerCase()==='z'&&e.shiftKey)){e.preventDefault();redoAction();return;}
   }
-  if(!shortcut&&['1','2','3','4','5','6','7'].includes(k)){e.preventDefault();const b=$(`.toolBtn[data-tool="${['wood','steel','cable','road','roadHeavy','move','delete'][Number(k)-1]}"]`);b?.click();return;}
+  if(!shortcut&&['1','2','3','4','5','6','7'].includes(k)){
+    e.preventDefault();
+    if(tutorialMode){toast('TUTORIAL // 숫자키 도구 전환은 잠겨 있습니다');return;}
+    const b=$(`.toolBtn[data-tool="${['wood','steel','cable','road','roadHeavy','move','delete'][Number(k)-1]}"]`);b?.click();return;
+  }
   if(!shortcut&&k.toLowerCase()==='t'){e.preventDefault();startSimulation();return;}
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','+','=','-','0'].includes(k))e.preventDefault();
   if(k==='ArrowUp')panCamera(0,-55);else if(k==='ArrowDown')panCamera(0,55);else if(k==='ArrowLeft')panCamera(-70,0);else if(k==='ArrowRight')panCamera(70,0);else if(k==='+'||k==='=')zoomCamera(1.12);else if(k==='-')zoomCamera(.89);else if(k==='0')resetCamera();else if(k.toLowerCase()==='g')toggleGrid();else if(k.toLowerCase()==='m')toggleSnap();else if(k.toLowerCase()==='l')toggleLoadPath();else if(k.toLowerCase()==='s')scanStructure();else if(k.toLowerCase()==='r')toggleMeasure();else if(k.toLowerCase()==='f')toggleFullscreen();
 });
 
-$$('.toolBtn').forEach(b=>b.addEventListener('click',()=>{if(sim)return;if(measureMode){measureMode=false;measureA=null;measureB=null;$('#measureBtn').classList.remove('isOn');updateMeasureTag();}tool=b.dataset.tool;selected=null;dragging=null;$$('.toolBtn').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});updateModeBadge();updateCanvasCursor(pointerWorld);draw()}));
+$$('.toolBtn').forEach(b=>b.addEventListener('click',()=>{if(sim)return;playSfx('select');if(measureMode){measureMode=false;measureA=null;measureB=null;$('#measureBtn').classList.remove('isOn');updateMeasureTag();}tool=b.dataset.tool;selected=null;dragging=null;$$('.toolBtn').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});updateModeBadge();updateCanvasCursor(pointerWorld);draw()}));
 $$('.stageBtn').forEach((b,i)=>b.addEventListener('click',()=>{if(sim)return;resetStage(i)}));
 $('#resetBtn').onclick=()=>{if(sim)stopSimulation();resetStage(stageIndex);toast('스테이지를 초기화했습니다')};
 $('#undoBtn').onclick=undoAction; $('#redoBtn').onclick=redoAction;
 $('#stressBtn').onclick=()=>{stressMode=!stressMode;$('#stressBtn').classList.toggle('isOn',stressMode);draw();toast(stressMode?'응력 표시 ON':'응력 표시 OFF')}; $('#loadPathBtn').onclick=toggleLoadPath;
-ui.test.onclick=startSimulation;
+ui.test.onclick=()=>startSimulation(false);
 $('#helpBtn').onclick=()=>ui.intro.classList.add('show');
 $('#startBtn').onclick=()=>ui.intro.classList.remove('show');
 $('#libraryBtn').onclick=()=>ui.library.classList.add('show');
@@ -2806,83 +3888,283 @@ $('#endingLabBtn').onclick=leaveEducationToLab;
 $('#endingEduBtn').onclick=()=>openEducationCenter(0);
 $('#endingTitleBtn').onclick=()=>{$('#endingScreen').hidden=true;$('#educationScreen').hidden=true;runLoadingSequence({title:'RETURNING TO MAIN TITLE',statuses:['[01] SAVE COMPLETION','[02] CLOSE EDUCATION','[03] RESET TITLE SYSTEM','[04] VERIFY PROFILE','[05] TITLE READY'],duration:800,hint:'TRUSS LAB'},()=>{updateEducationAccess();$('#titleScreen').hidden=false})};
 
+const TUTORIAL_TRUSS_TOPS=[[350,250],[525,250],[675,250],[850,250]];
 const STAGE_TUTORIAL_STEPS=[
-  {title:'01 · 일반 도로 선택',text:'이제 기본 도로는 없습니다. 아래 툴바에서 <strong>일반도로</strong>를 선택해 차량이 달릴 바닥판부터 직접 만듭니다.',hint:'ROAD // 폭 16px · 최대 길이 180 · 저렴하지만 강화 도로보다 약함',target:'[data-tool="road"]',mini:'road'},
-  {title:'02 · 왼쪽 지지점에서 시작',text:'왼쪽 빨간 <strong>핀 지지점</strong>을 클릭하세요. 도로의 첫 시작점이 됩니다.',hint:'INPUT // 좌클릭 = 관절 선택 / 생성 / 연결',canvas:[170,390],mini:'start'},
-  {title:'03 · 도로를 한 칸씩 연결',text:'점선으로 안내되는 도로 위치 근처를 차례로 클릭하세요. <strong>도로 조각도 하나의 구조 부재</strong>라서 비용과 강도를 가집니다.',hint:'DECK // 왼쪽 지지점 → 중간 도로 관절 → 오른쪽 지지점까지 연속 연결',canvas:[310,390],mini:'deck'},
-  {title:'04 · 강화 도로와 구조재',text:'하중이 큰 구간은 <strong>강화도로</strong>로 바꿀 수 있습니다. 도로를 만든 다음 <strong>목재</strong>나 강철로 트러스 골격을 추가하세요.',hint:'MATERIAL // 강화 도로 = 폭 22px · 최대 길이 220 · 더 높은 강성·강도',target:'[data-tool="roadHeavy"]',mini:'tool'},
-  {title:'05 · 자유 관절과 삼각형',text:'목재 또는 강철을 선택하고 도로 위·아래 빈 공간에 자유 관절을 만든 뒤, 도로 관절과 대각선으로 이어 <strong>삼각형</strong>을 닫으세요.',hint:'STRUCTURE // 도로만 이어 놓으면 관절이 회전하며 쉽게 처질 수 있습니다.',canvas:[380,300],mini:'triangle'},
-  {title:'06 · 연속 설치와 우클릭 종료',text:'마지막 관절이 계속 선택되어 A → B → C처럼 연속 건설됩니다. 끝낼 때는 <strong>우클릭</strong>으로 설치를 종료하세요.',hint:'INPUT // 연속 설치는 도로와 구조재 모두 동일하게 동작합니다.',target:'.hint',mini:'chain'},
-  {title:'07 · TEST로 도로와 트러스 확인',text:'도로가 양쪽 지지점을 연결하고 트러스가 완성되면 <strong>TEST</strong>를 누르세요. 도로가 끊기거나 틈이 있으면 차량은 실제로 지지력을 잃고 붕괴 물리로 전환됩니다.',hint:'ANALYSIS // 일반 도로와 강화 도로의 처짐·파손 차이도 비교해 보세요.',target:'#testBtn',mini:'test'}
+  {key:'camera',title:'01 · 방향키로 카메라 이동',text:'키보드의 <strong>↑ ↓ ← → 방향키</strong> 중 하나를 눌러 화면을 직접 움직여 보세요. 이 단계에서는 캔버스에 자재를 설치할 수 없습니다.',hint:'CAMERA // 카메라 조작만 활성화되어 있습니다.',mini:'camera',ui:'camera'},
+  {key:'grid',title:'02 · 격자 표시 켜기',text:'왼쪽 카메라 패널의 <strong>⌗ GRID</strong> 버튼을 누르거나 키보드 <strong>G</strong>를 눌러 격자를 켜세요. 아직 건설 입력은 잠겨 있습니다.',hint:'GRID // 격자는 관절 높이와 패널 간격을 맞추는 기준선입니다.',mini:'grid',ui:'grid'},
+  {key:'snap',title:'03 · 스냅 설정 켜기',text:'<strong>⊕ SNAP</strong> 버튼 또는 <strong>M</strong> 키를 눌러 스냅을 켜세요. 이 단계가 끝나기 전까지 자재 배치는 차단됩니다.',hint:'SNAP // ON에서는 25 단위 격자에 관절이 정렬됩니다.',mini:'snap',ui:'snap'},
+  {key:'roadTool',title:'04 · 일반 도로 도구 선택',text:'아래 툴바에서 <strong>일반도로</strong>를 선택하세요. 도구를 고르는 동안에는 아직 캔버스 건설이 시작되지 않습니다.',hint:'ROAD // 도로도 직접 만들어야 하는 구조 부재입니다.',mini:'road',tool:'road'},
+  {key:'support',title:'05 · 왼쪽 지지점 선택',text:'이제 건설 입력이 열렸습니다. 왼쪽 빨간 <strong>핀 지지점</strong>을 클릭해 도로의 시작점을 선택하세요.',hint:'INPUT // 첫 클릭은 시작 관절을 선택합니다.',mini:'start',canvas:[280,390],tool:'road'},
+  {key:'roadComplete',title:'06 · 도로를 끝까지 직접 연결',text:'점선 가이드 위의 <strong>정해진 도로 기준점만 차례대로</strong> 클릭해 왼쪽 지지점부터 오른쪽 지지점까지 정확히 4개 도로 패널을 완성하세요. 가이드 밖의 임의 도로는 인정되지 않습니다.',hint:'DECK // 0→1→2→3→4의 정확한 4개 가이드 패널과 일반 도로 사용 여부를 검사합니다.',mini:'deck',tool:'road'},
+  {key:'woodTool',title:'07 · 목재 구조재 선택',text:'도로가 완성됐습니다. <strong>목재</strong>를 선택하세요. 다음 단계에서 청록색 설계도를 따라 완성형 Warren 트러스를 직접 건설합니다.',hint:'MATERIAL // 목재 최대 길이 270. 이 훈련장 치수는 목재로 완성할 수 있습니다.',mini:'tool',tool:'wood'},
+  {key:'topChord',title:'08 · 완성형 Warren 트러스 건설',text:'청록색 점선 설계도와 똑같이 <strong>상부 관절 4개, 상부 코드, 모든 대각재</strong>를 직접 연결하세요. 완전한 트러스와 구조 안정성이 모두 확인되면 자동으로 다음 단계로 넘어갑니다.',hint:'BLUEPRINT // 한 번에 이어지지 않는 부재는 우클릭으로 연속 설치를 종료한 뒤 다른 관절에서 다시 시작하세요.',mini:'triangle',tool:'wood',blueprint:true},
+  {key:'rightClick',title:'09 · 우클릭으로 연속 설치 종료',text:'완성형 트러스가 만들어졌습니다. 캔버스에서 <strong>마우스 오른쪽 버튼</strong>을 눌러 연속 설치를 종료하세요.',hint:'INPUT // 우클릭 = 현재 설치 연결 종료.',mini:'chain',tool:'wood',blueprint:true},
+  {key:'moveTool',title:'10 · GRAB / 이동 도구 선택',text:'훈련용으로 <strong>상부 관절 하나가 설계선에서 살짝 벗어나 있습니다.</strong> 아래의 <strong>이동 ✥</strong> 도구를 선택해서 위치 보정 준비를 하세요.',hint:'GRAB // 어긋난 관절을 원래 설계 위치로 되돌리는 훈련입니다.',mini:'move',tool:'move',blueprint:true},
+  {key:'dragNode',title:'11 · 어긋난 관절을 목표 위치로 복원',text:'설계선에서 벗어난 상부 관절을 드래그해 <strong>청록색 목표 링의 정확한 위치</strong>로 다시 옮기세요. 목표 위치에 충분히 가까워져야 완료됩니다.',hint:'MOVE // 단순히 움직이기만 해서는 완료되지 않습니다. 목표 좌표로 복원해야 합니다.',mini:'move',tool:'move',blueprint:true},
+  {key:'test',title:'12 · 완성된 트러스 TEST',text:'도로와 Warren 트러스가 모두 준비됐습니다. 오른쪽 위 <strong>▶ TEST</strong>를 직접 눌러 차량이 다리를 끝까지 통과하는지 확인하세요. 차량 주행이 실제로 끝난 뒤 튜토리얼이 완료됩니다.',hint:'READY // TEST 입력 후 실제 차량 주행 시뮬레이션이 실행됩니다.',mini:'test',ui:'test',blueprint:true}
 ];
-let stageTutorialIndex=0;
+
 function tutorialMiniSvg(type){
-  const common='<svg viewBox="0 0 120 90" aria-hidden="true">';
-  const end='</svg>';
-  if(type==='road')return common+'<path d="M15 58H105" stroke="#66524a" stroke-width="14" stroke-linecap="round"/><path d="M15 55H105" stroke="#d6c8bb" stroke-width="2" opacity=".55"/><circle class="support" cx="17" cy="58" r="6"/><circle class="support" cx="103" cy="58" r="6"/><text x="23" y="80" fill="#62e1ae" font-size="8" font-family="monospace">BUILD THE DECK FIRST</text>'+end;
+  const common='<svg viewBox="0 0 120 90" aria-hidden="true">',end='</svg>';
+  if(type==='camera')return common+'<path d="M60 18v54M33 45h54" stroke="#65737b" stroke-width="3"/><path d="M60 15l-6 9h12zM60 75l-6-9h12zM30 45l9-6v12zM90 45l-9-6v12z" fill="#62e1ae"/><text x="24" y="86" fill="#d7b94d" font-size="8" font-family="monospace">ARROW KEYS</text>'+end;
+  if(type==='grid')return common+'<g stroke="#52616a" stroke-width="1">'+[25,45,65,85].map(x=>`<path d="M${x} 18V72"/>`).join('')+[25,45,65].map(y=>`<path d="M18 ${y}H102"/>`).join('')+'</g><rect x="39" y="39" width="12" height="12" fill="#62e1ae"/><text x="29" y="84" fill="#d7b94d" font-size="8" font-family="monospace">GRID ON</text>'+end;
+  if(type==='snap')return common+'<g stroke="#48565e"><path d="M30 20V70M60 20V70M90 20V70M20 30H100M20 60H100"/></g><circle cx="60" cy="60" r="8" fill="#f0d84b" stroke="#10161a" stroke-width="3"/><path d="M39 42L58 58" stroke="#62e1ae" stroke-width="3" stroke-dasharray="4 3"/><text x="25" y="84" fill="#d7b94d" font-size="8" font-family="monospace">SNAP / GRID</text>'+end;
+  if(type==='road')return common+'<path d="M15 58H105" stroke="#66524a" stroke-width="14" stroke-linecap="round"/><path d="M15 55H105" stroke="#d6c8bb" stroke-width="2" opacity=".55"/><circle class="support" cx="17" cy="58" r="6"/><circle class="support" cx="103" cy="58" r="6"/>'+end;
   if(type==='tool')return common+'<rect x="16" y="22" width="88" height="46" fill="#12191d" stroke="#46525b"/><path class="solid" d="M30 58L60 31L91 58"/><circle class="node" cx="30" cy="58" r="5"/><circle class="node" cx="60" cy="31" r="5"/><circle class="node" cx="91" cy="58" r="5"/>'+end;
   if(type==='start')return common+'<path class="solid" d="M18 65H104"/><circle class="support" cx="22" cy="65" r="7"/><path class="cursor" d="M39 47l15 8-8 3 4 10-5 2-4-10-6 6z"/>'+end;
-  if(type==='deck')return common+'<path class="solid" d="M16 64H104"/><circle class="support" cx="18" cy="64" r="6"/><circle class="node" cx="59" cy="64" r="6"/><path class="ghost" d="M18 64H59"/><path class="cursor" d="M65 45l15 8-8 3 4 10-5 2-4-10-6 6z"/>'+end;
-  if(type==='node')return common+'<path class="solid" d="M15 67H105"/><circle class="node" cx="48" cy="67" r="5"/><circle class="node" cx="76" cy="34" r="5"/><path class="ghost" d="M48 67L76 34"/><path class="cursor" d="M82 17l15 8-8 3 4 10-5 2-4-10-6 6z"/>'+end;
+  if(type==='deck')return common+'<path class="solid" d="M14 64H106"/><g fill="#f0d84b" stroke="#11171a" stroke-width="2"><circle cx="16" cy="64" r="4"/><circle cx="45" cy="64" r="4"/><circle cx="74" cy="64" r="4"/><circle cx="104" cy="64" r="4"/></g><path class="ghost" d="M16 64H104"/>'+end;
+  if(type==='node')return common+'<path class="solid" d="M15 67H105"/><circle class="node" cx="48" cy="67" r="5"/><circle class="node" cx="76" cy="34" r="5"/><path class="cursor" d="M82 17l15 8-8 3 4 10-5 2-4-10-6 6z"/>'+end;
   if(type==='triangle')return common+'<path class="solid" d="M18 68H102M28 68L60 30L94 68"/><circle class="node" cx="28" cy="68" r="5"/><circle class="node" cx="60" cy="30" r="5"/><circle class="node" cx="94" cy="68" r="5"/>'+end;
-  if(type==='chain')return common+'<path class="solid" d="M14 68L38 37L62 68L86 37L108 68"/><g fill="#f0d84b" stroke="#11171a" stroke-width="2"><circle cx="14" cy="68" r="4"/><circle cx="38" cy="37" r="4"/><circle cx="62" cy="68" r="4"/><circle cx="86" cy="37" r="4"/><circle cx="108" cy="68" r="4"/></g><text x="24" y="84" fill="#d7b94d" font-size="8" font-family="monospace">RIGHT CLICK = STOP</text>'+end;
-  return common+'<path class="solid" d="M12 66H108M20 66L45 37L70 66L94 37"/><rect x="45" y="54" width="23" height="10" fill="#53aee6"/><circle cx="50" cy="66" r="4" fill="#2d3337"/><circle cx="64" cy="66" r="4" fill="#2d3337"/><path class="ghost" d="M43 37H94"/>'+end;
+  if(type==='chain')return common+'<path class="solid" d="M14 68L38 37L62 68L86 37L108 68"/><text x="20" y="84" fill="#d7b94d" font-size="8" font-family="monospace">RIGHT CLICK</text>'+end;
+  if(type==='move')return common+'<circle class="node" cx="47" cy="52" r="7"/><path d="M57 48h34m-8-7l8 7-8 7" stroke="#62e1ae" stroke-width="3" fill="none"/><path class="cursor" d="M30 28l15 8-8 3 4 10-5 2-4-10-6 6z"/><text x="34" y="82" fill="#d7b94d" font-size="8" font-family="monospace">GRAB / MOVE</text>'+end;
+  return common+'<path class="solid" d="M12 66H108M20 66L45 37L70 66L94 37"/><rect x="45" y="54" width="23" height="10" fill="#53aee6"/><circle cx="50" cy="66" r="4" fill="#2d3337"/><circle cx="64" cy="66" r="4" fill="#2d3337"/>'+end;
 }
-function clearTutorialFocus(){document.querySelectorAll('.tutorialFocus,.tutorialFocusDanger').forEach(el=>el.classList.remove('tutorialFocus','tutorialFocusDanger'));const m=$('#tutorialCanvasMarker');if(m)m.hidden=true}
+
+function tutorialCurrentStep(){return STAGE_TUTORIAL_STEPS[tutorialStep]||null}
+function tutorialCanvasInputAllowed(){
+  if(!tutorialMode)return true;
+  const key=tutorialCurrentStep()?.key;
+  return ['support','roadComplete','topChord','dragNode'].includes(key);
+}
+function tutorialTopNodes(){
+  const pool=nodes.filter(n=>n.user&&!n.roadNode&&!n.deck&&!n.support);
+  const used=new Set(),out=[];
+  for(const [tx,ty] of TUTORIAL_TRUSS_TOPS){
+    let best=null,bd=75;
+    for(const n of pool){if(used.has(n.id))continue;const d=Math.hypot(n.x-tx,n.y-ty);if(d<bd){bd=d;best=n}}
+    if(!best)return null;used.add(best.id);out.push(best);
+  }
+  return out;
+}
+function tutorialMemberExists(a,b,mat='wood'){
+  return members.some(m=>m.user&&m.mat===mat&&memberKey(m.a,m.b)===memberKey(a,b));
+}
+function tutorialTopChordReady(){
+  const t=tutorialTopNodes();if(!t)return false;
+  if(!tutorialMemberExists(0,t[0].id))return false;
+  for(let i=0;i<t.length-1;i++)if(!tutorialMemberExists(t[i].id,t[i+1].id))return false;
+  return true;
+}
+function tutorialPerfectTruss(){
+  if(!tutorialRoadConnected())return false;
+  const t=tutorialTopNodes();if(!t||!tutorialTopChordReady())return false;
+  for(let i=0;i<4;i++){
+    if(!tutorialMemberExists(t[i].id,i)||!tutorialMemberExists(t[i].id,i+1))return false;
+  }
+  if(triangleCount()<4)return false;
+  try{return !!assemble((stage.deck[0][0]+stage.deck.at(-1)[0])/2,new Set()).ok}catch(_){return false}
+}
+function prepareTutorialMoveChallenge(){
+  const t=tutorialTopNodes();if(!t||tutorialMoveTarget)return;
+  const n=t[1]||t[0];
+  const target=TUTORIAL_TRUSS_TOPS[1]||TUTORIAL_TRUSS_TOPS[0];
+  tutorialMoveTarget={id:n.id,x:target[0],y:target[1]};
+  n.x=target[0]+50;n.y=target[1]+25;
+  tutorialFlags.moved=false;selected=null;currentAnalysis=null;lastFullAnalysis=null;
+}
+
+function drawTutorialBlueprint(){
+  if(!tutorialMode||tutorialTestRunning||!tutorialCurrentStep()?.blueprint)return;
+  const pts=TUTORIAL_TRUSS_TOPS.map(([x,y])=>({x,y}));
+  ctx.save();ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.strokeStyle='rgba(98,225,174,.58)';ctx.fillStyle='rgba(98,225,174,.16)';
+  for(let i=0;i<4;i++){
+    const a={x:stage.deck[i][0],y:stage.deck[i][1]},b={x:stage.deck[i+1][0],y:stage.deck[i+1][1]},t=pts[i];
+    line(a,t);line(t,b);
+  }
+  for(let i=0;i<3;i++)line(pts[i],pts[i+1]);
+  ctx.setLineDash([]);
+  for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,10,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(98,225,174,.9)';ctx.stroke()}
+  if(tutorialMoveTarget&&['moveTool','dragNode','test'].includes(tutorialCurrentStep()?.key)){
+    ctx.setLineDash([4,4]);ctx.lineWidth=2.5;ctx.strokeStyle='rgba(215,185,77,.95)';ctx.beginPath();ctx.arc(tutorialMoveTarget.x,tutorialMoveTarget.y,16,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(215,185,77,.95)';ctx.font='800 9px monospace';ctx.fillText('ALIGN',tutorialMoveTarget.x,tutorialMoveTarget.y-22);
+  }
+  ctx.font='800 10px var(--mono), monospace';ctx.fillStyle='rgba(98,225,174,.9)';ctx.textAlign='center';ctx.fillText('TARGET WARREN TRUSS',600,220);ctx.restore();
+}
+function tutorialRoadGuideSegmentOK(a,b){
+  if(!tutorialMode||tutorialCurrentStep()?.key!=='roadComplete')return true;
+  if(tool!=='road')return false;
+  const ia=Number(a?.id),ib=Number(b?.id);
+  if(!Number.isInteger(ia)||!Number.isInteger(ib))return false;
+  if(ia<0||ib<0||ia>=stage.deck.length||ib>=stage.deck.length)return false;
+  return Math.abs(ia-ib)===1;
+}
+function tutorialRoadGuideExact(){
+  if(!tutorialMode)return false;
+  const roads=members.filter(m=>m.user&&m.road);
+  if(roads.length!==stage.deck.length-1)return false;
+  if(roads.some(m=>m.mat!=='road'))return false;
+  for(let i=0;i<stage.deck.length-1;i++){
+    if(!roads.some(m=>memberKey(m.a,m.b)===memberKey(i,i+1)))return false;
+  }
+  // No off-guide road helper nodes may remain in the tutorial deck.
+  if(nodes.some(n=>n.user&&n.roadNode))return false;
+  return true;
+}
+function tutorialRoadConnected(){
+  if(!tutorialMode)return false;
+  return tutorialRoadGuideExact();
+}
+function tutorialFreeNode(){return nodes.find(n=>n.user&&!n.deck&&!n.support)}
+function clearTutorialFocus(){document.querySelectorAll('.tutorialFocus,.tutorialFocusAmber').forEach(el=>el.classList.remove('tutorialFocus','tutorialFocusAmber'));const m=$('#tutorialCanvasMarker');if(m)m.hidden=true}
 function positionTutorialMarker(world){
   const marker=$('#tutorialCanvasMarker');if(!marker||!world)return;
-  const r=canvas.getBoundingClientRect(),main=document.querySelector('.main').getBoundingClientRect();
-  const sx=((world[0]*cameraZoom+cameraX)*scaleX)+(r.left-main.left), sy=((world[1]*cameraZoom+cameraY)*scaleY)+(r.top-main.top);
-  marker.style.left=sx+'px';marker.style.top=sy+'px';marker.hidden=false;
+  const p=worldToScreen({x:world[0],y:world[1]}),r=canvas.getBoundingClientRect(),main=document.querySelector('.main').getBoundingClientRect();
+  marker.style.left=(r.left-main.left+p.x)+'px';marker.style.top=(r.top-main.top+p.y)+'px';marker.hidden=false;
+}
+function setTutorialStepUI(s){
+  $$('.toolBtn').forEach(b=>b.classList.toggle('tutorialStepHidden',!s.tool||b.dataset.tool!==s.tool));
+  const view=$('.viewControls'),pan=$('.panPad'),zoom=$('.zoomStack'),extra=$('.viewExtraStack');
+  const showView=['camera','grid','snap'].includes(s.ui);
+  view?.classList.toggle('tutorialStepHidden',!showView);
+  pan?.classList.toggle('tutorialStepHidden',s.ui!=='camera');
+  zoom?.classList.add('tutorialStepHidden');
+  extra?.classList.toggle('tutorialStepHidden',!['grid','snap'].includes(s.ui));
+  $('#gridBtn')?.classList.toggle('tutorialStepHidden',s.ui!=='grid');
+  $('#snapBtn')?.classList.toggle('tutorialStepHidden',s.ui!=='snap');
+  ui.test?.classList.toggle('tutorialStepHidden',s.ui!=='test');
+  if(s.tool){const el=$(`.toolBtn[data-tool="${s.tool}"]`);el?.classList.add('tutorialFocus')}
+  if(s.ui==='grid')$('#gridBtn')?.classList.add('tutorialFocus');
+  if(s.ui==='snap')$('#snapBtn')?.classList.add('tutorialFocus');
+  if(s.ui==='test')ui.test?.classList.add('tutorialFocus');
 }
 function renderStageTutorialStep(){
-  const t=$('#stageTutorial');if(!t||t.hidden)return;clearTutorialFocus();
-  const s=STAGE_TUTORIAL_STEPS[stageTutorialIndex];
-  $('#stageTutorialStep').textContent=String(stageTutorialIndex+1).padStart(2,'0')+' / '+String(STAGE_TUTORIAL_STEPS.length).padStart(2,'0');
-  $('#stageTutorialTitle').textContent=s.title;$('#stageTutorialText').innerHTML=s.text;$('#stageTutorialHint').innerHTML='<b>'+s.hint.split('//')[0]+'//</b>'+s.hint.split('//').slice(1).join('//');$('#tutorialMini').innerHTML=tutorialMiniSvg(s.mini);
-  $('#tutorialPrev').disabled=stageTutorialIndex===0;$('#tutorialNext').textContent=stageTutorialIndex===STAGE_TUTORIAL_STEPS.length-1?'START BUILDING →':'NEXT →';
-  $('#tutorialDots').innerHTML=STAGE_TUTORIAL_STEPS.map((_,i)=>`<i class="${i===stageTutorialIndex?'active':''}"></i>`).join('');
-  if(s.target){const el=$(s.target);if(el)el.classList.add('tutorialFocus');}
+  const t=$('#stageTutorial');if(!tutorialMode||!t||t.hidden)return;
+  clearTutorialFocus();
+  const s=STAGE_TUTORIAL_STEPS[tutorialStep];
+  $('#stageTutorialStep').textContent=String(tutorialStep+1).padStart(2,'0')+' / '+String(STAGE_TUTORIAL_STEPS.length).padStart(2,'0');
+  $('#stageTutorialTitle').textContent=s.title;
+  $('#stageTutorialText').innerHTML=s.text;
+  const parts=s.hint.split('//');$('#stageTutorialHint').innerHTML='<b>'+parts[0]+'//</b>'+parts.slice(1).join('//');
+  $('#tutorialMini').innerHTML=tutorialMiniSvg(s.mini);
+  const stat=$('#tutorialStatus');if(stat){stat.className='stageTutorialStatus';stat.innerHTML='<i></i><span>WAITING FOR INPUT</span>'}
+  setTutorialStepUI(s);
   if(s.canvas)positionTutorialMarker(s.canvas);
 }
-function startStageOneTutorial(force=false){
-  if(stageIndex!==0||sim)return;
-  const t=$('#stageTutorial');if(!t)return;
-  pauseStageClock(false);
-  stageTutorialIndex=0;t.hidden=false;renderStageTutorialStep();
-  if(force)toast('STAGE 01 BUILD TUTORIAL');
+function tutorialActionSatisfied(key,action){
+  if(key==='camera')return action==='camera';
+  if(key==='grid')return gridVisible;
+  if(key==='snap')return snapEnabled;
+  if(key==='roadTool')return tool==='road';
+  if(key==='support')return !!selected&&selected.id===0;
+  if(key==='roadComplete')return tutorialRoadConnected();
+  if(key==='woodTool')return tool==='wood';
+  if(key==='topChord')return tutorialPerfectTruss();
+  if(key==='rightClick')return tutorialFlags.rightClick;
+  if(key==='moveTool')return tool==='move';
+  if(key==='dragNode'){const n=tutorialMoveTarget?nodeById(tutorialMoveTarget.id):null;return !!(tutorialFlags.moved&&n&&Math.hypot(n.x-tutorialMoveTarget.x,n.y-tutorialMoveTarget.y)<=14);}
+  if(key==='test')return action==='test'&&tutorialPerfectTruss();
+  return false;
 }
-function closeStageTutorial(){clearTutorialFocus();const t=$('#stageTutorial');if(t)t.hidden=true;if(stageIndex===0&&!stage.sandbox&&stageClock.finalMs===null)resumeStageClock();}
+function tutorialHandleAction(action='state'){
+  if(!tutorialMode||tutorialTransitioning)return false;
+  const s=STAGE_TUTORIAL_STEPS[tutorialStep];
+  if(!tutorialActionSatisfied(s.key,action))return false;
+  tutorialTransitioning=true;
+  const stat=$('#tutorialStatus');if(stat){stat.className='stageTutorialStatus done';stat.innerHTML='<i></i><span>INPUT VERIFIED</span>'}
+  if(s.key==='camera')setTimeout(()=>resetCamera(),120);
+  if(s.key==='woodTool')selected=null;
+  if(s.key==='test'){
+    tutorialTransitioning=true;
+    tutorialTestRunning=true;
+    const panel=$('#stageTutorial');
+    if(panel){panel.hidden=true;panel.style.display='none';}
+    // TEST view must be completely clean: hide all tutorial guide graphics before the first simulation frame.
+    clearTutorialFocus();
+    const badge=$('#tutorialStageBadge');if(badge)badge.style.opacity='.45';
+    draw();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      tutorialTransitioning=false;
+      startSimulation(true);
+    }));
+    return true;
+  }
+  setTimeout(()=>{
+    tutorialStep=Math.min(STAGE_TUTORIAL_STEPS.length-1,tutorialStep+1);
+    if(STAGE_TUTORIAL_STEPS[tutorialStep]?.key==='rightClick')tutorialFlags.rightClick=false;
+    if(STAGE_TUTORIAL_STEPS[tutorialStep]?.key==='moveTool')prepareTutorialMoveChallenge();
+    tutorialTransitioning=false;
+    renderStageTutorialStep();
+    draw();
+  },420);
+  return true;
+}
+function leaveTutorialVisualMode(){
+  document.body.classList.remove('tutorial-mode');
+  clearTutorialFocus();
+  $$('.tutorialStepHidden').forEach(el=>el.classList.remove('tutorialStepHidden'));
+  const t=$('#stageTutorial');if(t)t.hidden=true;
+  const badge=$('#tutorialStageBadge');if(badge)badge.remove();
+  $('#infoPanel')?.removeAttribute('aria-hidden');$('#coachPanel')?.removeAttribute('aria-hidden');
+}
+function startTutorialStage(force=false){
+  tutorialMode=true;tutorialStep=0;tutorialTransitioning=false;tutorialFlags={camera:false,rightClick:false,moved:false};tutorialDragStart=null;tutorialMoveTarget=null;tutorialTestRunning=false;
+  document.body.classList.add('tutorial-mode');
+  stageIndex=-1;stage=TUTORIAL_STAGE;nodes=[];members=[];history=[];redoHistory=[];selected=null;sim=null;currentAnalysis=null;lastFullAnalysis=null;totalCost=0;stressMode=false;loadPathMode=false;measureMode=false;measureA=null;measureB=null;lastBroken=new Set();
+  stage.deck.forEach((pt,i)=>nodes.push({id:i,x:pt[0],y:pt[1],deck:true,support:i===0?'pin':i===stage.deck.length-1?'roller':null,user:false,visible:i===0||i===stage.deck.length-1,activated:false}));
+  tool='wood';$$('.toolBtn').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));
+  gridVisible=false;snapEnabled=false;$('#gridBtn')?.classList.remove('toggled');$('#snapBtn')?.classList.remove('toggled');
+  resetStageClock(false);resetCamera();updateHUD();updateModeBadge();
+  $('#infoPanel')?.setAttribute('aria-hidden','true');$('#coachPanel')?.setAttribute('aria-hidden','true');
+  let badge=$('#tutorialStageBadge');if(!badge){badge=document.createElement('div');badge.id='tutorialStageBadge';badge.className='tutorialStageBadge';document.querySelector('.main')?.appendChild(badge)}
+  badge.innerHTML='<b>TRAINING ENVIRONMENT</b>AUTO-PROGRESS // LIVE INPUT CHECK';
+  const t=$('#stageTutorial');if(t){t.hidden=false;t.style.display='';}
+  renderStageTutorialStep();draw();
+  if(force)toast('TUTORIAL STAGE // 직접 조작하면 자동 진행됩니다');
+}
+function finishTutorialStage(skipped=false){
+  if(!tutorialMode)return;
+  tutorialMode=false;leaveTutorialVisualMode();
+  localStorage.setItem('trusslab-tutorial-complete','1');
+  if($('#app'))$('#app').style.visibility='hidden';
+  runLoadingSequence({title:skipped?'SKIPPING TRAINING STAGE':'TRAINING STAGE COMPLETE',statuses:['[01] INPUT MAP VERIFIED','[02] GRID / SNAP PROFILE','[03] ROAD BUILD CONTROLS','[04] TRUSS TOOLCHAIN','[05] STAGE 01 READY'],duration:1350,hint:'ENTERING MAIN MISSION'},()=>{
+    resetStage(0);resetCamera();resize();if($('#app'))$('#app').style.visibility='visible';toast(skipped?'튜토리얼을 건너뛰고 Stage 01을 시작합니다':'튜토리얼 완료 // Stage 01 시작');
+  });
+}
+function startStageOneTutorial(force=false){startTutorialStage(force)}
+function closeStageTutorial(){finishTutorialStage(true)}
+
+// Tutorial action observers: no NEXT button. Real input is the progression trigger.
+document.addEventListener('click',e=>{if(!tutorialMode)return;setTimeout(()=>tutorialHandleAction('click'),0)});
+window.addEventListener('keydown',e=>{if(!tutorialMode)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))setTimeout(()=>tutorialHandleAction('camera'),0);else setTimeout(()=>tutorialHandleAction('key'),0)});
+canvas.addEventListener('pointerdown',()=>{if(!tutorialMode)return;setTimeout(()=>tutorialHandleAction('canvas'),0)});
+canvas.addEventListener('contextmenu',()=>{if(!tutorialMode)return;tutorialFlags.rightClick=true;setTimeout(()=>tutorialHandleAction('rightClick'),0)});
+canvas.addEventListener('pointerdown',()=>{if(!tutorialMode||tool!=='move'||!dragging)return;tutorialDragStart={id:dragging.id,x:dragging.x,y:dragging.y}});
+canvas.addEventListener('pointerup',()=>{if(!tutorialMode||!tutorialDragStart)return;const n=nodeById(tutorialDragStart.id);if(n&&Math.hypot(n.x-tutorialDragStart.x,n.y-tutorialDragStart.y)>6)tutorialFlags.moved=true;tutorialDragStart=null;setTimeout(()=>tutorialHandleAction('drag'),0)});
 
 function beginGameSequence(){
-  const title=$('#titleScreen'),startBtn=$('#titleStartBtn'),app=$('#app');
-  if(!title)return;
+  const title=$('#titleScreen'),credit=$('#creditScreen'),startBtn=$('#titleStartBtn');
+  if(!title||!credit)return;
   if(startBtn)startBtn.disabled=true;
   applyDifficultyProfile();
-  resetStage(0);
-  pauseStageClock(false);
-  closeStageTutorial();
   pauseStageClock(false);
   title.setAttribute('hidden','');
+  credit.hidden=false;
+  $('#creditConfirmBtn')?.focus();
+}
+function confirmProjectCredit(){
+  const credit=$('#creditScreen'),startBtn=$('#titleStartBtn'),app=$('#app');
+  if(!credit||credit.hidden)return;
+  credit.hidden=true;
   if(app)app.style.visibility='hidden';
   const d=DIFFICULTY[difficultyMode];
   runLoadingSequence({
-    title:'INITIALIZING STRUCTURAL MODEL',
-    statuses:[`[01] PROFILE ${difficultyMode.toUpperCase()}`,'[02] MATERIAL MATRICES','[03] SUPPORT CONSTRAINTS',`[04] LOAD MODEL ${Math.round(stages[0].load/1000)} kN`,'[05] SOLVER READY'],
+    title:'INITIALIZING TRAINING ENVIRONMENT',
+    statuses:[`[01] PROFILE ${difficultyMode.toUpperCase()}`,'[02] INPUT CONTROL MAP','[03] GRID / SNAP SYSTEM','[04] BUILD TOOLCHAIN','[05] TUTORIAL READY'],
     duration:3000,
     hint:d.label
   },()=>{
     if(app)app.style.visibility='visible';
-    resetCamera?.();
     resize();
     if(startBtn)startBtn.disabled=false;
-    toast(`${d.label} · STRUCTURAL MODEL READY`);
-    setTimeout(()=>startStageOneTutorial(),320);
+    startTutorialStage(false);
+    toast('TUTORIAL STAGE // 수행한 행동을 실시간으로 확인합니다');
   });
 }
 $$('.difficultyBtn').forEach(b=>b.onclick=()=>setDifficulty(b.dataset.difficulty));
 updateDifficultyUI();
+document.addEventListener('pointerdown',e=>{const b=e.target.closest?.('button');if(!b)return;ensureAudio();if(!b.matches('.toolBtn,#testBtn,#sfxBtn,.titleStart,.primaryBtn'))playSfx('click')},{capture:true});
 $('#titleStartBtn').onclick=beginGameSequence;
+$('#creditConfirmBtn').onclick=confirmProjectCredit;
 
 
 
@@ -2979,10 +4261,8 @@ $('#sandboxWind').oninput=e=>{const v=Number(e.target.value);$('#sandboxWindLabe
 $$('.presetBtn').forEach(b=>b.onclick=()=>{window.__sandboxPreset=b.dataset.preset;});
 $('#enterSandbox').onclick=()=>{ui.sandbox.classList.remove('show');loadPreset(window.__sandboxPreset||'blank')};
 
-$('#tutorialSkip')?.addEventListener('click',closeStageTutorial);
-$('#tutorialPrev')?.addEventListener('click',()=>{if(stageTutorialIndex>0){stageTutorialIndex--;renderStageTutorialStep()}});
-$('#tutorialNext')?.addEventListener('click',()=>{if(stageTutorialIndex<STAGE_TUTORIAL_STEPS.length-1){stageTutorialIndex++;renderStageTutorialStep()}else{closeStageTutorial();toast('이제 직접 삼각형 트러스를 만들어 보세요!')}});
-$('#replayStageTutorial')?.addEventListener('click',()=>{ui.intro.classList.remove('show');if(stageIndex!==0)resetStage(0);startStageOneTutorial(true)});
+$('#tutorialSkip')?.addEventListener('click',()=>finishTutorialStage(true));
+$('#replayStageTutorial')?.addEventListener('click',()=>{ui.intro.classList.remove('show');if(sim)stopSimulation();runLoadingSequence({title:'LOADING TUTORIAL STAGE',statuses:['[01] RESET TRAINING AREA','[02] INPUT MAP','[03] BUILD GUIDES','[04] CAMERA CONTROLS','[05] TUTORIAL READY'],duration:900,hint:'GUIDED TRAINING'},()=>startTutorialStage(true))});
 
 updateEducationAccess();updateModeBadge();updateZoomText();$('#gridBtn').classList.toggle('toggled',gridVisible);$('#snapBtn').classList.toggle('toggled',snapEnabled);$('#loadPathBtn').classList.toggle('isOn',loadPathMode);updateSpeedButton();resetStage(0);resize();updateCanvasCursor(null);
 })();
