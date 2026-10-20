@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "_guide": [
+    "이 파일을 수정하고 새로고침하면 적용됩니다. HTTP 서버로 실행하세요.",
+    "uiDefaults와 difficultyDefault는 저장된 사용자 설정이 없을 때만 사용합니다. 이미 저장된 설정은 설정 화면에서 바꿀 수 있습니다.",
+    "uiDefaults: mode=basic/advanced, scale=\"90\"/\"100\"/\"110\"/\"120\"(문자열), inspector-mode=basic/detail, speed=0.5/1/1.5/2. 나머지 기본값은 true/false입니다.",
+    "developer.enabled를 true로 바꾸면 아래 개발용 덮어쓰기가 적용됩니다. 개발자 콘솔 인증과 진행도는 변경하지 않습니다.",
+    "개발용 설정은 파일을 기준으로 매 실행에 적용됩니다. 개발자 콘솔의 기본값 복원도 이 파일이 적용된 값을 기준으로 합니다.",
+    "physics는 기존 붕괴 물리 설정입니다. gravity:100~1800, airDrag:0.9~1, substeps:1~16 정수, constraintIterations:1~40 정수, roadBendingNormal:0~0.6, roadBendingHeavy:0~0.9, cableSegmentLength:12~80 정수, cableTensionLimit:0.01~0.4, cableDamping:0~0.25, collisionPush:0.2~1.",
+    "vehicleSpeeds는 차량 속도(GU/s, 20~160)입니다. 키: CAR, BUS, TRUCK, HEAVY TRUCK, DOUBLE TRUCK.",
+    "materialOverrides 예: {\"wood\":{\"cost\":2.7,\"maxLen\":270,\"tension\":26000,\"compression\":23000}}. 지원 키: wood, steel, cable, road, roadHeavy. cost:0~1000, maxLen:1~10000, tension/compression:1~1000000000. 케이블 길이 무제한은 maxLen 항목을 생략하세요.",
+    "levelOverrides 예: {\"set01_level01\":{\"budget\":10000,\"load\":9000,\"serviceDeflection\":60,\"wind\":0}}. budget:100~10000000, load(N):1~1000000, serviceDeflection:1~1000, wind(N):-100000~100000, maxMemberCount:1~500 정수, maxCableCount:0~500 정수. 예산·하중·변위에는 이후 선택 난이도 배율이 적용됩니다.",
+    "sandbox: load(N)=6000~100000, wind(N)=-50000~50000, vehicleSpeed(GU/s)=20~160, memberFailure=부재 파단 사용 여부. 샌드박스 설정 화면에서 다시 조절할 수 있습니다.",
+    "지원하지 않는 키, 잘못된 ID·자료형·범위는 오류 화면에서 알려줍니다. _guide는 설명 전용입니다."
+  ],
+  "difficultyDefault": "easy",
+  "uiDefaults": {
+    "mode": "basic",
+    "scale": "110",
+    "large-text": true,
+    "reduced-motion": false,
+    "high-contrast": false,
+    "colorblind-stress": false,
+    "sfx": true,
+    "grid": true,
+    "snap": true,
+    "speed": 1,
+    "inspector-mode": "basic"
+  },
+  "developer": {
+    "enabled": false,
+    "physics": {
+      "gravity": 760,
+      "airDrag": 0.996,
+      "substeps": 5,
+      "constraintIterations": 12,
+      "roadBendingNormal": 0.095,
+      "roadBendingHeavy": 0.22,
+      "cableSegmentLength": 34,
+      "cableTensionLimit": 0.13,
+      "cableDamping": 0.045,
+      "collisionPush": 0.88
+    },
+    "vehicleSpeeds": {
+      "CAR": 82,
+      "BUS": 82,
+      "TRUCK": 82,
+      "HEAVY TRUCK": 82,
+      "DOUBLE TRUCK": 82
+    },
+    "materialOverrides": {},
+    "levelOverrides": {},
+    "sandbox": {
+      "load": 18000,
+      "wind": 0,
+      "vehicleSpeed": 82,
+      "memberFailure": false
+    }
+  }
+}

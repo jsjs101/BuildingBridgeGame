@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>TRUSS LAB — AI Bridge Challenge</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="education.css">
+</head>
+<body>
+<div id="unsupportedScreen" role="alert" aria-live="assertive">
+  <section class="unsupportedConsole">
+    <div class="code">DISPLAY CHECK // DESKTOP REQUIRED</div>
+    <h1>이 기기에서는 사용할 수 없습니다</h1>
+    <p>TRUSS LAB은 교량 건설 영역과 구조 해석 정보를 동시에 표시하기 위해 넓은 컴퓨터 화면을 기준으로 제작되었습니다.</p>
+    <div class="spec">REQUIRED VIEWPORT // WIDTH 1100 PX OR MORE<br>RECOMMENDED // DESKTOP OR LAPTOP · LANDSCAPE</div>
+  </section>
+</div>
+<div class="uiTooltip" id="uiTooltip" role="tooltip" hidden><b></b><span></span></div>
+<div class="pregameScreen" id="titleScreen" role="dialog" aria-label="TRUSS LAB 타이틀 화면">
+  <div class="titleBlueprint"></div>
+  <section class="titleShell">
+    <div class="titleCorner tl">SYS // TRUSS-LAB_34</div>
+    <div class="titleCorner br">STRUCTURAL SIMULATION CONSOLE<br>EDUCATIONAL BUILD</div>
+    <div class="titleKicker">Bridge Engineering Arcade</div>
+    <h1 class="gameTitle">TRUSS <span class="outline">LAB</span></h1>
+    <p class="titleSub">DESIGN LOAD PATHS. TEST STRUCTURAL REDUNDANCY. LEARN HOW TRUSS, CABLE, ARCH AND TOWER SYSTEMS CARRY FORCE.</p>
+    <div class="titleMeta">
+      <div><b>MODE // BUILD + TEST</b><span>2D PIN-JOINT STRUCTURAL MODEL</span></div>
+      <div><b>LAB // SANDBOX</b><span>LOAD / MATERIAL / GEOMETRY EXPERIMENTS</span></div>
+      <div><b>INPUT // MOUSE + KEYBOARD</b><span>CTRL+Z / CTRL+Y / CAMERA PAN + ZOOM</span></div>
+    </div>
+    <div class="difficultySelect" aria-label="난이도 선택">
+      <div class="difficultyHead"><span>PLAYER PROFILE // 난이도 선택</span><b id="difficultyLabel">초등학생용 // 쉬움</b></div>
+      <div class="difficultyOptions">
+        <button class="difficultyBtn active" data-difficulty="easy"><b>초등학생용 // 쉬움</b><span>더 넉넉한 예산 · 낮은 차량 하중 · 더 큰 허용 변형</span></button>
+        <button class="difficultyBtn" data-difficulty="hard"><b>중·고등학생용 // 어려움</b><span>더 제한된 예산 · 높은 차량 하중 · 구조 효율 강조</span></button>
+      </div>
+      <div class="difficultySummary" id="difficultySummary"><strong>쉬움 //</strong> 기본 예산 +35% · 차량 하중 -22% · 허용 변형 +18%</div>
+    </div>
+    <div class="titleActions"><button class="titleStart" id="titleStartBtn">▶ 시뮬레이션 시작</button><button class="titleSecondary" id="titleEduBtn" hidden>구조공학 학습</button><span class="titleHint">교육용 모델 · 실제 교량 안전 판정용이 아닙니다</span></div>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="welcomeScreen" hidden aria-label="TRUSS LAB 첫 플레이 안내">
+  <section class="flowShell orientationConsole" aria-labelledby="orientationTitle">
+    <header class="orientationMasthead">
+      <div class="orientationIntro"><div class="orientationEyebrow">FIRST RUN / PLAYER ORIENTATION</div><h1 id="orientationTitle">WELCOME TO<br><span>TRUSS LAB</span><i aria-hidden="true"> /</i></h1><p class="orientationLead">직접 설계하며 배우는 구조공학.</p><p class="orientationDescription">도로와 부재를 연결하고, 차량을 통과시키고, 결과를 읽어 설계를 개선하세요. 첫 훈련에서 기본 조작부터 차근차근 안내합니다.</p></div>
+      <div class="orientationBlueprint" aria-hidden="true">
+        <div><span>STRUCTURAL LAB</span><span>01 / START</span></div>
+        <svg viewBox="0 0 360 160" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <g class="orientationGuides"><path d="M30 20v110m60-110v110m60-110v110m60-110v110m60-110v110m60-110v110M16 40h328M16 80h328M16 120h328M30 145h300m-300-4v8m300-8v8"/></g>
+          <path class="orientationStructure" d="m30 110 50-70 50 70 50-70 50 70 50-70 50 70M80 40h200"/>
+          <path class="orientationDeck" d="M30 110h300"/>
+          <g class="orientationNodes"><circle cx="30" cy="110" r="4"/><circle cx="80" cy="40" r="4"/><circle cx="130" cy="110" r="4"/><circle cx="180" cy="40" r="4"/><circle cx="230" cy="110" r="4"/><circle cx="280" cy="40" r="4"/><circle cx="330" cy="110" r="4"/></g>
+          <path class="orientationSupports" d="m30 116-9 13h18l-9-13Zm300 0-9 13h18l-9-13ZM18 134h24m276 0h24"/>
+        </svg><p>DESIGN → TEST → LEARN → REDESIGN</p>
+      </div>
+    </header>
+    <ol class="orientationCycle" aria-label="게임 진행 방식">
+      <li><header><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 26h22L16 6 5 26Zm5-9h12M10 26l6-9 6 9"/></svg><span>01 / DESIGN</span></header><h2>연결하고 설계하기</h2><p>도로와 구조 부재를 직접 배치해 차량이 건널 다리를 만듭니다.</p></li>
+      <li><header><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="4" width="24" height="24" rx="3"/><path d="m13 10 9 6-9 6V10Z"/></svg><span>02 / TEST</span></header><h2>하중을 시험하기</h2><p>차량을 주행시켜 다리의 변형과 부재의 응력·파단을 관찰합니다.</p></li>
+      <li><header><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 14a10 10 0 0 1 17-6l3 3m0-7v7h-7M26 18A10 10 0 0 1 9 24l-3-3m0 7v-7h7"/></svg><span>03 / REDESIGN</span></header><h2>분석하고 개선하기</h2><p>응력 보기와 구조 코치로 원인을 찾고, 설계를 수정해 다시 시험합니다.</p></li>
+    </ol>
+    <section class="orientationBrief" aria-labelledby="orientationBriefTitle"><div class="orientationBriefTitle"><span aria-hidden="true">↳</span><div><h2 id="orientationBriefTitle">첫 설계를 위한 준비 훈련</h2><p>카메라·격자·스냅부터 도로 건설, 트러스 구성, 관절 이동과 구조 시험까지.</p></div></div><dl><div><dt>시작 모드</dt><dd>기본 UI</dd></div><div><dt>조작</dt><dd>마우스 + 키보드</dd></div><div><dt>훈련 이후</dt><dd>세트 01 해금</dd></div></dl></section>
+    <footer class="orientationFooter"><button class="orientationBegin" id="welcomeBeginBtn">훈련 시작하기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button class="orientationBack" id="welcomeBackBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>타이틀로</button><p>직접 조작하며 익히는 튜토리얼입니다.</p></footer>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="mainMenuScreen" hidden aria-label="TRUSS LAB 메인 메뉴">
+  <section class="flowShell menuConsole">
+    <header class="menuMasthead">
+      <div><div class="menuEyebrow"><span class="menuSignal" aria-hidden="true"></span>PLAYER CONSOLE / MAIN MENU</div><h1>TRUSS LAB<span class="menuVersion">STRUCTURAL DESIGN SYSTEM</span></h1><p>설계하고, 시험하고, 더 나은 구조를 발견하세요.</p></div>
+      <div class="menuProfile"><span class="menuProfileLabel">PLAYER PROFILE</span><b id="mainMenuProfileLabel">기초 구조 // 배지 0/12</b><span><span id="mainMenuDifficulty">쉬움</span><span class="menuProfileDivider" aria-hidden="true">/</span><span id="mainMenuBuild">TRUSS-LAB_34</span></span></div>
+    </header>
+    <div class="menuOverview">
+      <section class="menuResume" aria-labelledby="continueLevel">
+        <div class="menuResumeCopy"><div class="menuEyebrow" id="continueTitle">이어하기 // 계약 01</div><h2 id="continueLevel">세트 01 // 첫 연결</h2><p>마지막 설계에서 다음 도전을 이어가세요.</p><button class="menuContinue" id="continueBtn">이어서 설계하기 <span aria-hidden="true">→</span></button><div class="menuResumeStats"><span>획득한 별 <b id="continueStars">0 ★</b></span><span>완료한 계약 <b id="continueClears">0 / 36</b></span></div></div>
+        <svg class="menuBlueprint" viewBox="0 0 320 200" fill="none" aria-hidden="true"><defs><pattern id="menuBlueprintGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" stroke="currentColor" stroke-opacity=".15" stroke-width=".5"/></pattern></defs><rect width="320" height="200" fill="url(#menuBlueprintGrid)"/><g stroke="currentColor" stroke-width="1.5"><path d="M28 140h264M28 140 72 64l44 76 44-76 44 76 44-76 44 76M72 64h176M72 64v76M160 64v76M248 64v76"/><path d="m28 144-9 16h18zM285 153h14M292 144v6" stroke-opacity=".6"/><path d="M28 176h264M28 170v12M292 170v12M17 140V64M11 140h12M11 64h12" stroke-opacity=".35" stroke-width="1"/></g><g fill="currentColor"><circle cx="28" cy="140" r="3"/><circle cx="72" cy="64" r="3"/><circle cx="116" cy="140" r="3"/><circle cx="160" cy="64" r="3"/><circle cx="204" cy="140" r="3"/><circle cx="248" cy="64" r="3"/><circle cx="292" cy="140" r="3"/></g><g fill="currentColor" opacity=".55" font-family="monospace" font-size="8"><text x="116" y="192">LOAD PATH / 01</text><text x="204" y="34">PIN-JOINT MODEL</text></g></svg>
+      </section>
+      <section class="menuProgress" aria-labelledby="menuProgressTitle"><div class="menuProgressHead"><h2 id="menuProgressTitle">캠페인 진행도</h2><span>MAIN / 36</span></div><div class="menuProgressNumber" id="campaignPercent">0<span>%</span></div><progress id="campaignProgress" max="100" value="0" aria-label="메인 캠페인 완료율">0%</progress><div class="menuProgressRows"><div><span>기본 훈련</span><b id="campaignTraining">완료</b></div><div><span>해금된 세트</span><b id="campaignSets">1</b></div><div><span>획득한 별</span><b id="campaignStars">0 / 108</b></div></div></section>
+    </div>
+    <div class="menuModulesHeading"><h2>다음으로 할 일</h2><span>WORKSPACE / 06 MODULES</span></div>
+    <nav class="menuDeck" aria-label="메인 메뉴">
+<button class="menuCard" id="menuSetsBtn"><span class="menuCardTop"><span class="menuCardIcon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="5" width="8" height="8"/><rect x="19" y="5" width="8" height="8"/><rect x="5" y="19" width="8" height="8"/><rect x="19" y="19" width="8" height="8"/></svg></span><span class="menuCardIndex">01 / CAMPAIGN</span><span class="menuCardArrow" aria-hidden="true">↗</span></span><span class="menuCardTitle">세트·스테이지</span><span class="menuCardDescription">진행 중인 캠페인과 새로운 계약을 확인하세요.</span></button>
+<button class="menuCard" id="menuSandboxBtn"><span class="menuCardTop"><span class="menuCardIcon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 4h10M13 4v9L6 25a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-12V4M10 21h12M13 17h6"/><path d="M14 24h.1M20 24h.1"/></svg></span><span class="menuCardIndex">02 / SANDBOX</span><span class="menuCardArrow" aria-hidden="true">↗</span></span><span class="menuCardTitle">샌드박스 실험실</span><span class="menuCardDescription">제약 없이 구조를 만들고 하중을 실험하세요.</span></button>
+<button class="menuCard" id="menuEducationBtn"><span class="menuCardTop"><span class="menuCardIcon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 9c-4-3-8-4-12-3v19c4-1 8 0 12 3 4-3 8-4 12-3V6c-4-1-8 0-12 3Zm0 0v19M8 12l4 1M8 17l4 1M20 13l4-1M20 18l4-1"/></svg></span><span class="menuCardIndex">03 / EDUCATION</span><span class="menuCardArrow" aria-hidden="true">↗</span></span><span class="menuCardTitle">학습 센터</span><span class="menuCardDescription">트러스와 하중 전달의 원리를 배워보세요.</span></button>
+<button class="menuCard" id="menuRecordsBtn"><span class="menuCardTop"><span class="menuCardIcon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 5h12M12 3h8v5h-8zM10 5H6v24h20V5h-4M11 15h10M11 20h10M11 25h6"/></svg></span><span class="menuCardIndex">04 / RECORDS</span><span class="menuCardArrow" aria-hidden="true">↗</span></span><span class="menuCardTitle">플레이 기록</span><span class="menuCardDescription">완료한 계약과 획득한 별을 돌아보세요.</span></button>
+<button class="menuCard" id="menuSettingsBtn"><span class="menuCardTop"><span class="menuCardIcon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 4v9M7 19v9M16 4v16M16 26v2M25 4v3M25 13v15"/><rect x="4" y="13" width="6" height="6" rx="1"/><rect x="13" y="20" width="6" height="6" rx="1"/><rect x="22" y="7" width="6" height="6" rx="1"/></svg></span><span class="menuCardIndex">05 / SYSTEM</span><span class="menuCardArrow" aria-hidden="true">↗</span></span><span class="menuCardTitle">플레이 설정</span><span class="menuCardDescription">난이도와 화면·접근성을 조정하세요.</span></button>
+<button class="menuCard" id="menuTrainingBtn"><span class="menuCardTop"><span class="menuCardIcon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 24h22M6 24l5-12 5 12 5-12 5 12M11 12h10M6 7h20M6 5v4M26 5v4M16 11V5"/></svg></span><span class="menuCardIndex">06 / TRAINING</span><span class="menuCardArrow" aria-hidden="true">↗</span></span><span class="menuCardTitle">조작 훈련</span><span class="menuCardDescription">건설부터 시험까지 기본 조작을 복습하세요.</span></button>
+    </nav>
+    <footer class="menuConsoleFooter"><button class="menuUtility" id="menuTitleBtn"><span aria-hidden="true">←</span> 타이틀로 돌아가기</button><span class="menuFooterNote">TRUSS LAB / ENGINEERING THROUGH PLAY</span><button class="menuUtility" id="menuDeveloperBtn">개발자 모드</button></footer>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="setSelectScreen" hidden aria-label="TRUSS LAB 세트 선택">
+  <section class="flowShell setConsole" aria-labelledby="setSelectionTitle">
+    <nav class="contractBreadcrumb" aria-label="현재 위치"><button id="setMenuCrumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v11h5v-7h4v7h5V10"/></svg>메인 메뉴</button><span aria-hidden="true">/</span><span aria-current="page">세트 선택</span></nav>
+    <header class="contractMasthead"><div><div class="contractEyebrow">CAMPAIGN / SET SELECT</div><h1 id="setSelectionTitle">구조 세트 선택</h1><p>기초 교량부터 복합 하중까지, 주제별 설계 과정을 따라가 보세요. 세트를 선택하면 계약 지도에서 다음 도전을 확인할 수 있습니다.</p></div><div class="contractProgressPanel"><span>전체 캠페인 진행도</span><b id="setSelectionProgress"></b><progress id="setSelectionMeter" value="0" max="36" aria-label="전체 메인 계약 완료 진행도"></progress><small id="setSelectStars"></small></div></header>
+    <div class="contractLegend"><p>각 세트의 메인 계약을 진행하며 다음 주제로 나아가세요.</p><span><i class="available" aria-hidden="true"></i>도전 가능</span><span><i class="complete" aria-hidden="true">✓</i>완료</span><span><i class="locked" aria-hidden="true"></i>잠김</span></div>
+    <div class="setChapters" id="setGrid"></div>
+    <footer class="contractFooter"><button class="contractBack" id="setBackBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>메인 메뉴</button><p>보너스 실험은 선택 도전입니다. 다음 세트 해금에는 필요하지 않습니다.</p></footer>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="levelSelectScreen" hidden aria-label="TRUSS LAB 레벨 선택">
+  <section class="flowShell contractConsole" aria-labelledby="levelSetTitle">
+    <nav class="contractBreadcrumb" aria-label="현재 위치"><button id="contractMenuCrumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v11h5v-7h4v7h5V10"/></svg>메인 메뉴</button><span aria-hidden="true">/</span><button id="contractSetsCrumb">세트 선택</button><span aria-hidden="true">/</span><span id="contractBreadcrumbCurrent" aria-current="page">계약 선택</span></nav>
+    <header class="contractMasthead"><div><div class="contractEyebrow" id="levelSetKicker"></div><h1 id="levelSetTitle">트러스 기초</h1><p id="levelSetDescription"></p></div><div class="contractProgressPanel"><span>이 세트의 진행도</span><b id="levelSetProgress"></b><progress id="levelSetMeter" value="0" max="6" aria-label="메인 계약 완료 진행도"></progress><small id="levelSetStars"></small></div></header>
+    <div class="contractLegend"><p>계약을 선택해 목표와 설계 조건을 확인하세요.</p><span><i class="available" aria-hidden="true"></i>도전 가능</span><span><i class="complete" aria-hidden="true">✓</i>완료</span><span><i class="locked" aria-hidden="true"></i>잠김</span></div>
+    <div class="contractSections" id="levelGrid"></div>
+    <footer class="contractFooter"><button class="contractBack" id="levelBackBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>세트 선택</button><button class="contractBack" id="levelMenuBtn">메인 메뉴</button><p>메인 계약을 완료하면 다음 계약이 열립니다.</p></footer>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="briefingScreen" hidden aria-label="TRUSS LAB 레벨 브리핑">
+  <section class="flowShell missionConsole" aria-labelledby="briefingTitle">
+    <nav class="contractBreadcrumb" aria-label="현재 위치"><button id="briefingHomeCrumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v11h5v-7h4v7h5V10"/></svg>메인 메뉴</button><span aria-hidden="true">/</span><button id="briefingSetsCrumb">세트 선택</button><span aria-hidden="true">/</span><button id="briefingContractsCrumb">계약 선택</button><span aria-hidden="true">/</span><span id="briefingCurrentCrumb" aria-current="page">브리핑</span></nav>
+    <header class="missionMasthead"><div><div class="contractEyebrow" id="briefingKicker"></div><h1 id="briefingTitle">계약 브리핑</h1><p id="briefingSubtitle"></p></div><div class="missionStatus"><span id="briefingStatus"></span><b id="briefingDifficulty"></b><span id="briefingConcept"></span></div></header>
+    <div class="missionWorkspace"><div class="missionInstructions">
+      <section class="missionObjectivePanel" aria-labelledby="missionObjectiveTitle"><header class="missionSectionHead"><span class="missionSectionIcon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11"/><circle cx="16" cy="16" r="5"/><path d="M16 2v5m0 18v5M2 16h5m18 0h5"/></svg></span><div><small>01 / DESIGN OBJECTIVE</small><h2 id="missionObjectiveTitle">이번 계약의 목표</h2></div></header><p id="briefingObjective"></p></section>
+      <section class="missionRulesPanel" aria-labelledby="missionRulesTitle"><header class="missionSectionHead"><span class="missionSectionIcon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 5h16v24H8V5Zm4 0V3h8v5h-8V5Zm0 9h8m-8 5h8m-8 5h5"/></svg></span><div><small>02 / DESIGN CONDITIONS</small><h2 id="missionRulesTitle">설계 조건</h2></div></header><ul id="briefingConstraints" class="missionConstraints"></ul></section>
+      <section class="missionExtraPanel" aria-labelledby="missionExtraTitle"><header class="missionSectionHead"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 4 3.7 7.5L28 13l-6 5.9 1.4 8.3-7.4-4-7.4 4 1.4-8.3L4 13l8.3-1.5L16 4Z"/></svg><div><small>03 / EXTRA OBJECTIVES</small><h2 id="missionExtraTitle">추가 도전 목표</h2></div></header><ul id="briefingSecondary" class="missionExtras"></ul></section>
+    </div><section class="missionDataPanel" aria-labelledby="missionDataTitle"><header class="missionSectionHead"><span class="missionSectionIcon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="4" y="5" width="24" height="22" rx="2"/><path d="M4 12h24M12 12v15m8-15v15M4 20h24"/></svg></span><div><small>TEST PROFILE</small><h2 id="missionDataTitle">설계 · 시험 정보</h2></div></header><div class="missionDiagram" id="briefingThumb" aria-hidden="true"></div><p class="missionDiagramCaption">구조 개념도 · 실제 지형은 설계 화면에서 확인하세요.</p><dl class="missionSpecs" id="briefingSpec"></dl><p class="missionProfileNote">현재 난이도가 반영된 시험 조건입니다.<br>사용성 한계는 허용 변위, u는 게임 내 길이 단위입니다.</p></section></div>
+    <footer class="missionFooter"><button class="missionBegin" id="briefingStartBtn">설계 시작<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button class="contractBack" id="briefingBackBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>계약 선택</button><button class="contractBack" id="briefingMenuBtn">메인 메뉴</button><p>목표와 조건을 확인했다면 설계를 시작하세요.</p></footer>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="trainingCompleteScreen" hidden aria-label="TRUSS LAB 튜토리얼 완료">
+  <section class="flowShell trainingConsole" aria-labelledby="trainingCompleteTitle">
+    <header class="trainingConsoleTop"><span>TRAINING / COMPLETE</span><span class="trainingReady"><i aria-hidden="true"></i>캠페인 준비 완료</span></header>
+    <div class="trainingConsoleBody">
+      <div class="trainingAchievement">
+        <div class="trainingSuccessIcon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h16l12 12v16L32 44H16L4 32V16L16 4Z"/><path d="m14 24 7 7 14-15"/></svg></div>
+        <p class="trainingKicker">기초 조작 훈련 종료</p><h1 id="trainingCompleteTitle">훈련 완료<span aria-hidden="true">.</span></h1>
+        <p class="trainingLead">이제, 나만의 다리를 설계할 차례입니다.</p><p class="trainingDescription">훈련에서 익힌 조작을 바탕으로 첫 번째 구조 설계에 도전하세요.</p>
+        <ul class="trainingRecap" aria-label="훈련에서 다룬 핵심 조작">
+          <li><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 3v22M3 14h22m-14-8 3-3 3 3m-6 16 3 3 3-3M6 11l-3 3 3 3m16-6 3 3-3 3"/></svg><div><b>화면과 기준선</b><span>카메라 이동 · 격자 · 스냅</span></div></li>
+          <li><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 22h22L14 5 3 22Zm6-9h10M9 22l5-9 5 9"/></svg><div><b>교량 설계와 수정</b><span>도로 연결 · 트러스 건설 · 관절 이동</span></div></li>
+          <li><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="4" width="20" height="20" rx="3"/><path d="m11 9 8 5-8 5V9Z"/></svg><div><b>구조 시험</b><span>차량 주행으로 설계 결과 확인</span></div></li>
+        </ul>
+      </div>
+      <section class="trainingNext" aria-labelledby="trainingNextTitle">
+        <div class="trainingNextTop"><span>NEXT / CAMPAIGN 01</span><b>세트 해금</b></div>
+        <div class="trainingSetNumber" aria-hidden="true">SET <span>01</span></div>
+        <h2 id="trainingNextTitle">트러스 기초</h2><p>작은 연결에서 시작해, 하중을 지탱하는 구조로.</p>
+        <div class="trainingDrawing" aria-hidden="true">
+          <svg viewBox="0 0 440 180" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <g class="trainingDrawingGuides"><path d="M40 24v128m90-128v128m90-128v128m90-128v128m90-128v128M22 46h396M22 82h396M22 118h396"/><path d="M40 155h360m-360-5v10m360-10v10"/></g>
+            <path class="trainingDrawingMembers" d="M40 118 85 46l45 72 45-72 45 72 45-72 45 72 45-72 45 72M85 46h270"/>
+            <path class="trainingDrawingDeck" d="M40 118h360"/>
+            <g class="trainingDrawingNodes"><circle cx="40" cy="118" r="4"/><circle cx="130" cy="118" r="4"/><circle cx="220" cy="118" r="4"/><circle cx="310" cy="118" r="4"/><circle cx="400" cy="118" r="4"/><circle cx="85" cy="46" r="4"/><circle cx="175" cy="46" r="4"/><circle cx="265" cy="46" r="4"/><circle cx="355" cy="46" r="4"/></g>
+            <path class="trainingDrawingSupports" d="m40 124-10 15h20l-10-15Zm360 0-10 15h20l-10-15ZM27 144h26m334 0h26"/>
+          </svg><span>STRUCTURAL STUDY // WARREN TRUSS</span>
+        </div>
+        <div class="trainingSetMeta"><span>계약 <b>01—06</b></span><span>주제 <b>삼각형 · 인장과 압축</b></span></div>
+        <p class="trainingNextHint">세트에서 첫 계약을 선택하고 직접 설계를 시작하세요.</p>
+      </section>
+    </div>
+    <footer class="trainingConsoleFooter"><button class="trainingContinue" id="trainingSetBtn"><span>세트 01 살펴보기</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button><button class="trainingReturn" id="trainingMenuBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>메인 메뉴</button><p>설계하고, 시험하고, 더 나은 구조로.</p></footer>
+  </section>
+</div>
+
+<div class="gameFlowScreen" id="recordsScreen" hidden aria-label="TRUSS LAB 기록">
+  <section class="flowShell"><div class="flowTop"><div><div class="flowEyebrow">PLAYER DATA // RECORDS</div><h1>구조 설계 기록</h1><p>레벨별 최고 기록과 진행 상황입니다. 난이도별 스테이지 시간 기록은 기존 저장값을 그대로 사용합니다.</p></div><div class="flowStamp"><b id="recordsStars">0 ★</b>CAMPAIGN TOTAL</div></div><div id="recordsBody"></div><div class="flowActions"><button class="flowBtn" id="recordsBackBtn">← 메인 메뉴</button></div></section>
+</div>
+
+<div class="gameFlowScreen" id="flowSettingsScreen" hidden aria-label="TRUSS LAB 설정">
+  <section class="flowShell settingsShell">
+    <header class="settingsMasthead">
+      <div><div class="settingsEyebrow">SYSTEM / PLAYER PREFERENCES</div><h1>플레이 설정<span aria-hidden="true"> /</span></h1><p>나에게 맞는 설계 환경을 구성하세요.<br>표시 방식부터 조작 피드백까지, 원하는 대로 조절할 수 있습니다.</p></div>
+      <div class="settingsProfile"><span class="settingsProfileMark" aria-hidden="true">●</span><div><b>개인 플레이 환경</b><small>TRUSS LAB // LOCAL PROFILE</small></div></div>
+    </header>
+    <div class="settingsBoard"><div class="settingsStack"><section class="settingsPanel" aria-labelledby="settingsHeading01"><header class="settingsPanelHead"><span class="settingsPanelIcon"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 25 16 6l11 19H5Zm5-9h12M10 25l6-9 6 9M16 6v10"/></svg></span><div><small>01 // PLAY CONTROL</small><h2 id="settingsHeading01">게임플레이</h2></div></header><div class="settingsOption"><div class="settingsOptionText"><b>난이도</b><p>차량 하중, 예산과 설계 허용 한계를 조절합니다.</p></div><div class="settingsSegments " role="group" aria-label="난이도"><button class="settingsChoice flowDifficultyBtn" data-flow-difficulty="easy">쉬움</button><button class="settingsChoice flowDifficultyBtn" data-flow-difficulty="hard">어려움</button></div></div><div class="settingsOption"><div class="settingsOptionText"><b>UI 정보 표시 수준</b><p>기본은 핵심 설계 도구, 고급은 전체 해석 도구를 표시합니다.</p></div><div class="settingsSegments " role="group" aria-label="UI 정보 표시 수준"><button class="settingsChoice flowUIModeBtn" data-flow-ui="basic">기본</button><button class="settingsChoice flowUIModeBtn" data-flow-ui="advanced">고급</button></div></div></section><section class="settingsPanel" aria-labelledby="settingsHeading02"><header class="settingsPanelHead"><span class="settingsPanelIcon"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="24" height="17" rx="2"/><path d="M11 27h10m-5-5v5M9 10h6m-6 4h10m4-4v7"/></svg></span><div><small>02 // DISPLAY</small><h2 id="settingsHeading02">화면 표시</h2></div></header><div class="settingsOption"><div class="settingsOptionText"><b>UI 크기</b><p>설계 화면의 도구와 정보 패널 크기를 조절합니다.</p></div><div class="settingsSegments uiScaleChoices" role="group" aria-label="UI 크기"><button class="settingsChoice" data-ui-scale="90">90%</button><button class="settingsChoice" data-ui-scale="100">100%</button><button class="settingsChoice" data-ui-scale="110">110%</button><button class="settingsChoice" data-ui-scale="120">120%</button></div></div><div class="settingsOption"><div class="settingsOptionText"><b>큰 글자</b><p>설명과 데이터에 더 큰 글자를 사용합니다.</p></div><div class="settingsSegments " role="group" aria-label="큰 글자"><button class="settingsChoice settingToggleBtn" data-accessibility="large-text" data-value="on">켜기</button><button class="settingsChoice settingToggleBtn" data-accessibility="large-text" data-value="off">끄기</button></div></div></section></div><div class="settingsStack"><section class="settingsPanel" aria-labelledby="settingsHeading03"><header class="settingsPanelHead"><span class="settingsPanelIcon"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="6" r="2.5"/><path d="m5 12 11 3 11-3M16 15v6m0 0-7 7m7-7 7 7M16 15v-4"/></svg></span><div><small>03 // ACCESSIBILITY</small><h2 id="settingsHeading03">접근성</h2></div></header><div class="settingsOption"><div class="settingsOptionText"><b>동작 줄이기</b><p>화면 전환과 반복 애니메이션을 최소화합니다.</p></div><div class="settingsSegments " role="group" aria-label="동작 줄이기"><button class="settingsChoice settingToggleBtn" data-accessibility="reduced-motion" data-value="on">켜기</button><button class="settingsChoice settingToggleBtn" data-accessibility="reduced-motion" data-value="off">끄기</button></div></div><div class="settingsOption"><div class="settingsOptionText"><b>고대비</b><p>패널 경계와 정보의 명암 차이를 높입니다.</p></div><div class="settingsSegments " role="group" aria-label="고대비"><button class="settingsChoice settingToggleBtn" data-accessibility="high-contrast" data-value="on">켜기</button><button class="settingsChoice settingToggleBtn" data-accessibility="high-contrast" data-value="off">끄기</button></div></div><div class="settingsOption"><div class="settingsOptionText"><b>색각 보조 응력 표시</b><p>압축 부재에 패턴을 더해 색상 구분을 돕습니다.</p></div><div class="settingsSegments " role="group" aria-label="색각 보조 응력 표시"><button class="settingsChoice settingToggleBtn" data-accessibility="colorblind-stress" data-value="on">켜기</button><button class="settingsChoice settingToggleBtn" data-accessibility="colorblind-stress" data-value="off">끄기</button></div></div></section><section class="settingsPanel" aria-labelledby="settingsHeading04"><header class="settingsPanelHead"><span class="settingsPanelIcon"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13h5l7-6v18l-7-6H5v-6Zm17-2a8 8 0 0 1 0 10m4-14a13 13 0 0 1 0 18"/></svg></span><div><small>04 // FEEDBACK & DATA</small><h2 id="settingsHeading04">소리 · 저장</h2></div></header><div class="settingsOption"><div class="settingsOptionText"><b>효과음</b><p>버튼 클릭, 부재 설치와 시험의 소리 피드백입니다.</p></div><div class="settingsSegments " role="group" aria-label="효과음"><button class="settingsChoice settingToggleBtn" data-accessibility="sfx-setting" data-value="on">켜기</button><button class="settingsChoice settingToggleBtn" data-accessibility="sfx-setting" data-value="off">끄기</button></div></div><div class="settingsStorage"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h16l4 4v20H5V4h2Zm3 0v8h12V4M10 28V18h12v10"/></svg><div><b>이 브라우저에 자동 저장</b><p>진행도와 환경설정은 현재 기기에 보관됩니다.</p></div></div></section></div></div>
+    <footer class="settingsFooter"><button class="settingsBack" id="settingsBackBtn"><span aria-hidden="true">←</span> 메인 메뉴</button><p>설정은 변경 즉시 적용됩니다.</p><button class="settingsDev devEntryBtn" id="settingsDeveloperBtn">개발자 모드</button></footer>
+  </section>
+</div>
+
+
+<div class="gameFlowScreen" id="programCompleteScreen" hidden>
+  <div class="titleBlueprint"></div>
+  <section class="flowShell programCompleteShell">
+    <div class="flowTop"><div><div class="flowEyebrow" id="programCompleteKicker">STRUCTURAL ENGINEERING PROGRAM</div><h1 id="programCompleteTitle">메인 캠페인 완료</h1><p id="programCompleteSubtitle">메인 계약 36개 완료</p></div><div class="flowStamp"><b id="programCompleteStamp">PROGRAM STATUS</b><span>TRUSS LAB // CERTIFICATION</span></div></div>
+    <div class="programCompleteGrid"><div class="programCertificate"><span>CERTIFICATION</span><b id="programCertificateTitle">STRUCTURAL LAB</b><strong id="programCertificateState">메인 과정 완료</strong><p>본 인증은 TRUSS LAB의 교육용 게임 진행도를 나타냅니다. 실제 구조설계 자격이나 전문 엔지니어링 인증을 의미하지 않습니다.</p></div><div class="programStats" id="programCompleteStats"></div></div>
+    <div class="flowActions"><button class="flowBtn primary" id="programBonusBtn">보너스 계약 계속하기 →</button><button class="flowBtn" id="programRecordsBtn">설계 기록</button><button class="flowBtn" id="programMenuBtn">메인 메뉴</button></div>
+  </section>
+</div>
+
+
+<div class="gameFlowScreen" id="devAuthScreen" hidden aria-label="TRUSS LAB 개발자 인증">
+	<section class="flowShell devAuthShell">
+		<div class="flowTop"><div><div class="flowEyebrow">개발자 전용 · 접근 코드 인증</div><h1>개발자 모드</h1><p>Static HTML 환경의 개발 보조 인증입니다. 브라우저 내부 코드를 완전하게 보호하는 보안 경계가 아니라 일반 플레이 중 우발적 접근을 방지하기 위한 장치입니다.</p></div><div class="flowStamp"><b>세션 인증</b>PBKDF2 · SHA-256<br>현재 세션에만 적용</div></div>
+		<form class="devAuthBox" id="devAuthForm" autocomplete="off">
+			<div class="devAuthField"><label for="devPasswordInput">접근 코드</label><input id="devPasswordInput" type="password" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="32" aria-describedby="devAuthStatus"></div>
+			<div class="devAuthStatus" id="devAuthStatus">설정된 개발자 접근 코드를 입력하세요. 입력한 코드는 브라우저 저장소나 콘솔 기록에 남기지 않습니다.</div>
+			<div class="flowActions"><button class="flowBtn primary" type="submit" id="devAuthSubmit">인증하기 →</button><button class="flowBtn" type="button" id="devAuthCancel">취소</button></div>
+		</form>
+	</section>
+</div>
+
+<div class="gameFlowScreen devConsoleScreen" id="devConsoleScreen" hidden aria-label="TRUSS LAB 개발자 콘솔">
+	<section class="devConsoleShell">
+		<header class="devConsoleTop"><div class="devConsoleBrand"><b>TRUSS LAB</b><span>개발자 콘솔</span></div><div class="devSessionPill">개발자 세션 활성</div><div class="devConsoleTopActions"><button class="flowBtn" id="devConsoleReturnBtn">게임으로 돌아가기</button><button class="flowBtn danger" id="devConsoleLockBtn">개발자 모드 잠그기</button></div></header>
+		<div class="devConsoleBody">
+			<nav class="devConsoleNav" aria-label="개발자 콘솔 메뉴"><div class="devNavLabel">개발 도구</div><div class="devConsoleSearch"><label for="devSettingsSearch">설정 검색 · Enter</label><input id="devSettingsSearch" type="search" placeholder="중력 · 스테이지 30 · 별 · 차량" autocomplete="off"></div><button class="devNavBtn active" data-dev-section="overview">현황 요약</button><button class="devNavBtn" data-dev-section="campaigns">캠페인</button><button class="devNavBtn" data-dev-section="levels">스테이지</button><button class="devNavBtn" data-dev-section="materials">재료</button><button class="devNavBtn" data-dev-section="vehicles">차량</button><button class="devNavBtn" data-dev-section="physics">물리 설정</button><button class="devNavBtn" data-dev-section="solver">구조 해석</button><button class="devNavBtn" data-dev-section="sandbox">샌드박스</button><button class="devNavBtn" data-dev-section="progression">진행도</button><button class="devNavBtn" data-dev-section="storage">저장 관리</button><button class="devNavBtn" data-dev-section="ui">화면·접근성</button><button class="devNavBtn" data-dev-section="debug">디버깅</button><button class="devNavBtn" data-dev-section="performance">성능</button><button class="devNavBtn" data-dev-section="session">세션</button></nav>
+			<main class="devConsoleMain" id="devConsoleContent"></main>
+		</div>
+	</section>
+</div>
+
+<div class="gameFlowScreen" id="devPreviewScreen" hidden aria-label="TRUSS LAB 개발자 UI 프리뷰">
+	<section class="flowShell devPreviewShell"><div class="flowTop"><div><div class="flowEyebrow">개발 화면 미리보기 · 진행도 저장 안 함</div><h1 id="devPreviewTitle">화면 미리보기</h1><p id="devPreviewSubtitle">이 미리보기는 캠페인 진행도를 변경하지 않습니다.</p></div><div class="flowStamp"><b>미리보기</b>저장 데이터 변경 없음</div></div><div id="devPreviewBody"></div><div class="flowActions"><button class="flowBtn primary" id="devPreviewBackBtn">← 개발자 콘솔</button></div></section>
+</div>
+
+<button class="devModeBadge" id="devModeBadge" hidden type="button">개발자 모드</button>
+<div class="devQuickMenu" id="devQuickMenu" hidden><div class="devQuickMenuHead"><span>개발 빠른 메뉴 · F10</span><button class="iconBtn" id="devQuickClose" type="button">×</button></div><div class="devQuickMenuGrid"><button class="flowBtn" data-dev-quick="reload">스테이지 다시 불러오기</button><button class="flowBtn" data-dev-quick="pass">성공 처리</button><button class="flowBtn" data-dev-quick="fail">실패 처리</button><button class="flowBtn" data-dev-quick="break">가리킨 부재 파단 처리</button><button class="flowBtn" data-dev-quick="debug">진단 표시 전환</button><button class="flowBtn primary" data-dev-quick="console">개발자 콘솔 열기</button></div></div>
+<div class="devDebugOverlay" id="devDebugOverlay" hidden></div>
+<div class="devGeometryHud" id="devGeometryHud" hidden>
+  <h3>스테이지 형상 편집</h3>
+  <p id="devGeometryStatus">RUNTIME OVERRIDE // drag supports, water/height lines, or site zones. Apply reloads the level geometry.</p>
+  <div class="devGeometryTools">
+    <button data-geo-tool="select" class="active">선택·이동</button>
+    <button data-geo-tool="add-no-build">건설 제한 영역 추가</button>
+    <button data-geo-tool="add-clearance">ADD CLEARANCE</button>
+    <button data-geo-tool="add-water">ADD WATER</button>
+    <button data-geo-tool="add-height">ADD HEIGHT LIMIT</button>
+    <button data-geo-tool="duplicate">DUPLICATE</button>
+    <button data-geo-tool="delete">삭제</button>
+    <button data-geo-tool="fit">FIT VIEW</button>
+  </div>
+  <div class="devGeometryCoords"><label>X<input id="devGeoX" type="number" step="1"></label><label>Y<input id="devGeoY" type="number" step="1"></label><label>W<input id="devGeoW" type="number" step="1"></label><label>H<input id="devGeoH" type="number" step="1"></label></div>
+  <div class="devGeometryFooter"><button class="flowBtn primary" id="devGeometryApplyBtn">APPLY & RELOAD</button><button class="flowBtn" id="devGeometryExitBtn">EXIT MODE</button></div>
+</div>
+
+<div class="creditScreen" id="creditScreen" hidden role="dialog" aria-modal="true" aria-label="교육용 프로젝트 안내 및 크레딧">
+  <section class="creditShell creditConsole" aria-labelledby="creditTitle">
+    <header class="creditMasthead"><div><div class="creditEyebrow">TRUSS LAB / PROJECT CREDIT</div><h1 id="creditTitle">프로젝트 안내<span aria-hidden="true"> /</span><br>크레딧</h1><p>훈련을 시작하기 전, 이 프로젝트를 소개합니다.</p></div><div class="creditDocumentIcon" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9h29l14 14v48H17V9h3Zm29 0v16h14M26 35h20m-20 8h28m-28 8h12"/><path d="m45 64 9-14 9 14H45Zm5-6h8"/><path class="creditDocumentGuides" d="M8 9h4m-2-2v4M68 71h4m-2-2v4M9 20v40m62-40v24"/></svg><span>EDUCATIONAL PROJECT</span></div></header>
+    <div class="creditPanels">
+      <section class="creditPanel" aria-labelledby="creditPurposeTitle"><header><span class="creditPanelIcon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4 7c5-2 8-1 12 2 4-3 7-4 12-2v19c-5-2-8-1-12 2-4-3-7-4-12-2V7Zm12 2v19M8 12l4 1m-4 5 4 1m8-6 4-1m-4 7 4-1"/></svg></span><div><small>01 / PURPOSE</small><h2 id="creditPurposeTitle">배움을 위한 구조 실험</h2></div></header><p>본 게임은 학생들이 교량 설계 및 건설 과정을 직접 체험하며 구조역학과 물리 법칙의 원리를 직관적으로 이해할 수 있도록 개발된 <strong>비영리 교육용 프로젝트</strong>입니다.</p><div class="creditPurposeNote"><span aria-hidden="true">↳</span>설계와 실험으로 이해하는 구조역학</div></section>
+      <section class="creditPanel" aria-labelledby="creditInspirationTitle"><header><span class="creditPanelIcon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4 25h24M6 22l10-16 10 16H6Zm5-8h10M11 22l5-8 5 8"/></svg></span><div><small>02 / INSPIRATION</small><h2 id="creditInspirationTitle">영감을 준 작품</h2></div></header><p>게임의 교량 설계·건설 시스템 및 게임 메커니즘은 Dry Cactus사의 <strong>「Poly Bridge」</strong>에서 영감을 받아 교육적 목적에 맞게 재구성하였습니다.</p><a class="creditWorkLink" href="https://store.steampowered.com/app/1062160/Poly_Bridge_2/" target="_blank" rel="noopener noreferrer"><span><b>Poly Bridge 2</b><small>Dry Cactus · Steam 스토어 · 새 탭</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M9 4H4v16h16v-5"/></svg></a></section>
+    </div>
+    <div class="creditAttribution"><span>ORIGINAL ASSETS / UI / CODE</span><b>TRUSS LAB EDUCATIONAL PROJECT</b></div>
+    <footer class="creditConsoleFooter"><div><b>이제 첫 설계를 시작해 보세요.</b><p>안내를 확인하면 튜토리얼 스테이지가 시작됩니다.</p></div><button class="creditConfirm creditProceed" id="creditConfirmBtn">확인하고 훈련 시작<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button></footer>
+  </section>
+</div>
+
+<div class="pregameScreen" id="loadingScreen" hidden aria-live="polite" aria-label="구조 시뮬레이션 로딩">
+  <div class="titleBlueprint"></div>
+  <section class="loadingShell">
+    <div class="loadingTop"><b id="loadingTitle">INITIALIZING STRUCTURAL MODEL</b><span id="loadingPercent">00%</span></div>
+    <svg class="trussLoader" viewBox="0 0 760 240" aria-hidden="true">
+      <defs>
+        <pattern id="loaderGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26333a" stroke-width=".55"/></pattern>
+      </defs>
+      <rect class="loader-grid" x="0" y="0" width="760" height="240" fill="url(#loaderGrid)"/>
+      <text x="18" y="20" fill="#405059" font-size="8">ASSEMBLY BAY // TRUSS MODULE</text>
+      <text x="615" y="20" fill="#405059" font-size="8">UNIT // kN · m</text>
+      <path class="loader-baseline" d="M52 202H708"/>
+      <path class="loader-ghost" d="M92 180H668 M164 96H596 M92 180L164 96L236 180L308 96L380 180L452 96L524 180L596 96L668 180"/>
+
+      <g id="loaderSupports" class="loader-supports">
+        <path class="support-part" d="M54 180h76l-38 30z"/>
+        <path class="support-part" d="M630 180h76l-38 30z"/>
+      </g>
+
+      <g id="loaderDeckParts" class="loader-parts deck-parts">
+        <line class="assembly-member" data-kind="deck" x1="92" y1="180" x2="164" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="164" y1="180" x2="236" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="236" y1="180" x2="308" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="308" y1="180" x2="380" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="380" y1="180" x2="452" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="452" y1="180" x2="524" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="524" y1="180" x2="596" y2="180"/>
+        <line class="assembly-member" data-kind="deck" x1="596" y1="180" x2="668" y2="180"/>
+      </g>
+
+      <g id="loaderWebParts" class="loader-parts web-parts">
+        <line class="assembly-member" data-kind="web" x1="92" y1="180" x2="164" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="236" y1="180" x2="164" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="236" y1="180" x2="308" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="380" y1="180" x2="308" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="380" y1="180" x2="452" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="524" y1="180" x2="452" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="524" y1="180" x2="596" y2="96"/>
+        <line class="assembly-member" data-kind="web" x1="668" y1="180" x2="596" y2="96"/>
+      </g>
+
+      <g id="loaderTopParts" class="loader-parts top-parts">
+        <line class="assembly-member" data-kind="top" x1="164" y1="96" x2="308" y2="96"/>
+        <line class="assembly-member" data-kind="top" x1="308" y1="96" x2="452" y2="96"/>
+        <line class="assembly-member" data-kind="top" x1="452" y1="96" x2="596" y2="96"/>
+      </g>
+
+      <g fill="#62e1ae" class="truss-nodes">
+        <circle class="truss-node" cx="92" cy="180" r="4"/><circle class="truss-node" cx="164" cy="180" r="4"/><circle class="truss-node" cx="236" cy="180" r="4"/>
+        <circle class="truss-node" cx="308" cy="180" r="4"/><circle class="truss-node" cx="380" cy="180" r="4"/><circle class="truss-node" cx="452" cy="180" r="4"/>
+        <circle class="truss-node" cx="524" cy="180" r="4"/><circle class="truss-node" cx="596" cy="180" r="4"/><circle class="truss-node" cx="668" cy="180" r="4"/>
+        <circle class="truss-node" cx="164" cy="96" r="4"/><circle class="truss-node" cx="308" cy="96" r="4"/><circle class="truss-node" cx="452" cy="96" r="4"/><circle class="truss-node" cx="596" cy="96" r="4"/>
+      </g>
+      <g class="loader-rings">
+        <circle class="loader-node-ring" cx="380" cy="180" r="10"/>
+        <circle class="loader-node-ring" cx="308" cy="96" r="10"/>
+        <circle class="loader-node-ring" cx="452" cy="96" r="10"/>
+        <circle class="loader-node-ring" cx="92" cy="180" r="10"/>
+        <circle class="loader-node-ring" cx="668" cy="180" r="10"/>
+      </g>
+      <text id="loaderPhaseText" x="18" y="228" fill="#66767e" font-size="8">ASSEMBLY // WAITING</text>
+      <text id="loaderSolverText" x="548" y="228" fill="#d6b55a" font-size="8">FASTENER BANK // --</text>
+    </svg>
+    <div class="loaderMetrics">
+      <div class="loaderMetric live"><span>ELEMENTS</span><b id="loaderElem">00 / 10</b></div>
+      <div class="loaderMetric"><span>NODES</span><b id="loaderNodeCount">00 / 13</b></div>
+      <div class="loaderMetric"><span>DOF</span><b id="loaderDof">26</b></div>
+      <div class="loaderMetric"><span>SOLVER</span><b id="loaderSolver">IDLE</b></div>
+    </div>
+    <div class="loadingRail"><i></i></div>
+    <div class="loadingLog"><span id="loadingStatus">[01] MESH TOPOLOGY</span><strong id="loadingStandby">PLEASE STAND BY</strong></div>
+  </section>
+</div>
+
+<div id="educationMount"></div>
+
+
+<div class="stageTutorial" id="stageTutorial" hidden aria-label="TRUSS LAB 튜토리얼 스테이지">
+  <div class="stageTutorialDim"></div>
+  <div class="tutorialCanvasMarker" id="tutorialCanvasMarker" hidden></div>
+  <section class="stageTutorialPanel tutorialWindow" id="stageTutorialPanel" role="dialog" aria-label="튜토리얼 안내 창">
+    <div class="tutorialWindowBar" id="tutorialWindowBar">
+      <div class="tutorialWindowIdentity">
+        <i class="tutorialWindowAppIcon" aria-hidden="true">△</i>
+        <div><b>TRUSS LAB · TUTORIAL</b><span id="tutorialWindowStepLabel">GUIDED TRAINING</span></div>
+      </div>
+      <div class="tutorialWindowControls">
+        <button type="button" class="tutorialWindowAuto active" id="tutorialWindowAuto" title="다리 작업을 시작하면 안내 창 자동 최소화">AUTO</button>
+        <button type="button" class="tutorialWindowControl" id="tutorialWindowMin" title="최소화" aria-label="튜토리얼 창 최소화">—</button>
+      </div>
+    </div>
+    <div class="tutorialWindowContent" id="tutorialWindowContent">
+      <div class="stageTutorialHead"><b>TUTORIAL STAGE</b><span id="stageTutorialStep">01 / 13</span></div>
+      <div class="stageTutorialBody">
+        <div class="tutorialMini" id="tutorialMini"></div>
+        <div class="stageTutorialCopy"><h3 id="stageTutorialTitle">입력을 기다리는 중</h3><p id="stageTutorialText"></p></div>
+      </div>
+      <div class="stageTutorialHint" id="stageTutorialHint"></div>
+      <div class="stageTutorialActions">
+        <div><div class="stageTutorialStatus" id="tutorialStatus"><i></i><span>입력을 기다리는 중</span></div><div class="tutorialAutoNote">다리 위에서 작업을 시작하면 창이 자동으로 최소화됩니다. 다음 단계가 되면 다시 열립니다.</div></div>
+        <button class="tutorialBtn skip" id="tutorialSkip">튜토리얼 건너뛰기</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><div class="brandMark"><span>△</span></div><div class="brandIdentity">TRUSS LAB<small>STRUCTURAL SIMULATION CONSOLE</small></div><div class="brandContext"><span id="topContextSet">세트 01 // 레벨 01</span><strong id="topContextTitle">트러스 기초</strong></div></div>
+    <div class="hud">
+      <div class="metric"><b id="stageName">STAGE 01</b><span>스테이지</span></div>
+      <div class="metric stageClockMetric paused" id="stageClockMetric"><b><i class="clockLed"></i><span id="stageTimerText">00:00.00</span></b><span>스테이지 시간</span></div>
+      <div class="metric"><b id="loadText">13 kN</b><span>차량 하중</span></div>
+      <div class="metric"><b id="budgetText" class="good">₩0 / ₩6,500</b><span>비용 / 기본 예산</span><i class="budgetRail" id="budgetRail"><i id="budgetRailFill"></i></i></div>
+    </div>
+    <div class="topActions">
+      <button class="iconBtn eduAccessBtn" id="eduTopBtn" hidden title="구조공학 학습">학습</button>
+      <button class="iconBtn scanBtn" id="scanBtn" title="중앙 하중 빠른 구조 스캔 (S)">스캔</button>
+      <div class="topToolsWrap" id="topToolsWrap">
+        <button class="iconBtn toolsMenuBtn" id="toolsMenuBtn" title="도구 메뉴" aria-expanded="false" aria-controls="topToolsMenu">도구 <span>⌄</span></button>
+        <div class="topToolsMenu" id="topToolsMenu" hidden>
+          <div class="topToolsHead"><b>UTILITY PANEL</b><span>VIEW · STUDY · SYSTEM</span></div>
+          <div class="topToolsGroup">
+            <span class="topToolsLabel">STUDY</span>
+            <button class="topMenuItem advancedOnly" id="libraryBtn" title="교량 도감"><i>▦</i><span><b>교량 도감</b><small>교량 도감</small></span></button>
+            <button class="topMenuItem advancedOnly" id="sandboxBtn" title="샌드박스"><i>∞</i><span><b>샌드박스</b><small>자유 구조 실험</small></span></button>
+            <button class="topMenuItem" id="helpBtn" title="도움말"><i>?</i><span><b>도움말 / 튜토리얼</b><small>조작법과 튜토리얼</small></span></button>
+          </div>
+          <div class="topToolsGroup advancedOnlyGroup">
+            <span class="topToolsLabel">ANALYSIS / VIEW</span>
+            <button class="topMenuItem" id="measureBtn" title="두 관절 거리 측정 (R)"><i>↔</i><span><b>거리 측정</b><small>관절 간 거리 측정</small></span></button>
+            <button class="topMenuItem" id="speedBtn" title="시험 속도"><i>1×</i><span><b>시험 속도</b><small>시험 재생 속도</small></span></button>
+            <button class="topMenuItem" id="fullBtn" title="전체 화면"><i>⛶</i><span><b>전체 화면</b><small>전체 화면 전환</small></span></button>
+            <button class="topMenuItem" id="sfxBtn" title="효과음 켜기/끄기"><i>♪</i><span><b>효과음</b><small>설치·시험 피드백 효과음</small></span><em class="stateChip on" id="sfxState">ON</em></button>
+          </div>
+          <div class="topToolsGroup">
+            <span class="topToolsLabel">INTERFACE</span>
+            <button class="topMenuItem" id="uiSettingsBtn" title="UI 표시 수준 설정"><i>UI</i><span><b>UI 모드 / 설정</b><small>Basic · Advanced 표시 수준</small></span><em class="stateChip on" id="uiModeMenuState">BASIC</em></button>
+            <button class="topMenuItem advancedOnly" id="inspectorModeBtn" title="Hover Inspector 정보 밀도 전환"><i>HI</i><span><b>마우스 검사 정보</b><small>Basic · Detail 검사 패널</small></span><em class="stateChip on" id="inspectorModeMenuState">BASIC</em></button>
+          </div>
+          <div class="topToolsGroup dangerGroup">
+            <span class="topToolsLabel">SYSTEM</span>
+            <button class="topMenuItem" id="gameMainMenuBtn" title="메인 메뉴"><i>⌂</i><span><b>메인 메뉴</b><small>진행도 / 레벨 선택으로 돌아가기</small></span></button>
+            <button class="topMenuItem danger" id="resetBtn" title="초기화"><i>↻</i><span><b>현재 설계 초기화</b><small>현재 설계 초기화</small></span></button>
+          </div>
+        </div>
+      </div>
+      <button class="iconBtn menuQuickBtn" id="mainMenuQuickBtn" title="메인 메뉴">메뉴</button><button class="primaryBtn" id="testBtn" title="구조 시험 [T]">▶ 시험</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="canvasWrap"><canvas id="game"></canvas></div><div class="modeBadge" id="modeBadge">목재 · 최대 길이 270</div><div class="hoverInspector" id="hoverInspector"></div><div class="measureTag" id="measureTag"></div>
+
+    <aside class="coach" id="coachPanel">
+      <div class="coachHead"><div class="aiDot" aria-hidden="true"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 18h18M3 18l6-12 6 12 6-12M9 6h12"/></svg></div><div class="coachHeading"><b>구조 분석</b><span>설계 상태와 개선 제안</span></div><button class="collapseBtn" id="coachCollapse" title="구조 분석 접기" aria-label="구조 분석 접기" aria-expanded="true" aria-controls="coachBody"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 6 6 6-6 6"/></svg></button></div>
+      <div class="coachBody" id="coachBody">처음에는 지점 외의 관절이 없습니다. 빈 공간이나 도로의 연결 위치를 클릭해 직접 관절을 만들고 구조를 구성하세요.<div class="coachTip">좌클릭: 관절 생성/연결 · 우클릭: 관절 삭제 · ▦ 버튼: 교량 구조 도감</div></div>
+    </aside>
+
+    <div class="viewControls" aria-label="화면 이동 및 확대 축소">
+      <div class="panPad">
+        <button class="viewBtn blank" tabindex="-1"></button><button class="viewBtn" id="panUp" title="위로 이동">↑</button><button class="viewBtn blank" tabindex="-1"></button>
+        <button class="viewBtn" id="panLeft" title="왼쪽으로 이동">←</button><button class="viewBtn resetViewBtn" id="resetView" title="화면 원위치">⌂</button><button class="viewBtn" id="panRight" title="오른쪽으로 이동">→</button>
+        <button class="viewBtn blank" tabindex="-1"></button><button class="viewBtn" id="panDown" title="아래로 이동">↓</button><button class="viewBtn blank" tabindex="-1"></button>
+      </div>
+      <div class="zoomStack"><button class="viewBtn zoomBtn" id="zoomIn" title="확대">＋</button><div class="zoomText" id="zoomText">100%</div><button class="viewBtn zoomBtn" id="zoomOut" title="축소">−</button></div>
+      <div class="viewExtraStack"><button class="viewBtn toggled" id="gridBtn" title="격자 표시 G">⌗</button><button class="viewBtn toggled" id="snapBtn" title="격자 스냅 M">⊕</button></div>
+    </div>
+
+    <div class="legend"><span><i class="sw t"></i>인장</span><span><i class="sw c"></i>압축</span><span class="utilScale"><span class="utilTxt">낮음</span><i class="utilBar"></i><span class="utilTxt">높은 이용률</span></span><span><i class="sw l"></i>하중</span><span><i class="sw r"></i>반력</span></div>
+    <div class="toast" id="toast">메시지</div><div class="stageFlash" id="stageFlash"><b>STAGE READY</b><span>STRUCTURAL WORKSPACE INITIALIZED</span></div>
+    <div class="testTelemetry" id="testTelemetry" hidden aria-live="polite">
+      <div class="telemetryHead"><b>LIVE TEST TELEMETRY</b><span class="telemetryMode" id="telemetryMode">정적 해석</span></div>
+      <div class="telemetryProgress"><i id="telemetryProgressFill"></i></div>
+      <div class="telemetryRow"><span>차량 진행률</span><b id="telemetryProgressText">0%</b></div>
+      <div class="telemetryRow"><span>최대 이용률</span><b id="telemetryStressText">0%</b><div class="telemetryMiniBar"><i id="telemetryStressBar"></i></div></div>
+      <div class="telemetryRow"><span>최대 변형</span><b id="telemetryDeflText">0.0</b><div class="telemetryMiniBar"><i id="telemetryDeflBar"></i></div></div>
+      <div class="telemetryRow"><span>바닥판 처짐</span><b id="telemetryDeckDeflText">0.0 u</b></div>
+      <div class="telemetryRow"><span>바닥판 곡률</span><b id="telemetryDeckCurvatureText">0.00°/100u</b></div>
+      <div class="telemetryRow"><span>사용성 한계</span><b id="telemetryServiceLimitText">—</b></div>
+      <div class="telemetryRow"><span>붕괴 한계</span><b id="telemetryCollapseLimitText">—</b></div>
+      <div class="telemetryRow"><span>파단 수</span><b id="telemetryBrokenText">0</b></div>
+      <div id="telemetryVesselGroup" hidden>
+        <div class="telemetryRow"><span>선박 통항 여유</span><b id="telemetryVesselClearanceText">—</b></div>
+        <div class="telemetryRow"><span>선박 진행률</span><b id="telemetryVesselProgressText">0%</b></div>
+        <div class="telemetryRow"><span>최소 통항 여유</span><b id="telemetryVesselMinText">—</b></div>
+      </div>
+      <div class="telemetryFoot"><span>차량 상태</span><strong id="telemetryContact">도로 접촉</strong></div>
+    </div>
+    <div class="testDangerFrame" id="testDangerFrame"></div>
+
+
+    <div class="modal" id="introModal">
+      <div class="card">
+        <h1>TRUSS LAB</h1>
+        <div class="sub">실생활의 트러스교·현수교·사장교·아치교가 하중을 전달하는 방식을 배우고, 직접 구조를 설계하는 2D 교량 공학 아케이드입니다. 모든 계산은 이 브라우저 안에서 실행됩니다.</div>
+        <div class="steps">
+          <div class="step"><b>1 · 설계</b><p>기본 도로는 없습니다. 일반 도로(최대 180) 또는 강화 도로(최대 220)로 바닥판을 직접 만든 뒤 목재·강철·케이블로 구조를 보강합니다.</p></div>
+          <div class="step"><b>2 · 시험</b><p>시험을 누르면 차량이 이동합니다. 부재는 인장·압축에 따라 색이 바뀌고 변형이 확대되어 표시됩니다.</p></div>
+          <div class="step"><b>3 · 개선</b><p>AI 구조 코치와 교량 도감에서 하중 경로, 인장·압축, 트러스교와 현수교의 차이를 비교하며 설계를 개선합니다.</p></div>
+        </div>
+        <div class="sub" style="margin-top:10px"><b style="color:#fff">새 편의 기능</b> · 연결 중에는 길이·추가 비용이 실시간 표시됩니다. 부재에 마우스를 올리면 재료와 응력 정보를 볼 수 있고, <b>G</b> 격자 · <b>M</b> 스냅 · <b>L</b> 하중/반력 · <b>F</b> 전체 화면을 사용할 수 있습니다.</div><div class="sub" style="margin-top:8px">※ 교육용 게임 모델입니다. 실제 교량 설계·안전 판정에는 사용할 수 없습니다.</div>
+        <div class="bigActions" style="margin-top:18px"><button class="iconBtn" id="replayStageTutorial" title="1단계 튜토리얼 다시 보기">훈련</button><button class="primaryBtn" id="startBtn">설계 시작 →</button></div>
+      </div>
+    </div>
+
+
+    <div class="modal" id="libraryModal"><div class="card">
+      <h1>교량 구조 도감</h1>
+      <div class="sub">다리는 같은 하중을 받아도 구조 형식에 따라 힘을 전달하는 길이 달라집니다. 아래 구조를 비교한 뒤 스테이지에서 직접 확인해 보세요.</div>
+      <div class="bridgeGrid">
+        <div class="bridgeCard"><h3>△ 트러스교</h3><div class="bridgeSketch"><svg viewBox="0 0 300 80"><path d="M15 61H285" stroke="#5a4b43" stroke-width="8"/><g stroke="#e7b35d" stroke-width="5" fill="none"><path d="M25 60L70 20L115 60L160 20L205 60L250 20L282 60"/><path d="M70 20H160M160 20H250"/></g></svg></div><p>삼각형 부재가 주로 <b>축력(인장·압축)</b>으로 하중을 나눕니다. 재료를 효율적으로 쓰기 좋아 철도교·도로교에서 널리 사용됩니다. 실제 예로 영국의 포스 브리지(Forth Bridge)는 거대한 캔틸레버 트러스 구조로 유명합니다.</p><span class="learnBadge">핵심: 삼각형 · 축력 · 하중 분산</span></div>
+        <div class="bridgeCard"><h3>⌒ 현수교</h3><div class="bridgeSketch"><svg viewBox="0 0 300 80"><path d="M15 62H285" stroke="#5a4b43" stroke-width="7"/><path d="M72 65V15M228 65V15" stroke="#cbd1da" stroke-width="8"/><path d="M10 30 Q72 8 150 42 Q228 8 290 30" stroke="#f3e28b" stroke-width="4" fill="none"/><g stroke="#f3e28b" stroke-width="2"><path d="M85 15V61M110 22V61M135 34V61M165 34V61M190 22V61M215 15V61"/></g></svg></div><p>주 케이블이 <b>인장</b>으로 하중을 받고, 행어가 바닥판 하중을 케이블에 전달합니다. 주탑은 큰 <b>압축</b>을 받으며 매우 긴 경간에 유리합니다. 골든게이트교와 아카시 해협 대교가 대표적인 현수교입니다.</p><span class="learnBadge">핵심: 케이블 인장 · 주탑 압축</span></div>
+        <div class="bridgeCard"><h3>╱ 사장교</h3><div class="bridgeSketch"><svg viewBox="0 0 300 80"><path d="M15 62H285" stroke="#5a4b43" stroke-width="7"/><path d="M150 68V9" stroke="#cbd1da" stroke-width="8"/><g stroke="#f3e28b" stroke-width="3"><path d="M150 15L45 61M150 18L80 61M150 23L115 61M150 15L255 61M150 18L220 61M150 23L185 61"/></g></svg></div><p>주탑에서 도로로 뻗은 케이블이 하중을 직접 지지합니다. 현수교보다 하중 경로가 짧고, 중·장경간 교량에서 자주 쓰입니다. 프랑스의 미요 대교(Millau Viaduct)가 대표적인 사장교입니다.</p><span class="learnBadge">핵심: 직접 케이블 지지</span></div>
+        <div class="bridgeCard"><h3>∩ 아치교</h3><div class="bridgeSketch"><svg viewBox="0 0 300 80"><path d="M15 25H285" stroke="#5a4b43" stroke-width="7"/><path d="M35 62 Q150 -2 265 62" stroke="#e7b35d" stroke-width="8" fill="none"/></svg></div><p>아치가 주로 <b>압축</b>으로 하중을 양쪽 지점에 전달합니다. 지점에는 바깥쪽으로 미는 수평 추력이 생기므로 단단한 기초가 중요합니다. 시드니 하버 브리지는 거대한 강철 아치교의 대표 사례입니다.</p><span class="learnBadge">핵심: 압축 · 수평 추력</span></div>
+      </div>
+      <div class="eduSection"><h2>왜 트러스는 하중을 잘 버틸까?</h2><p>삼각형은 세 변의 길이가 정해지면 모양이 쉽게 찌그러지지 않습니다. 핀 접합으로 단순화한 트러스에서는 외력이 주로 각 부재의 길이 방향으로 전달되어, 부재가 <b>인장</b> 또는 <b>압축</b>을 담당합니다. 그래서 같은 양의 재료를 단순한 보처럼 쓰는 것보다 힘의 경로를 명확하게 만들 수 있습니다.</p><div class="conceptBox"><div><b>① 삼각형의 기하학적 안정성</b><br>사각형은 대각선이 없으면 평행사변형처럼 변형될 수 있지만, 삼각형은 형태를 유지하기 쉽습니다.</div><div><b>② 축력 중심의 하중 전달</b><br>잘 배치된 트러스 부재는 굽힘보다 인장·압축 축력으로 하중을 전달해 재료를 효율적으로 사용합니다.</div><div><b>③ 여러 하중 경로</b><br>연속된 삼각형은 차량 하중을 여러 부재와 지점으로 나누어 특정 한 곳에 힘이 몰리는 것을 줄입니다.</div></div></div>
+      <div class="eduSection"><h2>구조 선택은 언제 달라질까?</h2><ul><li><b>트러스교:</b> 비교적 짧거나 중간 경간, 강성이 필요하고 부재 조립이 유리할 때.</li><li><b>현수교:</b> 매우 긴 경간에서 케이블 인장을 활용할 때. 앵커리지와 주탑이 중요합니다.</li><li><b>사장교:</b> 중·장경간에서 주탑과 케이블이 바닥판을 직접 지지하도록 할 때.</li><li><b>아치교:</b> 압축을 잘 전달할 수 있고 양쪽 지반이 수평 추력을 받아줄 수 있을 때.</li></ul></div>
+      <div class="sub">※ 이 게임의 구조해석은 2D 핀 접합 트러스 모델을 중심으로 단순화되어 있습니다. 실제 현수교·아치교의 상세 거동과 설계는 훨씬 복잡합니다.</div>
+      <div class="bigActions" style="margin-top:16px"><button class="primaryBtn" id="closeLibrary">게임으로 돌아가기</button></div>
+    </div></div>
+
+
+    <div class="modal" id="sandboxModal" role="dialog" aria-modal="true" aria-labelledby="sandboxTitle"><div class="card sandboxLab">
+      <header class="sandboxLabHead"><div><div class="sandboxEyebrow">SANDBOX / STRUCTURAL WORKBENCH</div><h1 id="sandboxTitle">구조 실험실</h1><p>설계는 자유롭게, 비교는 정확하게. 같은 구조에서 조건을 바꿔 실험하세요.</p></div><button class="sandboxClose" id="closeSandbox" aria-label="샌드박스 설정 닫기">×</button></header>
+      <div class="sandboxWorkspace">
+        <div class="sandboxForm">
+          <section class="sandboxSection"><div class="sandboxSectionHeading"><span>01 / GEOMETRY</span><h2>부지와 시작 구조</h2></div>
+            <label class="sandboxField">시작 지형<select id="sandboxSite"></select></label><p class="sandboxHint" id="sandboxSiteState">캠페인의 지형만 가져옵니다. 설계는 직접 구성합니다.</p>
+            <div class="sandboxDimensions" id="sandboxDimensions"><label class="sandboxField">경간 <output id="sandboxSpanOut">930 GU</output><input id="sandboxSpan" type="range" min="450" max="1050" step="10" value="930"></label><label class="sandboxField">트러스 높이 <output id="sandboxHeightOut">135 GU</output><input id="sandboxHeight" type="range" min="80" max="240" step="5" value="135"></label></div>
+            <div class="sandboxPresets" aria-label="시작 구조"><button class="presetBtn" data-preset="current"><b>현재 설계 유지</b><small>조건만 변경</small></button><button class="presetBtn" data-preset="blank"><b>빈 실험장</b><small>직접 설계</small></button><button class="presetBtn" data-preset="warren"><b>워런 트러스</b><small>연속 삼각형</small></button><button class="presetBtn" data-preset="pratt"><b>프랫 트러스</b><small>수직재·대각재</small></button><button class="presetBtn" data-preset="cable"><b>사장교</b><small>주탑·케이블</small></button></div>
+            <label class="sandboxField sandboxMaterialField">예시 구조의 골격 재료<select id="sandboxMaterial"><option value="steel">강철</option><option value="wood">목재</option></select></label><p class="sandboxHint" id="presetStatus">예시 구조는 시작점입니다. 자유롭게 수정할 수 있습니다.</p>
+          </section>
+          <section class="sandboxSection"><div class="sandboxSectionHeading"><span>02 / TEST CONDITIONS</span><h2>하중과 차량</h2></div>
+            <div class="sandboxTestGrid"><label class="sandboxField">차량 하중 <output id="sandboxLoadLabel">18 kN</output><input id="sandboxLoad" type="range" min="6" max="100" value="18" step="1"></label><label class="sandboxField">횡풍 하중 <output id="sandboxWindLabel">0 kN</output><input id="sandboxWind" type="range" min="-50" max="50" value="0" step="1"></label><label class="sandboxField">차량 속도 <output id="sandboxSpeedOut">82 GU/s</output><input id="sandboxSpeed" type="range" min="20" max="160" value="82" step="2"></label><div class="sandboxField"><span>차종</span><div class="sandboxVehicleChoices"><button class="vehicleModelBtn" data-vehicle="CAR">승용차</button><button class="vehicleModelBtn" data-vehicle="BUS">버스</button><button class="vehicleModelBtn" data-vehicle="TRUCK">화물차</button></div></div></div>
+            <div class="sandboxSwatches" aria-label="차량 색상"><span>차량 색상</span><button class="vehicleSkinBtn" data-skin="#53aee6" style="--swatch:#53aee6" aria-label="파란색"></button><button class="vehicleSkinBtn" data-skin="#d85761" style="--swatch:#d85761" aria-label="빨간색"></button><button class="vehicleSkinBtn" data-skin="#4ba45a" style="--swatch:#4ba45a" aria-label="초록색"></button><button class="vehicleSkinBtn" data-skin="#e3b83f" style="--swatch:#e3b83f" aria-label="노란색"></button></div>
+            <p class="sandboxHint">바람은 음수일 때 왼쪽, 양수일 때 오른쪽으로 작용합니다. GU는 게임 내 길이 단위입니다.</p>
+            <div class="sandboxFailureRow"><div><b>부재 파단</b><p>켜면 과부하 파단과 대체 하중 경로를 관찰합니다.</p></div><div class="sandboxFailureToggle" role="group" aria-label="부재 파단"><button class="sandboxFailureBtn" data-failure="on">켜기</button><button class="sandboxFailureBtn" data-failure="off">끄기</button></div></div><p class="sandboxHint" id="sandboxFailureState"></p>
+          </section>
+        </div>
+        <aside class="sandboxAside"><section class="sandboxPreviewPanel"><div class="sandboxEyebrow">EXPERIMENT PREVIEW</div><div id="sandboxPreview" aria-hidden="true"></div><h2 id="sandboxSummaryTitle">빈 실험장</h2><p id="sandboxSummary"></p><p class="sandboxHint">예시 구조의 안정성과 허용력은 선택한 지형·높이·재료에 따라 달라집니다.</p></section>
+          <section class="sandboxArchive"><div class="sandboxSectionHeading"><span>03 / DESIGN ARCHIVE</span><h2>설계 보관함</h2></div><p class="sandboxHint">구조와 실험 조건을 함께 저장합니다. 이 브라우저에서 다시 불러올 수 있습니다.</p><label class="sandboxField">보관함<select id="sandboxSlot"><option value="0">보관함 1 · 비어 있음</option><option value="1">보관함 2 · 비어 있음</option><option value="2">보관함 3 · 비어 있음</option></select></label><label class="sandboxField">설계 이름<input id="sandboxSaveName" maxlength="40" placeholder="예: 강철 트러스 / 강풍 실험"></label><div class="sandboxArchiveActions"><button id="sandboxSave" class="sandboxButton">현재 설계 저장</button><button id="sandboxRestore" class="sandboxButton">불러오기</button></div><p class="sandboxHint" id="sandboxArchiveStatus" role="status"></p></section>
+        </aside>
+      </div>
+      <footer class="sandboxLabFooter"><p id="sandboxApplyHint">새 실험은 현재 작업 공간을 새 구조로 바꿉니다.</p><button id="enterSandbox" class="sandboxStart">새 실험 시작 <span aria-hidden="true">→</span></button></footer>
+    </div></div>
+    <div class="modal" id="uiSettingsModal"><div class="card" style="width:min(690px,calc(100% - 30px))">
+      <h1>인터페이스 설정</h1>
+      <div class="sub">기능을 삭제하지 않고 화면에 노출되는 정보의 깊이만 조절합니다. 기본 모드는 핵심 설계 흐름에 집중하고, 고급 모드는 구조해석 도구와 실시간 계측을 모두 엽니다.</div>
+      <div class="uiModeChoiceGrid" role="group" aria-label="UI mode">
+        <button class="uiModeChoice active" data-ui-mode="basic"><b>기본 모드</b><span>재료 · 도로 · 시험 · 초기화 · 하중 경로 중심<br>설계 목표와 핵심 상태만 표시<br>초기 학습 및 빠른 설계에 적합</span></button>
+        <button class="uiModeChoice" data-ui-mode="advanced"><b>고급 모드</b><span>스캔 · 거리 측정 · 응력 · 반력<br>실시간 계측 · 해석 데이터 · 구조적 여유도<br>전체 분석 도구와 엔지니어링 콘솔 표시</span></button>
+      </div>
+      <div class="inspectorSettingLabel">마우스 검사 정보 수준</div>
+      <div class="inspectorModeChoiceGrid" role="group" aria-label="Hover Inspector detail mode">
+        <button class="inspectorModeChoice active" data-inspector-mode="basic"><b>기본</b><span>식별 정보와 핵심 상태만 표시<br>빠른 설계 검토에 적합</span></button>
+        <button class="inspectorModeChoice" data-inspector-mode="detail"><b>상세</b><span>변위 · 반력 · 허용력 · 이용률<br>좌굴 · 연결 하중까지 표시</span></button>
+      </div>
+      <div class="uiModeStatus"><i></i><div><strong id="uiSettingsState">기본 모드 사용 중</strong><br><span id="uiSettingsDesc">핵심 건설 도구와 하중 경로만 표시됩니다.</span></div></div>
+      <div class="uiModeExplain">튜토리얼은 항상 기본 모드로 실행됩니다. 튜토리얼이 끝난 뒤 하단 UI 버튼 또는 도구 → UI 모드 / 설정에서 언제든 고급 모드로 전환할 수 있습니다.</div>
+      <div class="bigActions" style="margin-top:16px"><button class="primaryBtn" id="closeUISettings">설정 완료</button></div>
+    </div></div>
+    <div class="modal" id="resultModal"><div class="card" id="resultCard"></div></div>
+  </main>
+
+  <footer class="bottom">
+    <div class="tools">
+      <button class="toolBtn" data-tool="wood" title="목재 도구 [1]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 20-2-2L18 3l3 3Z M7 15l2 2M12 10l2 2M17 5l2 2"/></svg></span><span class="toolLabel">목재</span><kbd>1</kbd></button>
+      <button class="toolBtn" data-tool="steel" title="강철 도구 [2]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 18 2 2L20 6l-2-2ZM3 17l4 4M17 3l4 4M7 15l2 2M15 7l2 2"/></svg></span><span class="toolLabel">강철</span><kbd>2</kbd></button>
+      <button class="toolBtn" data-tool="cable" title="케이블 도구 [3]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7c6 12 12 12 18 0M3 5v6M21 5v6M8 13v5M16 13v5"/></svg></span><span class="toolLabel">케이블</span><kbd>3</kbd></button>
+      <button class="toolBtn active" data-tool="road" title="일반 도로 [4]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h16v16H4zM12 5v3M12 11v2M12 16v3"/></svg></span><span class="toolLabel">일반 도로</span><kbd>4</kbd></button>
+      <button class="toolBtn" data-tool="roadHeavy" title="강화 도로 [5]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 4h12v16H6zM3 4v16M21 4v16M12 5v3M12 11v2M12 16v3"/></svg></span><span class="toolLabel">강화 도로</span><kbd>5</kbd></button>
+      <button class="toolBtn" data-tool="move" title="관절 이동 [6]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg></span><span class="toolLabel">이동</span><kbd>6</kbd></button>
+      <button class="toolBtn" data-tool="delete" title="삭제 도구 [7]"><span class="toolIcon"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg></span><span class="toolLabel">삭제</span><kbd>7</kbd></button>
+    </div>
+    <div class="stageStrip"><button class="stageBtn active" data-stage="0">1</button><button class="stageBtn" data-stage="1">2</button><button class="stageBtn" data-stage="2">3</button><button class="stageBtn" data-stage="3">4</button></div>
+    <div class="rightTools"><span class="hint">좌클릭: 연속 설치 · 우클릭: 종료 · 1–7: 도구 · T: 시험 · S: 스캔 · 휠: 확대/축소</span><button class="iconBtn" id="undoBtn" title="실행 취소 Ctrl+Z"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12" transform="translate(0 -2)"/></svg></button><button class="iconBtn" id="redoBtn" title="다시 실행 Ctrl+Y"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 5 5 5-5 5M20 10h-10a6 6 0 0 0 0 12" transform="translate(0 -2)"/></svg></button><button class="iconBtn" id="stressBtn" title="응력 보기"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></button><button class="iconBtn" id="quickResetBtn" title="현재 설계 초기화"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg></button><button class="iconBtn" id="loadPathBtn" title="하중 경로 보기 L"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3v18M5 18l3 3 3-3M16 21V3M13 6l3-3 3 3"/></svg></button><button class="localAiTab" id="localAiTab" type="button" aria-expanded="false" aria-controls="localAiPanel" title="로컬 AI 챗 열기">
+    <svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-8l-6 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 9h8M8 13h5"/></svg><span>AI 도움</span><em class="localAiTabLed" aria-hidden="true"></em>
+  </button><button class="iconBtn uiModeQuickBtn basic" id="uiModeQuickBtn" type="button" role="switch" aria-checked="false" aria-label="고급 UI 사용" title="현재 기본 모드 · 클릭하여 고급 모드 열기"><span class="uiModeLabel uiModeBasic" aria-hidden="true">기본</span><span class="uiModeTrack" aria-hidden="true"><span class="uiModeThumb"></span></span><span class="uiModeLabel uiModeAdvanced" aria-hidden="true">고급</span></button></div>
+  </footer>
+</div>
+
+<!-- Local AI Bridge Chat: model runs in the browser after first download. -->
+<div class="localAiDock" id="localAiDock" aria-label="로컬 AI 교량 챗">
+
+  <section class="localAiPanel" id="localAiPanel" aria-live="polite" aria-hidden="true" inert>
+    <div class="localAiHead">
+      <div class="localAiMark">AI</div>
+      <div class="localAiTitle"><b>SMART BRIDGE AI</b><span>LOCAL WEBGPU · ONLINE WORKERS AI</span></div>
+      <button class="localAiHeadBtn" id="localAiClearBtn" type="button" title="대화 지우기"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg></button>
+      <button class="localAiHeadBtn" id="localAiCloseBtn" type="button" title="닫기"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="localAiSetup">
+      <div class="localAiModeRow">
+        <span class="localAiModeLabel">AI ENGINE</span>
+        <select class="localAiSelect" id="localAiModeSelect" aria-label="AI 실행 방식 선택">
+          <option value="local">로컬 AI · 내 GPU에서 실행</option>
+          <option value="online">온라인 AI · Cloudflare Worker</option>
+        </select>
+      </div>
+      <div class="localAiProviderPane" id="localAiLocalControls">
+        <div class="localAiSetupRow">
+          <select class="localAiSelect" id="localAiModelSelect" aria-label="로컬 AI 모델 선택">
+            <option value="Phi-4-mini-instruct-q4f16_1-MLC">Phi-4 Mini · 권장 · VRAM≈3.4GB</option>
+            <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B · 저사양 · VRAM≈2.3GB</option>
+            <option value="Llama-3.1-8B-Instruct-q4f16_1-MLC">Llama 3.1 8B · 고성능 · VRAM≈5.0GB</option>
+          </select>
+          <button class="localAiAction" id="localAiDownloadBtn" type="button">AI 다운로드</button>
+        </div>
+        <div class="localAiProgress" aria-hidden="true"><i id="localAiProgressFill"></i></div>
+      </div>
+      <div class="localAiProviderPane" id="localAiOnlineControls" hidden>
+        <div class="localAiSetupRow">
+          <input class="localAiEndpoint" id="localAiEndpointInput" type="url" spellcheck="false" placeholder="https://truss-lab-ai.YOURNAME.workers.dev">
+          <button class="localAiAction" id="localAiOnlineCheckBtn" type="button">연결 확인</button>
+        </div>
+        <div class="localAiOnlineHint"><strong>GEMMA 4 26B</strong> · API 키는 HTML에 넣지 않고 Worker의 AI binding을 사용합니다.</div>
+      </div>
+      <div class="localAiStatus"><span id="localAiStatusText">Phi-4 Mini를 권장합니다. 처음 한 번 다운로드하면 브라우저에 캐시됩니다.</span><b id="localAiDeviceText">WEBGPU CHECK…</b></div>
+    </div>
+    <div class="localAiMessages" id="localAiMessages" aria-label="AI 대화 내용">
+      <div class="localAiMsg system"><span class="who">LOCAL AI // READY TO INSTALL</span>로컬은 Phi-4 Mini를 권장합니다. 온라인 모드에서는 Cloudflare Worker를 통해 Gemma 4 26B를 사용할 수 있습니다. 두 방식 모두 현재 게임의 구조 해석 데이터를 질문마다 함께 참고합니다.</div>
+    </div>
+    <div class="localAiQuick" aria-label="빠른 질문">
+      <button type="button" data-local-ai-prompt="현재 내 교량 설계를 진단해 줘. 가장 먼저 고칠 점 3가지만 알려줘.">현재 설계 진단</button>
+      <button type="button" data-local-ai-prompt="이 스테이지에서 삼각형 트러스가 왜 중요한지 지금 설계와 연결해서 설명해 줘.">삼각형 설명</button>
+      <button type="button" data-local-ai-prompt="압축을 받는 긴 부재가 왜 위험할 수 있는지, 이 게임에서 어떻게 개선하면 되는지 알려줘.">압축재 개선</button>
+    </div>
+    <div>
+      <div class="localAiComposer">
+        <textarea class="localAiInput" id="localAiInput" rows="3" placeholder="교량 구조, 현재 설계, 인장·압축, 처짐 등에 대해 질문하세요. (Enter 전송 · Shift+Enter 줄바꿈)"></textarea>
+        <button class="localAiSend" id="localAiSendBtn" type="button">전송</button>
+      </div>
+      <div class="localAiFoot">교육용 AI입니다. 실제 교량의 설계·시공·안전 판정에는 사용할 수 없습니다. 로컬 모드는 기기에서, 온라인 모드는 설정한 Cloudflare Worker에서 추론합니다.</div>
+    </div>
+  </section>
+</div>
+
+<script src="education.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
