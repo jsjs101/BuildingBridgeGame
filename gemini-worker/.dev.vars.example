@@ -1,0 +1,2 @@
+# 로컬 테스트 전 이 파일을 .dev.vars로 복사하고 실제 키를 입력하세요.
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY

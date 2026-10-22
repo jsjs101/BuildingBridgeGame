@@ -1,0 +1,13 @@
+{
+  "name": "truss-lab-gemini-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "deploy": "wrangler deploy",
+    "check": "wrangler deploy --dry-run",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=22" },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}

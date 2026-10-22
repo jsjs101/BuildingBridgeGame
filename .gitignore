@@ -1,0 +1,7 @@
+gemini-worker/node_modules/
+gemini-worker/.wrangler/
+gemini-worker/.dev.vars
+gemini-worker/.dev.vars.*
+!gemini-worker/.dev.vars.example
+gemini-worker/.env
+gemini-worker/.env.*
