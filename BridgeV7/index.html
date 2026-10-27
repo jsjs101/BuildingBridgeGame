@@ -577,6 +577,7 @@
     </div>
     <div class="localAiSetup">
       <div class="localAiModeRow"><span class="localAiModeLabel">AI ENGINE</span><strong class="localAiProviderName">GEMINI</strong></div>
+      <div class="localAiExplanation"><label for="localAiExplanationLevel">설명 수준</label><select id="localAiExplanationLevel"><option value="easy">쉬움 · 쉬운 말로 짧게</option><option value="balanced">보통 · 원리와 근거</option><option value="technical">전문 · 구조 해석과 수치</option></select></div>
       <div class="localAiProviderPane" id="localAiOnlineControls">
         <div class="localAiSetupRow">
           <input class="localAiEndpoint" id="localAiEndpointInput" type="url" spellcheck="false" placeholder="https://truss-lab-ai.YOURNAME.workers.dev">
@@ -587,7 +588,7 @@
       <div class="localAiStatus"><span id="localAiStatusText">설정된 서버로 Gemini를 사용할 수 있습니다.</span><b id="localAiDeviceText">ONLINE · GEMINI</b></div>
     </div>
     <div class="localAiMessages" id="localAiMessages" aria-label="AI 대화 내용">
-      <div class="localAiMsg system"><span class="who">BRIDGE AI // READY</span>Gemini 구조 코치입니다. 질문을 보낼 때마다 현재 교량의 구조 해석 데이터를 함께 참고합니다.</div>
+      <div class="localAiMsg system"><span class="who">BRIDGE AI // READY</span>Gemini 구조 코치입니다. 현재 연결점의 위치와 막대·도로의 연결 관계, 사용 가능한 해석 결과를 함께 읽습니다. 설명 수준을 바꿔 원하는 깊이로 질문해 보세요.</div>
     </div>
     <div class="localAiQuick" aria-label="빠른 질문">
       <button type="button" data-local-ai-prompt="현재 내 교량 설계를 진단해 줘. 가장 먼저 고칠 점 3가지만 알려줘.">현재 설계 진단</button>
@@ -599,13 +600,14 @@
         <textarea class="localAiInput" id="localAiInput" rows="3" maxlength="2000" placeholder="교량 구조, 현재 설계, 인장·압축, 처짐 등에 대해 질문하세요. (Enter 전송 · Shift+Enter 줄바꿈)"></textarea>
         <button class="localAiSend" id="localAiSendBtn" type="button">전송</button>
       </div>
-      <div class="localAiFoot">교육용 AI입니다. 실제 교량의 설계·시공·안전 판정에는 사용할 수 없습니다. 질문·최근 대화·현재 교량 상태를 설정한 서버를 통해 Google Gemini에 전송합니다.</div>
+      <div class="localAiFoot">교육용 AI입니다. 실제 교량 안전 판정에는 사용할 수 없습니다. 질문·최근 대화·관절 좌표·부재 연결·재료·해석 결과를 서버를 통해 Google Gemini에 전송합니다. 해석이 없는 경우 강도는 판단하지 않습니다.</div>
     </div>
   </section>
 </div>
 
 <script src="education.js"></script>
 <script src="environment.js"></script>
+<script src="vendor/markdown-it/markdown-it.umd.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

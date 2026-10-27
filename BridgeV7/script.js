@@ -5394,9 +5394,9 @@ window.TRUSSLAB_DEV.config={export:()=>devGuard(devExportConfig,'EXPORT DEV CONF
 const localAiUI={
   dock:$('#localAiDock'),panel:$('#localAiPanel'),tab:$('#localAiTab'),close:$('#localAiCloseBtn'),clear:$('#localAiClearBtn'),
   endpoint:$('#localAiEndpointInput'),onlineCheck:$('#localAiOnlineCheckBtn'),status:$('#localAiStatusText'),
-  device:$('#localAiDeviceText'),messages:$('#localAiMessages'),input:$('#localAiInput'),send:$('#localAiSendBtn')
+  level:$('#localAiExplanationLevel'),device:$('#localAiDeviceText'),messages:$('#localAiMessages'),input:$('#localAiInput'),send:$('#localAiSendBtn')
 };
-let localAiBusy=false,localAiHistory=[];
+let localAiBusy=false,localAiHistory=[],localAiMarkdown=null;
 
 function localAiSetOpen(open){
   localAiUI.dock?.classList.toggle('open',!!open);
@@ -5420,72 +5420,117 @@ function localAiSetStatus(text,tone=''){
 function localAiSetBusy(busy){
   localAiBusy=!!busy;
   if(localAiUI.send)localAiUI.send.disabled=localAiBusy;
-  localAiUI.clear.disabled=localAiBusy;localAiUI.endpoint.disabled=localAiBusy;localAiUI.onlineCheck.disabled=localAiBusy;
+  localAiUI.clear.disabled=localAiBusy;localAiUI.level.disabled=localAiBusy;localAiUI.endpoint.disabled=localAiBusy;localAiUI.onlineCheck.disabled=localAiBusy;
 }
-function localAiEsc(text){return String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function localAiAddMessage(role,text){
   if(!localAiUI.messages)return null;
   const box=document.createElement('div');box.className=`localAiMsg ${role}`;
   const who=role==='user'?'YOU':role==='assistant'?'GEMINI':'SYSTEM';
-  box.innerHTML=`<span class="who">${who}</span><span class="localAiMsgText">${localAiEsc(text)}</span>`;
-  localAiUI.messages.appendChild(box);localAiUI.messages.scrollTop=localAiUI.messages.scrollHeight;return box.querySelector('.localAiMsgText');
+  const label=document.createElement('span');label.className='who';label.textContent=who;
+  const content=document.createElement('div');content.className='localAiMsgText';content.textContent=text;
+  box.append(label,content);
+  localAiUI.messages.appendChild(box);localAiUI.messages.scrollTop=localAiUI.messages.scrollHeight;return content;
+}
+function localAiRenderAnswer(target,text){
+  if(!localAiMarkdown){
+    if(typeof window.markdownit!=='function')throw new Error('마크다운 표시 파일을 불러오지 못했습니다. 게임 파일과 vendor 폴더를 함께 게시해 주세요.');
+    localAiMarkdown=window.markdownit({html:false,breaks:true,linkify:false});
+    localAiMarkdown.validateLink=href=>{try{return ['https:','http:'].includes(new URL(href,location.href).protocol)}catch{return false}};
+    localAiMarkdown.renderer.rules.image=(tokens,index)=>localAiMarkdown.utils.escapeHtml(tokens[index].content);
+    localAiMarkdown.renderer.rules.link_open=(tokens,index,options,env,renderer)=>{
+      tokens[index].attrSet('target','_blank');tokens[index].attrSet('rel','noopener noreferrer');
+      return renderer.renderToken(tokens,index,options);
+    };
+  }
+  target.classList.add('markdownBody');target.innerHTML=localAiMarkdown.render(text);
+  localAiUI.messages.scrollTop=localAiUI.messages.scrollHeight;
+}
+function localAiReadableAnswer(text,context){
+  const names=new Map();
+  for(const [columns,rows] of [[context.geometry.nodeColumns,context.geometry.nodes],[context.geometry.memberColumns,context.geometry.members]]){
+    const nameIndex=columns.indexOf('name');
+    for(const row of rows)if(typeof row[0]==='string'&&row[0].length>1&&!/^\d+$/.test(row[0]))names.set(row[0],row[nameIndex]);
+  }
+  if(!names.size)return text;
+  const ids=[...names.keys()].sort((a,b)=>b.length-a.length).map(id=>id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  return text.replace(new RegExp(`(?<![A-Za-z0-9_])(?:${ids.join('|')})(?![A-Za-z0-9_])`,'g'),id=>names.get(id));
 }
 function localAiResetChat(){
   localAiHistory=[];
   if(localAiUI.messages)localAiUI.messages.innerHTML='<div class="localAiMsg system"><span class="who">GEMINI // CHAT RESET</span>새 대화를 시작합니다. 현재 게임 상태는 질문을 보낼 때마다 다시 읽습니다.</div>';
 }
-function localAiMaterialSummary(){
-  const counts={wood:0,steel:0,cable:0,road:0,roadHeavy:0};
-  for(const m of members||[])if(m?.user&&m.mat in counts)counts[m.mat]++;
-  return `목재 ${counts.wood}, 강철 ${counts.steel}, 케이블 ${counts.cable}, 일반도로 ${counts.road}, 강화도로 ${counts.roadHeavy}`;
-}
-function localAiCriticalMembers(a,limit=5){
-  if(!a?.ok||!a.forces?.get)return [];
-  return (members||[]).filter(m=>m?.user&&a.forces.has(m.id)).map(m=>{
-    const info=a.forces.get(m.id)||{},aa=nodeById(m.a),bb=nodeById(m.b);
-    return {id:m.id,mat:m.mat,ratio:Number(info.ratio)||0,force:Number(info.force)||0,capacity:Number(info.capacity)||0,
-      governing:info.governing||'—',length:Number(info.length)||Math.hypot((aa?.x||0)-(bb?.x||0),(aa?.y||0)-(bb?.y||0)),moment:info.moment,momentCapacity:info.momentCapacity,shear:info.shear,shearCapacity:info.shearCapacity};
-  }).sort((x,y)=>y.ratio-x.ratio).slice(0,limit);
-}
 function localAiBridgeContext(){
-  const a=lastFullAnalysis?.ok?lastFullAnalysis:(sim?.last?.ok?sim.last:(currentAnalysis?.ok?currentAnalysis:null));
-  const mode=sim?.mode?String(sim.mode).toUpperCase():'BUILD';
-  const budget=Number(stage?.budget)||0,cost=Number(totalCost)||0;
-  const critical=localAiCriticalMembers(a,5);
-  const supportRows=a?.reactions instanceof Map?[...a.reactions.entries()].map(([id,r])=>`#${id}: Rx=${(Number(r.rx)||0).toFixed(0)}, Ry=${(Number(r.ry)||0).toFixed(0)}`).join(' / '):'데이터 없음';
-  const lines=[
-    '[TRUSS LAB CURRENT STATE]',
-    `screen=${String(currentGameScreen||'game')}`,
-    `stage_name=${stage?.name||'—'}`,
-    `stage_title=${stage?.title||'—'}`,
-    `stage_type=${stage?.type||'—'}`,
-    `goal=${stage?.goal||'—'}`,
-    `vehicle_load=${stage?.load?`${(stage.load/1000).toFixed(2)} kN`:'—'}`,
-    `cost=${Math.round(cost)} / budget=${Math.round(budget)} / budget_used=${budget?Math.round(cost/budget*100):0}%`,
-    `nodes=${nodes?.length||0} / members=${members?.length||0} / triangles=${triangleCount()}`,
-    `materials=${localAiMaterialSummary()}`,
-    `test_mode=${mode}`
-  ];
-  if(a?.ok){
-    lines.push('analysis_status=stable');
-    lines.push(`max_utilization=${((a.maxRatio||0)*100).toFixed(1)}%`);
-    lines.push(`max_deflection=${(a.maxDefl||0).toFixed(2)} u`);
-    lines.push(`deck_deflection=${(a.deckDeflection||0).toFixed(2)} u`);
-    lines.push(`deck_curvature=${(a.deckCurvature||0).toFixed(3)} deg/100u`);
-    lines.push(`load_x=${Number(a.loadX||0).toFixed(1)} u`);
-    lines.push(`support_reactions=${supportRows}`);
-    if(critical.length){
-      lines.push('[TOP CRITICAL MEMBERS]');
-      critical.forEach((m,i)=>lines.push(`${i+1}. member #${m.id} / ${MAT[m.mat]?.name||m.mat} / ${m.force<0?'COMPRESSION':'TENSION'} / utilization=${(m.ratio*100).toFixed(1)}% / force=${Math.abs(m.force).toFixed(0)} / capacity=${m.capacity.toFixed(0)} / length=${m.length.toFixed(1)} / governing=${m.governing}${Number.isFinite(m.moment)?` / bending_moment=${m.moment.toFixed(0)} N*u / moment_capacity=${m.momentCapacity.toFixed(0)} N*u / shear=${m.shear.toFixed(0)} N / shear_capacity=${m.shearCapacity.toFixed(0)} N`:''}`));
-    }
-  }else if(currentAnalysis&&!currentAnalysis.ok){
-    lines.push('analysis_status=unstable_or_failed');
-  }else{
-    lines.push('analysis_status=no_analysis_data');
+  const physics=sim?.mode==='collapse'?sim.physics:null;
+  // Build edits clear currentAnalysis; do not reuse an older test on a changed design.
+  const analysis=physics?null:(sim?.mode==='static'?sim.last:(currentAnalysis?.ok?lastFullAnalysis:null));
+  const a=analysis?.ok&&analysis.forces instanceof Map?analysis:null;
+  const broken=sim?.broken||lastBroken;
+  const excluded=new Set([...broken,...DEV_STATE.disabledMembers]);
+  const number=value=>Number.isFinite(value)?Math.round(value*1000)/1000:null;
+  const activeMembers=members.filter(member=>!excluded.has(member.id));
+  const linked=new Set(activeMembers.flatMap(member=>[member.a,member.b]));
+  const roadReachable=roadReachableNodeIds(excluded);
+  const span=stage.deck.at(-1)[0]-stage.deck[0][0];
+  const position=x=>['왼쪽 지지대 근처','왼쪽 구간','가운데 구간','오른쪽 구간','오른쪽 지지대 근처'][clamp(Math.floor((x-stage.deck[0][0])/Math.max(1,span)*5),0,4)];
+  const memberNames=new Map(members.map(member=>{
+    const a=nodeById(member.a),b=nodeById(member.b),dx=Math.abs(b.x-a.x),dy=Math.abs(b.y-a.y);
+    const direction=dy<dx*.15?'가로':dx<dy*.15?'세로':'대각선';
+    const location=dx>span*.75?'양쪽 지지대 사이':position((a.x+b.x)/2);
+    const description=member.road?`${direction==='가로'?'':direction==='세로'?'세로로 선 ':'경사진 '}${MAT[member.mat].name}`:`${MAT[member.mat].name} ${direction} 막대`;
+    return [member.id,`${location}의 ${description}`];
+  }));
+  const context={
+    format:'truss-lab-bridge-v2',
+    units:{length:'u (game units, not meters)',force:'N',moment:'N*u',utilization:'ratio; 1 = 100%',coordinates:'x right, y down; design coordinates and physical displacement, no camera or visual deformation scale'},
+    stage:{name:stage.name||stage.title||'',goal:stage.goal||'',deckGuide:stage.deck,restrictedZones:stage.forbidden||[],budget:stage.budget,cost:totalCost,vehicle:stage.vehicle,vehicleLoadN:stage.load,windN:stage.wind||0,serviceDeflectionLimit:stage.maxDefl,memberFailure:memberFailureEnabled()},
+    summary:{nodes:nodes.length,members:members.length,span:number(span),completeRoadPath:roadReachable.has(rightSupportId()),isolatedNodeIds:nodes.filter(node=>!linked.has(node.id)&&!node.support).map(node=>node.id),brokenMemberIds:[...broken],disabledMemberIds:[...DEV_STATE.disabledMembers],selectedNodeId:selected?.id??null,hoveredMemberId:hoverMember?.id??null},
+    geometry:{
+      nodeColumns:['id','designX','designY','support','displacementX','displacementY','name'],
+      nodes:nodes.map(node=>{
+        const particle=physics?.particles.get(node.id),index=a?.index.get(node.id);
+        return [node.id,number(node.x),number(node.y),node.support||null,
+          particle?number(particle.x-node.x):(index===undefined?null:number(a.U[2*index])),
+          particle?number(particle.y-node.y):(index===undefined?null:number(a.U[2*index+1])),
+          node.id===leftSupportId()?'왼쪽 지지점':node.id===rightSupportId()?'오른쪽 지지점':`${position(node.x)}의 ${node.support?'지지점':'연결점'}`];
+      }),
+      memberColumns:['id','nodeA','nodeB','material','road','broken','disabled','name'],
+      members:members.map(member=>[member.id,member.a,member.b,member.mat,!!member.road,broken.has(member.id),DEV_STATE.disabledMembers.has(member.id),memberNames.get(member.id)])
+    },
+    materials:Object.fromEntries([...new Set(members.map(member=>member.mat))].map(mat=>[mat,{name:MAT[mat].name,tensionCapacityN:MAT[mat].tension,compressionMaterialCapacityN:MAT[mat].compression,momentCapacity:MAT[mat].momentCapacity,shearCapacityN:MAT[mat].shearCapacity,weightNPerU:MAT[mat].weight}])),
+    analysis:{
+      status:physics?'dynamic':a?'static_snapshot':'unavailable',
+      note:physics?'Current collapse positions; no current linear force solution.':a?'One load position only; not a full journey safety verdict.':'Geometry only. Run a test or structural scan for measured forces. Old analysis is not reused after design edits.',
+      loadX:a?number(a.loadX):null,
+      maxUtilization:a?number(a.maxRatio):null,maxDeflection:a?number(a.maxDefl):null,
+      deckDeflection:a?number(a.deckDeflection):null,deckCurvature:a?number(a.deckCurvature):null,
+      axleLoadColumns:['x','loadN','roadMemberId'],
+      axleLoads:a?a.axleLoads.map(axle=>[number(axle.x),number(axle.load),axle.seg.m.id]):[],
+      reactionColumns:['nodeId','horizontalN','verticalN'],
+      reactions:a?[...a.reactions].map(([id,reaction])=>[id,number(reaction.rx),number(reaction.ry)]):[],
+      memberResultColumns:['id','axialForceN','utilization','capacityN','governing','length','moment','momentCapacity','shearN','shearCapacityN'],
+      memberResults:a?[...a.forces].sort((left,right)=>right[1].ratio-left[1].ratio).map(([id,result])=>[id,number(result.force),number(result.ratio),number(result.capacity),result.governing,number(result.length),number(result.moment),number(result.momentCapacity),number(result.shear),number(result.shearCapacity)]):[]
+    },
+    test:{screen:currentGameScreen,mode:sim?.mode||'build',vehicle:physics?{x:number(physics.vehicle.x),y:number(physics.vehicle.y),attached:physics.vehicle.attached}:sim?{progress:number(sim.progress)}:null,failureReason:sim?.failReason||null,failureEvents:(sim?.failureEvents||[]).slice(-8)},
+    omitted:{nodes:0,members:0,memberResults:0}
+  };
+  const resultCount=context.analysis.memberResults.length;
+  let serialized=JSON.stringify(context);
+  // Preserve topology before individual result rows; report any omissions explicitly.
+  while(serialized.length>48000&&context.analysis.memberResults.length){
+    context.analysis.memberResults.length=Math.floor(context.analysis.memberResults.length/2);
+    context.omitted.memberResults=resultCount-context.analysis.memberResults.length;
+    serialized=JSON.stringify(context);
   }
-  if(stage?.maxDefl!=null)lines.push(`stage_serviceability_limit=${Number(stage.maxDefl).toFixed(1)} u`);
-  if(stage?.forbidden?.length)lines.push(`restricted_zones=${stage.forbidden.length}`);
-  return lines.join('\n');
+  while(serialized.length>48000&&context.geometry.members.length){
+    context.geometry.members.length=Math.floor(context.geometry.members.length*.75);
+    const referenced=new Set(context.geometry.members.flatMap(member=>[member[1],member[2]]));
+    context.geometry.nodes=context.geometry.nodes.filter(node=>referenced.has(node[0])||node[3]);
+    context.omitted.nodes=nodes.length-context.geometry.nodes.length;
+    context.omitted.members=members.length-context.geometry.members.length;
+    serialized=JSON.stringify(context);
+  }
+  if(serialized.length>48000)throw new Error('교량 정보가 너무 큽니다. 설계를 줄이거나 질문을 나누어 주세요.');
+  return serialized;
 }
 function localAiNormalizeEndpoint(raw){return String(raw||'').trim().replace(/\/+$/,'')}
 async function localAiRequestOnline(path,options={}){
@@ -5518,10 +5563,12 @@ async function localAiCheckOnline(){
   finally{localAiSetBusy(false)}
 }
 async function localAiSendOnline(text,target){
-  const payload={message:text,context:localAiBridgeContext(),history:localAiHistory.slice(0,-1).slice(-10).map(entry=>({role:entry.role,content:entry.content.slice(0,4000)})),client:'truss-lab-github-pages'};
+  const context=localAiBridgeContext();
+  const payload={message:text,context,explanationLevel:localAiUI.level.value,history:localAiHistory.slice(0,-1).slice(-10).map(entry=>({role:entry.role,content:entry.content.slice(0,4000)})),client:'truss-lab-github-pages'};
   const data=await localAiRequestOnline('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const answer=String(data?.answer||'').trim();if(!answer)throw new Error('온라인 AI가 빈 답변을 반환했습니다.');
-  if(target)target.textContent=answer;return answer;
+  const readable=localAiReadableAnswer(answer,JSON.parse(context));
+  if(target)localAiRenderAnswer(target,readable);return readable;
 }
 async function localAiSend(textOverride=''){
   const text=String(textOverride||localAiUI.input?.value||'').trim();if(!text||localAiBusy)return;
@@ -5543,6 +5590,9 @@ function initLocalAiBridgeChat(){
   localStorage.removeItem('trusslab-ai-mode');localStorage.removeItem('trusslab-local-ai-model');
   const savedEndpoint=localStorage.getItem('trusslab-ai-endpoint'),endpoint=savedEndpoint||projectSettings.geminiWorkerUrl||'';
   localAiUI.endpoint.value=endpoint;
+  const savedLevel=localStorage.getItem('trusslab-ai-explanation-level');
+  localAiUI.level.value=['easy','balanced','technical'].includes(savedLevel)?savedLevel:'easy';
+  localAiUI.level.addEventListener('change',()=>localStorage.setItem('trusslab-ai-explanation-level',localAiUI.level.value));
   localAiUI.tab?.addEventListener('click',()=>localAiSetOpen(!localAiUI.dock.classList.contains('open')));localAiUI.close?.addEventListener('click',()=>localAiSetOpen(false));localAiUI.clear?.addEventListener('click',localAiResetChat);
   localAiUI.onlineCheck?.addEventListener('click',localAiCheckOnline);localAiUI.send?.addEventListener('click',()=>localAiSend());
   localAiUI.input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();localAiSend()}});$$('[data-local-ai-prompt]').forEach(b=>b.addEventListener('click',()=>localAiSend(b.dataset.localAiPrompt||'')));

@@ -1613,7 +1613,7 @@ body.ui-advanced .hoverInspector{font-size:11px!important}
 .localAiHead{display:flex;align-items:center;gap:10px;padding:12px 13px;border-bottom:1px solid #303a42;background:#0c1216}
 .localAiMark{width:30px;height:30px;display:grid;place-items:center;border:1px solid #4d5a63;color:#62e1ae;background:#11181d;font:900 11px var(--mono)}
 .localAiTitle{min-width:0;flex:1}.localAiTitle b{display:block;color:#eef5f6;font:900 11px var(--mono);letter-spacing:.1em}.localAiTitle span{display:block;margin-top:3px;color:#68767e;font:800 7px var(--mono);letter-spacing:.08em}
-.localAiHeadBtn{width:30px;height:30px;border:1px solid #46525b;background:#11181d;color:#aeb9bf;cursor:pointer;font:900 13px var(--mono)}
+.localAiHeadBtn{width:30px;height:30px;border:1px solid #46525b;background:#11181d;color:#aeb9bf;cursor:pointer;font:900 13px var(--mono);justify-content:center;}
 .localAiHeadBtn:hover{border-color:#7b8992;color:#fff}
 .localAiSetup{padding:10px 12px;border-bottom:1px solid #2b353c;background:#0a1014}
 .localAiSetupRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center}
@@ -1631,6 +1631,21 @@ body.ui-advanced .hoverInspector{font-size:11px!important}
 .localAiMsg{max-width:91%;padding:9px 10px;border:1px solid #344049;background:#0e151a;color:#cbd6da;font:700 10px/1.58 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
 .localAiMsg.user{align-self:flex-end;border-color:#3d725f;background:#102019;color:#dff8ee}.localAiMsg.assistant{align-self:flex-start;border-left:3px solid #62e1ae}.localAiMsg.system{align-self:stretch;max-width:100%;border-color:#574c2b;border-left:3px solid #d7b94d;background:#16140d;color:#bcb386;font-size:8.5px}
 .localAiMsg .who{display:block;margin-bottom:4px;color:#66757d;font:900 7px var(--mono);letter-spacing:.12em}.localAiMsg.user .who{color:#6fb89d}.localAiMsg.assistant .who{color:#62e1ae}
+.localAiMsg.assistant{min-width:0;box-sizing:border-box}
+.localAiMsgText.markdownBody{white-space:normal;line-height:1.8;overflow-wrap:anywhere}
+.markdownBody>:first-child{margin-top:0}.markdownBody>:last-child{margin-bottom:0}
+.markdownBody p{margin:0 0 10px}.markdownBody strong{font-weight:750;color:#e2f2eb}.markdownBody em{font-style:italic}
+.markdownBody h1,.markdownBody h2,.markdownBody h3,.markdownBody h4,.markdownBody h5,.markdownBody h6{margin:16px 0 8px;color:#c1ead8;font:700 15px/1.6 "Noto Sans KR",Arial,sans-serif;letter-spacing:0}
+.markdownBody h1{font-size:18px}.markdownBody h2{font-size:16px}
+.markdownBody ul,.markdownBody ol{margin:8px 0 12px;padding-left:22px}.markdownBody li{margin:5px 0}.markdownBody li::marker{color:#9bd5bd}.markdownBody li>p{margin:4px 0}
+.markdownBody blockquote{margin:12px 0;padding:4px 12px;border-left:2px solid #79b69d;color:#b2cfc2;background:#13251e}
+.markdownBody code{padding:2px 5px;border:1px solid #39554b;border-radius:3px;background:#0a1c14;color:#c7e6d7;font:500 .9em/1.65 var(--mono);white-space:pre-wrap}
+.markdownBody pre{max-width:100%;overflow-x:auto;margin:12px 0;padding:10px;border:1px solid #39554b;border-radius:4px;background:#081710;white-space:pre}
+.markdownBody pre code{padding:0;border:0;background:none;white-space:pre}
+.markdownBody a{color:#a8d9ef;text-decoration:underline;text-underline-offset:3px}
+.markdownBody table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:12px 0;font-size:12px}
+.markdownBody th,.markdownBody td{padding:7px 9px;border:1px solid #3c574d;text-align:left}.markdownBody th{background:#1a3027;color:#d4ebdf}
+.markdownBody hr{border:0;border-top:1px solid #3c574d;margin:14px 0}
 .localAiQuick{display:flex;gap:5px;overflow-x:auto;padding:8px 10px;border-top:1px solid #28323a;background:#0a0f12}
 .localAiQuick button{flex:0 0 auto;border:1px solid #3f4b54;background:#10171b;color:#9daab0;padding:7px 8px;cursor:pointer;font:800 8px var(--mono);letter-spacing:.03em}.localAiQuick button:hover{border-color:#62e1ae;color:#dff8ee}
 .localAiComposer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:10px;border-top:1px solid #303a42;background:#0b1014}
@@ -1841,6 +1856,11 @@ body.tutorial-mode #localAiTab{display:none}
 .localAiHeadBtn{display:grid;place-items:center;flex:none;border-radius:5px}
 .localAiModeLabel{font-size:10px;letter-spacing:0}
 .localAiProviderName{color:#b1dbc9;font:600 12px/1.5 var(--mono)}
+.localAiExplanation{display:flex;align-items:center;gap:12px;margin:12px 0}
+.localAiExplanation label{flex:none;color:#b8d2c8;font:600 12px/1.5 "Noto Sans KR",Arial,sans-serif}
+.localAiExplanation select{min-width:0;flex:1;min-height:36px;border:1px solid #52766b;border-radius:4px;padding:7px 10px;background:#132720;color:#d8eee5;font:500 12px/1.5 "Noto Sans KR",Arial,sans-serif}
+.localAiExplanation select:focus-visible{outline:2px solid #9bd6be;outline-offset:2px}
+@media(max-height:700px){.localAiExplanation{margin:6px 0}.localAiSetup{padding:8px 12px}.localAiHead{padding:8px 12px}.localAiOnlineHint{display:none}}
 .localAiEndpoint{font:500 12px/1.4 "Noto Sans KR",Arial,sans-serif}
 .localAiAction,.localAiSend{font:700 12px/1.4 "Noto Sans KR",Arial,sans-serif;letter-spacing:0}
 .localAiStatus{font:500 11px/1.5 "Noto Sans KR",Arial,sans-serif;letter-spacing:0}

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "display_version": "V7.2.1",
+  "display_version": "V7.3.3",
   "geminiWorkerUrl": "https://truss-lab-gemini.jxxnueo.workers.dev",
   "_guide": [
     "geminiWorkerUrl에 배포한 https://...workers.dev 주소를 입력하면 AI 서버 주소가 자동 입력됩니다. 저장된 개인 서버 주소가 우선합니다. AI는 Gemini 전용이며, 빈 문자열이면 사용자가 서버 주소를 입력해야 합니다. API 키는 넣지 마세요.",
