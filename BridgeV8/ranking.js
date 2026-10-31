@@ -1,7 +1,8 @@
-function createBridgeRanking(settings) {
+function createBridgeRanking(settings, formatTime) {
   'use strict';
   let request = null;
   const money = cost => '₩' + cost.toLocaleString('ko-KR');
+  const buildTime = ms => Number.isFinite(ms)&&ms>=0?formatTime(ms):'—';
   function element(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -17,6 +18,9 @@ function createBridgeRanking(settings) {
     header.append(element('h2','','설계 리더보드'),element('p','',snapshot.levelTitle+' · '+(snapshot.difficulty==='easy'?'쉬움':'어려움')));
     const current=element('div','rankingCurrent');
     current.append(element('span','','이번 설계 비용'),element('strong','',money(snapshot.cost)));
+    const timeLabel=element('span','','건설 시간');
+    timeLabel.title='설계 화면에서 보낸 누적 시간입니다. 시험·결과창·메뉴·다른 탭에서 보낸 시간은 제외합니다.';
+    current.append(timeLabel,element('b','rankingBuildTime',buildTime(snapshot.buildTimeMs)));
     const status=element('p','rankingStatus',''), results=element('div','rankingResults');
     status.setAttribute('role','status');
     panel.append(header,current,status,results);
@@ -26,14 +30,14 @@ function createBridgeRanking(settings) {
       return;
     }
     const controller=new AbortController(); request=controller;
-    let pending=false,registered=false;
+    let pending=false,registered=false,timeSupported=false;
     const attemptId=Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
     const form=element('form','rankingSubmit'), label=element('label','','공개 닉네임'), input=element('input');
     input.type='text';input.maxLength=20;input.required=true;input.autocomplete='nickname';input.value=localStorage.getItem('trusslab-ranking-name')||'';
     label.append(input);
     const submit=element('button','completionAction isPrimary','기록 등록');submit.type='submit';
     const retry=element('button','completionAction','새로고침');retry.type='button';
-    const note=element('p','rankingNote','등록 시 닉네임·비용·설계가 공개됩니다.');
+    const note=element('p','rankingNote','등록 시 닉네임·비용·건설 시간·설계가 공개됩니다.');
     form.append(label,submit,retry,note);panel.append(form);
     if(snapshot.ineligible) { submit.disabled=true;input.disabled=true;note.textContent='개발자 기능 또는 사용자 설정이 적용된 실행은 조회만 가능합니다. 기본 설정으로 새로 실행한 뒤 등록하세요.'; }
     function render(board, submitted) {
@@ -57,12 +61,15 @@ function createBridgeRanking(settings) {
       for(const entry of board.entries) {
         const row=element('div','rankingEntry');
         if(entry.mine) row.classList.add('isMine');
-        row.append(element('span','rankingPlace',String(entry.rank)),element('span','rankingName',entry.nickname+(entry.mine?' · 나':'')),element('b','',money(entry.cost)));
+        const metrics=element('div','rankingEntryMetrics');
+        metrics.append(element('b','',money(entry.cost)),element('span','','건설 '+buildTime(entry.buildTimeMs)));
+        row.append(element('span','rankingPlace',String(entry.rank)),element('span','rankingName',entry.nickname+(entry.mine?' · 나':'')),metrics);
         results.append(row);
       }
     }
     async function load(submitting=false) {
       if(pending || controller.signal.aborted || (submitting&&registered))return;
+      if(submitting&&!timeSupported){status.hidden=false;status.textContent='건설 시간을 저장하려면 랭킹 서버를 업데이트해 주세요.';return}
       pending=true;submit.disabled=true;retry.disabled=true;
       status.hidden=false;
       status.textContent=submitting?'기록을 등록하고 있습니다…':'순위를 불러오고 있습니다…';
@@ -81,18 +88,19 @@ function createBridgeRanking(settings) {
         if(!response.ok)throw new Error('랭킹 서버 응답 오류 ('+response.status+')');
         const board=await response.json();
         if(!board.ok)throw new Error(board.error||'랭킹 응답을 확인할 수 없습니다.');
+        timeSupported=board.buildTimeSupported===true;
         if((submitting||registered)&&board.registered!==true)throw new Error('랭킹 서버의 Code.gs를 새 버전으로 배포해 주세요.');
         if(controller.signal.aborted)return;
         render(board,submitting||registered);
-        status.hidden=!submitting;
-        status.textContent=submitting?'기록을 등록했습니다.':'';
+        status.hidden=!submitting&&timeSupported;
+        status.textContent=!timeSupported?'건설 시간을 저장하려면 랭킹 서버를 업데이트해 주세요.':submitting?'기록을 등록했습니다.':'';
         panel.scrollTop=0;
         if(submitting){registered=true;submit.textContent='등록 완료';input.disabled=true;localStorage.setItem('trusslab-ranking-name',input.value.trim())}
       } catch(error) {
         if(request!==controller || !panel.isConnected || !panel.closest('.show'))return;
         status.textContent=controller.signal.aborted?'요청이 종료되었습니다. 결과창을 다시 열어 주세요.':'랭킹 연결 실패: '+error.message+' 새로고침으로 다시 시도할 수 있습니다.';
         console.error('[TRUSS LAB] Ranking',error);
-      } finally {clearTimeout(timeout);pending=false;submit.disabled=!!snapshot.ineligible||registered;retry.disabled=false;}
+      } finally {clearTimeout(timeout);pending=false;submit.disabled=!!snapshot.ineligible||registered||!timeSupported;retry.disabled=false;}
     }
     form.addEventListener('submit',event=>{event.preventDefault();if(!snapshot.ineligible)load(true)});
     retry.addEventListener('click',()=>load());

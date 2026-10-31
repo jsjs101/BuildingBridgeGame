@@ -1,7 +1,7 @@
-const RANKING_SEASON = 'v8-1';
+const RANKING_SEASON = 'v8-2';
 const RANKING_SHEET = 'Rankings';
-const RANKING_COLUMNS = ['board','player','nickname','cost','timeMs','peakRatio','design','updatedAt','attemptId'];
-const RANKING_COSTS = {wood:2.7,steel:5,cable:3.7,road:2.2,roadHeavy:4.4};
+const RANKING_COLUMNS = ['board','player','nickname','cost','timeMs','peakRatio','design','updatedAt','attemptId','buildTimeMs'];
+const RANKING_COSTS = {wood:3.8,steel:8.5,cable:4.8,road:4,roadHeavy:9.5};
 
 function setupRanking() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -15,7 +15,9 @@ function setupRanking() {
     sheet.appendRow(RANKING_COLUMNS);
     sheet.setFrozenRows(1);
   } else if (sheet.getRange(1,1,1,8).getValues()[0].join('|') === RANKING_COLUMNS.slice(0,8).join('|')) {
-    sheet.getRange(1,9,1,1).setValues([['attemptId']]);
+    const extra=sheet.getRange(1,9,1,2).getValues()[0];
+    if ((extra[0] && extra[0]!=='attemptId') || (extra[1] && extra[1]!=='buildTimeMs')) throw new Error('I열과 J열의 기존 제목을 확인하세요. 랭킹 항목과 충돌합니다.');
+    sheet.getRange(1,9,1,2).setValues([['attemptId','buildTimeMs']]);
   }
 }
 
@@ -23,7 +25,7 @@ function rankingSheet_() {
   const id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
   if (!id) throw new Error('관리자가 setupRanking을 먼저 실행해야 합니다.');
   const sheet = SpreadsheetApp.openById(id).getSheetByName(RANKING_SHEET);
-  if (!sheet || sheet.getRange(1,1,1,9).getValues()[0].join('|') !== RANKING_COLUMNS.join('|')) throw new Error('관리자가 새 Code.gs를 저장하고 setupRanking을 다시 실행해야 합니다. 기존 기록은 유지됩니다.');
+  if (!sheet || sheet.getRange(1,1,1,10).getValues()[0].join('|') !== RANKING_COLUMNS.join('|')) throw new Error('관리자가 새 Code.gs를 저장하고 setupRanking을 다시 실행해야 합니다. 기존 기록은 유지됩니다.');
   return sheet;
 }
 
@@ -72,12 +74,12 @@ function rankingRows_(sheet) {
   const count=sheet.getLastRow()-1;
   if (!count) return [];
   // Read numeric metadata in bulk; load only the visible designs below.
-  const rows=sheet.getRange(2,1,count,6).getValues(), dates=sheet.getRange(2,8,count,2).getValues();
+  const rows=sheet.getRange(2,1,count,6).getValues(), dates=sheet.getRange(2,8,count,3).getValues();
   return rows.map((row,index)=>[...row,null,...dates[index]]);
 }
 
 function rankingSummary_(rows, boardId, candidateCost, player, sheet, attemptId) {
-  const entries = rows.map((row,index) => ({board:row[0],row:index+2,player:row[1],nickname:row[2],cost:Number(row[3]),timeMs:Number(row[4]),peakRatio:Number(row[5]),design:row[6],updatedAt:row[7],attemptId:row[8]})).filter(entry=>entry.board===boardId);
+  const entries = rows.map((row,index) => ({board:row[0],row:index+2,player:row[1],nickname:row[2],cost:Number(row[3]),timeMs:Number(row[4]),peakRatio:Number(row[5]),design:row[6],updatedAt:row[7],attemptId:row[8],buildTimeMs:typeof row[9]==='number'&&Number.isFinite(row[9])&&row[9]>=0?row[9]:null})).filter(entry=>entry.board===boardId);
   entries.sort((a,b)=>a.cost-b.cost || String(a.updatedAt).localeCompare(String(b.updatedAt)));
   const total=entries.length, minCost=total?entries[0].cost:0, maxCost=total?entries[total-1].cost:0, histogram=Array(16).fill(0);
   for (const entry of entries) histogram[Math.min(15,Math.floor((entry.cost-minCost)/Math.max(1,maxCost-minCost)*16))]++;
@@ -91,7 +93,7 @@ function rankingSummary_(rows, boardId, candidateCost, player, sheet, attemptId)
   }
   const visible = entries.slice(0,8);
   if (own && !visible.includes(own)) visible.push(own);
-  return {ok:true,total,minCost,maxCost,histogram,comparison,entries:visible.map(entry=>({rank:1+entries.filter(other=>other.cost<entry.cost).length,nickname:entry.nickname,cost:entry.cost,timeMs:entry.timeMs,peakRatio:entry.peakRatio,design:JSON.parse(entry.design||sheet.getRange(entry.row,7,1,1).getValues()[0][0]),mine:entry===own}))};
+  return {ok:true,buildTimeSupported:true,total,minCost,maxCost,histogram,comparison,entries:visible.map(entry=>({rank:1+entries.filter(other=>other.cost<entry.cost).length,nickname:entry.nickname,cost:entry.cost,timeMs:entry.timeMs,buildTimeMs:entry.buildTimeMs,peakRatio:entry.peakRatio,design:JSON.parse(entry.design||sheet.getRange(entry.row,7,1,1).getValues()[0][0]),mine:entry===own}))};
 }
 
 function doGet(e) {
@@ -114,6 +116,7 @@ function doPost(e) {
     const design=rankingDesign_(input.design);
     if (input.cost !== design.cost) throw new Error('설계 비용이 일치하지 않습니다. 기본 재료 설정으로 다시 시험하세요.');
     rankingNumber_(input.timeMs,1,604800000);
+    if (input.buildTimeMs!==undefined && input.buildTimeMs!==null) rankingNumber_(input.buildTimeMs,0,604800000);
     rankingNumber_(input.peakRatio,0,1000);
     const salt=PropertiesService.getScriptProperties().getProperty('PLAYER_SALT');
     if (!salt) throw new Error('관리자가 setupRanking을 먼저 실행해야 합니다.');
@@ -125,7 +128,7 @@ function doPost(e) {
     const cache=CacheService.getScriptCache();
     if (cache.get(player)) throw new Error('기록 등록은 10초 간격으로 가능합니다.');
     if (rows.length>=5000) throw new Error('현재 시즌 저장 공간이 가득 찼습니다. 관리자에게 알려주세요.');
-    const row=[boardId,player,input.nickname.trim(),design.cost,Math.round(input.timeMs),input.peakRatio,design.serialized,new Date().toISOString(),input.attemptId];
+    const row=[boardId,player,input.nickname.trim(),design.cost,Math.round(input.timeMs),input.peakRatio,design.serialized,new Date().toISOString(),input.attemptId,input.buildTimeMs==null?'':Math.round(input.buildTimeMs)];
     sheet.appendRow(row);rows.push(row);
     SpreadsheetApp.flush();
     cache.put(player,'1',10);

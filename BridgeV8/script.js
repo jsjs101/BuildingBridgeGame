@@ -67,6 +67,7 @@ function applyProjectSettings(){
     if(typeof projectSettings.display_version!=='string'||!projectSettings.display_version.trim()||projectSettings.display_version.length>80)throw new Error(`${path}.display_version: 1~80자의 버전 문자열을 입력하세요.`);
     const versionLabel=document.getElementById('displayVersion');
     versionLabel.textContent=projectSettings.display_version;
+    document.getElementById('mainMenuBuild').textContent=projectSettings.display_version;
     versionLabel.parentElement.hidden=false;
   }
   if(projectSettings.difficultyDefault!==undefined&&!['easy','hard'].includes(projectSettings.difficultyDefault))throw new Error(`${path}.difficultyDefault: easy 또는 hard를 입력하세요.`);
@@ -131,12 +132,12 @@ const MAT = {
   // beamScale is a separate gameplay calibration used only by the simplified
   // translational road-bending approximation below; reinforced road still has
   // a much larger effective E·I even with its own tuned scale.
-  wood:{name:'목재', color:'#d9a15b', EA:650000, E:650, I:184742, K:1.0, weight:.8, tension:26000, compression:23000, cost:2.7, maxLen:270},
-  steel:{name:'강철', color:'#cbd1da', EA:900000, E:900, I:232305, K:1.0, weight:1.3, tension:36000, compression:31000, cost:5.0, maxLen:350},
-  cable:{name:'케이블', color:'#f1d874', EA:520000, E:520, I:6331, K:1.0, weight:.2, tension:43000, compression:900, cost:3.7, maxLen:Infinity},
+  wood:{name:'목재', color:'#d9a15b', EA:650000, E:650, I:184742, K:1.0, weight:.8, tension:26000, compression:23000, cost:3.8, maxLen:270},
+  steel:{name:'강철', color:'#cbd1da', EA:900000, E:900, I:232305, K:1.0, weight:1.3, tension:36000, compression:31000, cost:8.5, maxLen:350},
+  cable:{name:'케이블', color:'#f1d874', EA:520000, E:520, I:6331, K:1.0, weight:.2, tension:43000, compression:900, cost:4.8, maxLen:Infinity},
   // weight: N/u, momentCapacity: N·u, shearCapacity: N in the game's relative units.
-  road:{name:'일반 도로', color:'#66524a', EA:1080000, E:1080, I:302613, K:1.0, beamScale:3.4, weight:2, momentCapacity:700000, shearCapacity:12000, tension:56000, compression:56000, cost:2.2, maxLen:180, roadWidth:16},
-  roadHeavy:{name:'강화 도로', color:'#53606a', EA:1700000, E:1700, I:461143, K:1.0, beamScale:2.8, weight:3.5, momentCapacity:1400000, shearCapacity:20000, tension:92000, compression:92000, cost:4.4, maxLen:220, roadWidth:22}
+  road:{name:'일반 도로', color:'#66524a', EA:1080000, E:1080, I:302613, K:1.0, beamScale:3.4, weight:2, momentCapacity:700000, shearCapacity:12000, tension:56000, compression:56000, cost:4.0, maxLen:180, roadWidth:16},
+  roadHeavy:{name:'강화 도로', color:'#53606a', EA:1700000, E:1700, I:461143, K:1.0, beamScale:2.8, weight:3.5, momentCapacity:1400000, shearCapacity:20000, tension:92000, compression:92000, cost:9.5, maxLen:220, roadWidth:22}
 };
 
 function eulerBucklingLimit(matKey,L,KOverride=null){
@@ -176,7 +177,7 @@ const stages = [
 
 const TUTORIAL_STAGE = {
   name:'TUTORIAL', type:'TRAINING', title:'단계별 설계 훈련',
-  goal:'화면 조작부터 도로·트러스 건설, 관절 이동, TEST까지 직접 수행하며 조작을 익히는 전용 훈련 스테이지입니다.',
+  goal:'도로와 삼각형 하나를 완성하고 차량 시험과 AI 질문을 연습합니다.',
   tutorial:'정답 행동을 직접 수행하면 다음 지시가 자동으로 열립니다.',
   budget:99999, load:8000, maxDefl:90, collapseDeflLimit:198,
   deck:[[280,390],[440,390],[600,390],[760,390],[920,390]], forbidden:[], vehicle:'CAR', bg:'valley', tutorialStage:true
@@ -299,7 +300,7 @@ const gameSets = SET_DEFINITIONS.map(set=>({
 
 const GAME_PHASE=Object.freeze({BUILD:'build',TEST:'test',RESULT:'result'});
 let gamePhase=GAME_PHASE.BUILD;
-function setGamePhase(phase){if(!Object.values(GAME_PHASE).includes(phase))return;gamePhase=phase;document.body.dataset.gamePhase=phase}
+function setGamePhase(phase){if(!Object.values(GAME_PHASE).includes(phase))return;gamePhase=phase;document.body.dataset.gamePhase=phase;if(phase!==GAME_PHASE.TEST)updateVehicleRetry()}
 
 const PLAYER_PROGRESS_KEY='trusslab-player-progress-v3';
 const LEGACY_PLAYER_PROGRESS_KEYS=['trusslab-player-progress-v1','trusslab-player-progress-v2'];
@@ -426,7 +427,7 @@ function hideFlowScreens(){for(const id of FLOW_SCREEN_IDS){const el=$('#'+id);i
 function changeGameScreen(screenName,{resumeClock=false}={}){
   if(!Object.values(GAME_SCREEN).includes(screenName))return;
   const from=currentGameScreen;previousGameScreen=from;currentGameScreen=screenName;document.body.dataset.gameScreen=screenName;
-  if(from===GAME_SCREEN.GAME&&screenName!==GAME_SCREEN.GAME&&screenName!==GAME_SCREEN.RESULT&&screenName!==GAME_SCREEN.SANDBOX_SETUP&&stageClock?.running)pauseStageClock(false);
+  if(from===GAME_SCREEN.GAME&&screenName!==GAME_SCREEN.GAME&&screenName!==GAME_SCREEN.RESULT&&screenName!==GAME_SCREEN.SANDBOX_SETUP&&(stageClock?.running||stageClock?.buildStartedAt!==null))pauseStageClock(false);
   hideFlowScreens();
   $('#titleScreen').hidden=true;$('#creditScreen').hidden=true;
   if(screenName!==GAME_SCREEN.EDUCATION)$('#educationScreen').hidden=true;
@@ -449,7 +450,7 @@ function changeGameScreen(screenName,{resumeClock=false}={}){
   else if(screenName===GAME_SCREEN.DEV_AUTH){renderDevAuthScreen();show('#devAuthScreen')}
   else if(screenName===GAME_SCREEN.DEV_CONSOLE){if(!devSessionActive()){openDeveloperMode(from);return}renderDevConsole();show('#devConsoleScreen')}
   else if(screenName===GAME_SCREEN.DEV_PREVIEW){if(!devSessionActive()){openDeveloperMode(from);return}renderDevPreviewScreen();show('#devPreviewScreen')}
-  else if(screenName===GAME_SCREEN.GAME){requestAnimationFrame(()=>{resize();if(resumeClock&&!tutorialMode&&!stage?.sandbox&&!sim&&stageClock.finalMs===null)resumeStageClock()})}
+  else if(screenName===GAME_SCREEN.GAME){requestAnimationFrame(()=>{resize();if(resumeClock&&!tutorialMode&&!stage?.sandbox&&!sim){if(stageClock.finalMs===null)resumeStageClock();else resumeBuildClock()}})}
   updateDeveloperEntryUI();updateDevPresenceBadge();
   if(screenName!==GAME_SCREEN.GAME && screenName!==GAME_SCREEN.RESULT && screenName!==GAME_SCREEN.DEV_CONSOLE){
     requestAnimationFrame(()=>{
@@ -807,7 +808,7 @@ const DEV_VEHICLE_PROFILES={
 	'DOUBLE TRUCK':{base:'TRUCK',loadOverride:null,speed:82,length:108,axles:[[-54,.18],[-18,.24],[18,.27],[54,.31]],useAxleOverride:false,renderScale:1}
 };
 try{applyProjectSettings()}catch(error){showProjectConfigError(error);return}
-const bridgeRanking=createBridgeRanking(projectSettings.ranking);
+const bridgeRanking=createBridgeRanking(projectSettings.ranking,formatStageTime);
 new MutationObserver(()=>{if(!ui.result.classList.contains('show'))bridgeRanking.stop()}).observe(ui.result,{attributes:true,attributeFilter:['class']});
 const DEV_DEFAULTS={levels:clonePlain(LEVEL_LIBRARY),materials:devDeepClone(MAT),physics:clonePlain(DEV_PHYSICS_TUNING),vehicles:clonePlain(DEV_VEHICLE_PROFILES),sandbox:clonePlain(stages[4])};
 function devVehicleProfileFor(value){const key=String(value||'').toUpperCase();return DEV_VEHICLE_PROFILES[key]||DEV_VEHICLE_PROFILES.TRUCK}
@@ -983,7 +984,7 @@ const DEV_DISPLAY_LABELS={
 };
 function devLabel(value){return Object.hasOwn(DEV_DISPLAY_LABELS,value)?DEV_DISPLAY_LABELS[value]:value}
 function devMetric(label,value,className=''){return `<div class="devMetric"><span>${label}</span><b class="${className}">${devLabel(value)}</b></div>`}
-function devSectionHeader(title,copy,index='DEV'){return `<div class="devSectionHeader"><div><h1>${title}</h1><p>${copy}</p></div><div class="devSectionCode">${index}</div></div>`}
+function devSectionHeader(title,copy,index='DEV'){return `<div class="devSectionHeader"><div><h1 id="resultTitle">${title}</h1><p>${copy}</p></div><div class="devSectionCode">${index}</div></div>`}
 function devOverviewHTML(){
 	const c=devCurrentContext(),size=(devLocalStorageBytes()/1024).toFixed(1)+' KB',level=c.level?(c.level.type==='bonus'?`B${String(c.level.bonusNumber).padStart(2,'0')}`:`${String(c.level.globalNumber).padStart(2,'0')}`):'—';
 	return `${devSectionHeader('개발 현황','게임 상태와 캠페인 진행도를 확인합니다. 빠른 작업은 진행 상태에 반영되며, 화면 미리보기는 진행도를 저장하지 않습니다.','01 // 현황')}<div class="devMetricGrid" id="devOverviewMetrics">${devMetric('게임 버전','TRUSS-LAB_34')}${devMetric('저장 형식 버전',String(playerProgress.saveVersion||3))}${devMetric('현재 화면',String(currentGameScreen).toUpperCase())}${devMetric('현재 캠페인',c.campaign?`C${c.campaign.number} // ${c.campaign.title}`:'—')}${devMetric('현재 세트',c.set?`SET ${String(c.set.number).padStart(2,'0')}`:'—')}${devMetric('현재 스테이지',level)}${devMetric('전체 스테이지',String(LEVEL_LIBRARY.length))}${devMetric('관절 수',String(nodes?.length||0))}${devMetric('부재 수',String(members?.length||0))}${devMetric('현재 FPS',String(Math.round(DEV_STATE.fps)))}${devMetric('해석 상태',devSolverStatus(),sim?'warn':'')}${devMetric('브라우저 저장 용량',size)}</div><div class="devPanel"><div class="devPanelTitle"><span>빠른 작업</span><span>진행 상태에 반영되는 작업</span></div><div class="devActionGrid"><button class="flowBtn" data-dev-action="reload">스테이지 다시 불러오기</button><button class="flowBtn" data-dev-action="open-current">현재 스테이지 열기</button><button class="flowBtn amber" data-dev-action="pass">성공 처리</button><button class="flowBtn danger" data-dev-action="fail">실패 처리</button><button class="flowBtn" data-dev-action="reset">스테이지 초기화</button><button class="flowBtn" data-dev-action="result">결과 화면 미리보기</button><button class="flowBtn" data-dev-action="main-menu">메인 메뉴 열기</button><button class="flowBtn" data-dev-action="level-select">스테이지 선택 열기</button></div></div><div class="devPanel"><div class="devPanelTitle"><span>화면 바로가기</span><span>미리보기는 진행도를 변경하지 않습니다</span></div><div class="devActionGrid"><button class="flowBtn" data-dev-screen="title">타이틀</button><button class="flowBtn" data-dev-screen="main-menu">메인 메뉴</button><button class="flowBtn" data-dev-screen="set-select">세트 선택</button><button class="flowBtn" data-dev-screen="level-select">스테이지 선택</button><button class="flowBtn" data-dev-screen="briefing">미션 안내</button><button class="flowBtn" data-dev-screen="game">게임</button><button class="flowBtn" data-dev-screen="success">성공 결과</button><button class="flowBtn" data-dev-screen="failure">실패 결과</button><button class="flowBtn" data-dev-screen="set-complete">세트 완료</button><button class="flowBtn" data-dev-screen="campaign-complete">캠페인 완료</button><button class="flowBtn" data-dev-screen="sandbox">샌드박스</button><button class="flowBtn" data-dev-screen="education">학습 센터</button><button class="flowBtn" data-dev-screen="settings">설정</button><button class="flowBtn" data-dev-screen="records">기록</button></div></div><div class="devPanel"><div class="devPanelTitle"><span>테스트 화면</span><span>저장하지 않는 미리보기</span></div><div class="devActionGrid"><button class="flowBtn" data-dev-mock="success">성공 화면 보기</button><button class="flowBtn" data-dev-mock="failure">실패 화면 보기</button><button class="flowBtn" data-dev-mock="perfect">최고 성적 화면 보기</button><button class="flowBtn" data-dev-mock="set-complete">세트 완료 화면 보기</button><button class="flowBtn" data-dev-mock="campaign-complete">캠페인 완료 화면 보기</button></div></div>`;
@@ -1312,17 +1313,44 @@ const sessionClearedStages=new Set(playerProgress.completedLevels.map(id=>getGam
 // Legacy clear flags are no longer authoritative; campaign progression is centralized in playerProgress.
 for(let i=0;i<4;i++)localStorage.removeItem('trusslab-best-'+i);
 localStorage.removeItem('trusslab-education-unlocked');
+let tutorialRunId=0;
 let tutorialMode=false,tutorialStep=0,tutorialTransitioning=false,tutorialFlags={camera:false,rightClick:false,moved:false},tutorialDragStart=null,tutorialMoveTarget=null,tutorialTestRunning=false;
 let tool='road', selected=null, hoverNode=null, hoverMember=null, pointerWorld=null, stressMode=false, loadPathMode=false, measureMode=false, measureA=null, measureB=null, sim=null, anim=0, dragging=null;
 let currentAnalysis=null, lastFullAnalysis=null, totalCost=0, lastBroken=new Set();
+let repairReview=null;
+const repairUI={panel:$('#repairReview'),position:$('#repairPosition'),status:$('#repairStatus'),previous:$('#repairPrevious'),next:$('#repairNext'),reinforce:$('#repairReinforce'),move:$('#repairMove'),remove:$('#repairDelete')};
+const VEHICLE_STALL_SECONDS=.65;
+const vehicleRetryUI={panel:$('#vehicleRetry'),button:$('#retryBlockedVehicle')};
+function updateVehicleRetry(visible=false){const hidden=!visible;if(vehicleRetryUI.panel.hidden!==hidden)vehicleRetryUI.panel.hidden=hidden}
+vehicleRetryUI.button.addEventListener('click',()=>{
+  if(!sim)return;
+  captureRepairReview(sim);stopSimulation();
+  if(repairReview)beginRepairReview();
+  else {lastBroken=new Set();currentAnalysis=null;lastFullAnalysis=null;stressMode=false;$('#stressBtn').classList.remove('isOn');draw()}
+  if(tutorialMode){
+    tutorialTestRunning=false;tutorialTransitioning=false;
+    const panel=$('#stageTutorial');panel.hidden=false;panel.style.display='';renderStageTutorialStep();
+  }
+  ui.test.focus({preventScroll:true});
+});
 let buildFx=[],screenShake={power:0,until:0};
-let stageClock={elapsed:0,startedAt:0,running:false,finalMs:null,raf:0,pausedForResult:false};
+let stageClock={elapsed:0,startedAt:0,running:false,finalMs:null,raf:0,pausedForResult:false,buildElapsed:0,buildStartedAt:null};
 function formatStageTime(ms){
   ms=Math.max(0,Number(ms)||0);
   const totalCs=Math.floor(ms/10),cs=totalCs%100,totalSec=Math.floor(totalCs/100),sec=totalSec%60,min=Math.floor(totalSec/60);
   return `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
 }
 function getStageElapsed(){return stageClock.elapsed+(stageClock.running?(performance.now()-stageClock.startedAt):0)}
+function getBuildElapsed(){return stageClock.buildElapsed+(stageClock.buildStartedAt===null?0:performance.now()-stageClock.buildStartedAt)}
+function resumeBuildClock(){
+  if(stage?.sandbox||tutorialMode||sim||document.hidden||currentGameScreen!==GAME_SCREEN.GAME||stageClock.buildStartedAt!==null)return;
+  stageClock.buildStartedAt=performance.now();
+}
+function pauseBuildClock(){
+  if(stageClock.buildStartedAt!==null){stageClock.buildElapsed+=performance.now()-stageClock.buildStartedAt;stageClock.buildStartedAt=null}
+  return stageClock.buildElapsed;
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseBuildClock();else resumeBuildClock()});
 function paintStageClock(){
   if(!ui.stageTimerText||!ui.stageClockMetric)return;
   if(stage?.sandbox){ui.stageTimerText.textContent='--:--.--';ui.stageClockMetric.classList.remove('running','finished');ui.stageClockMetric.classList.add('paused');return}
@@ -1334,16 +1362,18 @@ function paintStageClock(){
 function stageClockFrame(){paintStageClock();if(stageClock.running)stageClock.raf=requestAnimationFrame(stageClockFrame)}
 function resetStageClock(autoStart=true){
   if(stageClock.raf)cancelAnimationFrame(stageClock.raf);
-  stageClock={elapsed:0,startedAt:0,running:false,finalMs:null,raf:0,pausedForResult:false};
+  stageClock={elapsed:0,startedAt:0,running:false,finalMs:null,raf:0,pausedForResult:false,buildElapsed:0,buildStartedAt:null};
   paintStageClock();
   if(autoStart&&!stage?.sandbox)resumeStageClock();
 }
 function resumeStageClock(){
+  resumeBuildClock();
   if(stage?.sandbox||stageClock.running||stageClock.finalMs!==null)return;
   stageClock.startedAt=performance.now();stageClock.running=true;stageClock.pausedForResult=false;
   if(stageClock.raf)cancelAnimationFrame(stageClock.raf);stageClock.raf=requestAnimationFrame(stageClockFrame);paintStageClock();
 }
 function pauseStageClock(forResult=false){
+  pauseBuildClock();
   if(stageClock.running){stageClock.elapsed+=performance.now()-stageClock.startedAt;stageClock.running=false}
   if(stageClock.raf)cancelAnimationFrame(stageClock.raf);stageClock.raf=0;stageClock.pausedForResult=forResult;paintStageClock();
   return stageClock.elapsed;
@@ -1366,6 +1396,8 @@ let accessibilityPrefs={
   colorblindStress:!!readUIPref('colorblind-stress',false),
   largeText:!!readUIPref('large-text',true)
 };
+const systemMotionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
+function motionReduced(){return accessibilityPrefs.reducedMotion||systemMotionPreference.matches}
 const graphicsPrefs={optimized:!!readUIPref('graphics-optimized',false),simple:!!readUIPref('graphics-simple',false)};
 const winterEnvironment=createWinterEnvironment({width:W,height:H});
 let lastEnvironmentDraw=0;
@@ -1381,7 +1413,7 @@ function setGraphicsPreference(key,enabled){
   updateGraphicsUI();draw();
 }
 function updateEnvironmentFrame(now){
-  if(document.hidden||currentGameScreen!==GAME_SCREEN.GAME||sim||graphicsPrefs.simple||accessibilityPrefs.reducedMotion)return;
+  if(document.hidden||currentGameScreen!==GAME_SCREEN.GAME||sim||graphicsPrefs.simple||motionReduced())return;
   if(now-lastEnvironmentDraw>=1000/(graphicsPrefs.optimized?20:30))draw();
 }
 function applyAccessibilitySettings(){
@@ -1709,6 +1741,9 @@ function updateLevelToolAvailability(){
   if(!materialAllowed(tool)){tool=(stage.materials||[]).includes('road')?'road':(stage.materials||[])[0]||'road';selected=null;$$('.toolBtn').forEach(b=>{const on=b.dataset.tool===tool;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))})}
 }
 function resetStage(idx=stageIndex){
+  if(sim?.frame)cancelAnimationFrame(sim.frame);
+  clearRepairReview();
+  updateVehicleRetry();
   setGamePhase(GAME_PHASE.BUILD);
   if(tutorialMode)leaveTutorialVisualMode();
   tutorialMode=false;
@@ -1749,6 +1784,7 @@ function restoreSnapshot(s){
   updateHUD(); draw();
 }
 function undoAction(){
+  if(tutorialMode&&!tutorialCanvasInputAllowed())return false;
   if(sim||!history.length)return false;
   redoHistory.push(captureState());
   if(redoHistory.length>60)redoHistory.shift();
@@ -1757,6 +1793,7 @@ function undoAction(){
   return true;
 }
 function redoAction(){
+  if(tutorialMode&&!tutorialCanvasInputAllowed())return false;
   if(sim||!redoHistory.length)return false;
   history.push(captureState());
   if(history.length>60)history.shift();
@@ -1795,9 +1832,9 @@ function updateStageButtons(){
   });
 }
 function animateBuildFx(){if(!buildFx.length)return;draw();requestAnimationFrame(animateBuildFx)}
-function triggerBuildFx(a,b,mat){const wasEmpty=!buildFx.length;buildFx.push({a:{x:a.x,y:a.y},b:{x:b.x,y:b.y},mat,start:performance.now(),life:360});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
-function triggerNodeFx(p){const wasEmpty=!buildFx.length;buildFx.push({node:{x:p.x,y:p.y},start:performance.now(),life:300});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
-function kickShake(power=5,ms=180){screenShake.power=Math.max(screenShake.power,power);screenShake.until=Math.max(screenShake.until,performance.now()+ms)}
+function triggerBuildFx(a,b,mat){if(motionReduced())return;const wasEmpty=!buildFx.length;buildFx.push({a:{x:a.x,y:a.y},b:{x:b.x,y:b.y},mat,start:performance.now(),life:360});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
+function triggerNodeFx(p){if(motionReduced())return;const wasEmpty=!buildFx.length;buildFx.push({node:{x:p.x,y:p.y},start:performance.now(),life:300});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
+function kickShake(power=5,ms=180){if(motionReduced())return;screenShake.power=Math.max(screenShake.power,power);screenShake.until=Math.max(screenShake.until,performance.now()+ms)}
 function drawBuildFx(){
   const now=performance.now();buildFx=buildFx.filter(f=>now-f.start<f.life);
   for(const f of buildFx){const t=clamp((now-f.start)/f.life,0,1),fade=1-t;ctx.save();
@@ -1855,7 +1892,8 @@ function updateTestTelemetry(){
   setText('#telemetryDeckDeflText',`${deckDefl.toFixed(1)} u`,deckDeflLevel);
   setText('#telemetryDeckCurvatureText',`${deckCurvature.toFixed(2)}°/100u`,deckCurveLevel);
   setText('#telemetryBrokenText',String(sim.brokenCount||sim.broken?.size||0),(sim.brokenCount||sim.broken?.size||0)?'danger':'');
-  setText('#telemetryContact',contact,contact==='공중 이탈'?'danger':'');
+  if((dynamic?sim.physics.vehicle.blockedTime:sim.blockedTime)>=VEHICLE_STALL_SECONDS)contact='진행 막힘';
+  setText('#telemetryContact',contact,contact==='공중 이탈'?'danger':contact==='진행 막힘'?'warn':'');
   const vesselGroup=$('#telemetryVesselGroup');
   if(vesselGroup){
     vesselGroup.hidden=!stage.ship;
@@ -1885,6 +1923,7 @@ function resultAchievements(success,s){
 }
 
 function updateHUD(){
+  updateRepairReview();
   totalCost=calcCost(); ui.stageName.textContent=tutorialMode?'튜토리얼 · 훈련':(stage.sandbox?stage.name:`${stage.name} · ${difficultyMode==='easy'?'쉬움':'어려움'}`);ui.loadText.textContent=`${Math.round(stage.load/1000)} kN`;
   const ctxSet=$('#topContextSet'),ctxTitle=$('#topContextTitle'),campaignLevel=currentCampaignLevel?.();
   if(ctxSet)ctxSet.textContent=tutorialMode?'훈련 // 단계별 안내':stage.sandbox?'샌드박스 // 자유 실험':campaignLevel?`세트 ${String(getGameSet(campaignLevel.setId)?.number||1).padStart(2,'0')} // ${campaignLevel.type==='bonus'?'보너스':'계약'} ${displayContractId(campaignLevel)}`:`${stage.name} // ${difficultyMode==='easy'?'쉬움':'어려움'}`;
@@ -2354,6 +2393,10 @@ function addConnection(target){
   const L=dist(selected,target), limit=maxLengthForTool(); if(Number.isFinite(limit)&&L>limit){toast(`${MAT[tool].name} 최대 길이는 ${limit}입니다`);return}
   if(!evaluateContractConstraint('BUILD_ENVELOPE',{a:selected,b:target,mat:tool})){toast(isRoadTool()?'도로 폭이 건설 불가 구간과 겹칩니다':'건설 불가 구간을 통과하는 자재는 설치할 수 없습니다');return}
   const key=memberKey(selected.id,target.id);if(members.some(m=>memberKey(m.a,m.b)===key)){toast('이미 연결된 관절입니다');selected=null;draw();return}
+  if(tutorialMode&&tutorialCurrentStep()?.key==='triangle'){
+    const top=tutorialTopNodes()[1],pair=memberKey(selected.id,target.id);
+    if(![memberKey(1,top.id),memberKey(top.id,2)].includes(pair)){toast('표시된 점을 따라 빈 삼각형을 연결해 주세요.');return}
+  }
   if(tutorialMode&&tutorialCurrentStep()?.key==='roadComplete'&&!tutorialRoadGuideSegmentOK(selected,target)){
     toast('TUTORIAL // 도로는 표시된 기준점 사이를 순서대로 연결하세요');
     draw();
@@ -2375,10 +2418,85 @@ function addConnection(target){
   draw();
 }
 
+function clearRepairReview(){repairReview=null;repairUI.panel.hidden=true}
+function captureRepairReview(result){
+  clearRepairReview();
+  const ids=new Set([...(result.failureEvents||[]).map(event=>event.id),...(result.broken||[]),...(result.physics?.broken||[])]);
+  const records=[];
+  for(const id of ids){
+    const member=members.find(member=>member.id===id);
+    if(!member?.user)continue;
+    const a=nodeById(member.a),b=nodeById(member.b);
+    records.push({id,mat:member.mat,a:member.a,b:member.b,ax:a.x,ay:a.y,bx:b.x,by:b.y});
+  }
+  if(records.length)repairReview={records,index:0,active:false};
+}
+function repairMemberState(record,lookup=null){
+  const member=lookup?lookup.get(record.id):members.find(member=>member.id===record.id);
+  if(!member)return {member:null,modified:true};
+  const a=nodeById(member.a),b=nodeById(member.b);
+  return {member,a,b,modified:member.mat!==record.mat||member.a!==record.a||member.b!==record.b||a.x!==record.ax||a.y!==record.ay||b.x!==record.bx||b.y!==record.by};
+}
+function updateRepairReview(){
+  if(!repairReview?.active)return;
+  const record=repairReview.records[repairReview.index],state=repairMemberState(record);
+  repairUI.position.textContent=`${repairReview.index+1} / ${repairReview.records.length} · ${MAT[record.mat].name}`;
+  repairUI.status.textContent=!state.member?'삭제됨 · 새 연결을 만들고 다시 시험하세요.':state.modified?'수정됨 · 다시 시험해 변화를 확인하세요.':'주황 점선: 지난 시험에서 부러진 부재입니다.';
+  repairUI.previous.disabled=repairUI.next.disabled=repairReview.records.length<2;
+  repairUI.remove.disabled=!state.member;
+  repairUI.move.disabled=!state.member||![state.a,state.b].some(node=>node.user&&!node.deck&&!node.support);
+  repairUI.reinforce.disabled=!state.member||!['wood','steel','cable'].some(materialAllowed);
+}
+function beginRepairReview(){
+  if(!repairReview)return;
+  // Separate the previous failure markers from the broken set used by the solver.
+  sim=null;lastBroken=new Set();currentAnalysis=null;lastFullAnalysis=null;stressMode=false;
+  $('#stressBtn').classList.remove('isOn');
+  selected=null;dragging=null;repairReview.active=true;repairUI.panel.hidden=false;
+  ui.test.textContent='▶ 시험';ui.test.classList.remove('stop');
+  updateRepairReview();draw();
+}
+function drawRepairReview(){
+  if(!repairReview?.active||sim||currentGameScreen!==GAME_SCREEN.GAME)return;
+  const lookup=new Map(members.map(member=>[member.id,member]));
+  ctx.save();ctx.lineCap='round';
+  for(let index=0;index<repairReview.records.length;index++){
+    const state=repairMemberState(repairReview.records[index],lookup);
+    if(!state.member)continue;
+    const focused=index===repairReview.index,color=state.modified?'#8ddbb9':'#ffc47f';
+    ctx.setLineDash([9,6]);ctx.strokeStyle=color;ctx.lineWidth=(focused?5:2.5)/camera.zoom;line(state.a,state.b);ctx.setLineDash([]);
+    if(focused){
+      for(const node of [state.a,state.b]){ctx.beginPath();ctx.arc(node.x,node.y,14/camera.zoom,0,Math.PI*2);ctx.lineWidth=2/camera.zoom;ctx.stroke()}
+      const x=(state.a.x+state.b.x)/2,y=(state.a.y+state.b.y)/2;
+      ctx.font=`700 ${13/camera.zoom}px ui-monospace,monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+      const label=state.modified?'수정됨 · 재시험':`지난 시험 파단 ${index+1}`;
+      const width=ctx.measureText(label).width+16/camera.zoom;
+      ctx.fillStyle='#0c171d';ctx.fillRect(x-width/2,y-30/camera.zoom,width,23/camera.zoom);ctx.fillStyle=color;ctx.fillText(label,x,y-18/camera.zoom);
+    }
+  }
+  ctx.restore();
+}
+for(const [button,direction] of [[repairUI.previous,-1],[repairUI.next,1]])button.addEventListener('click',()=>{
+  repairReview.index=(repairReview.index+direction+repairReview.records.length)%repairReview.records.length;updateRepairReview();draw();
+});
+$('#repairDismiss').addEventListener('click',()=>{clearRepairReview();draw()});
+repairUI.remove.addEventListener('click',()=>{$('.toolBtn[data-tool="delete"]').click();toast('강조된 부재를 클릭하면 삭제합니다.')});
+repairUI.move.addEventListener('click',()=>{$('.toolBtn[data-tool="move"]').click();toast('강조된 부재 끝의 자유 연결점을 드래그하세요.')});
+repairUI.reinforce.addEventListener('click',()=>{
+  const state=repairMemberState(repairReview.records[repairReview.index]);
+  const material=['wood','steel','cable'].find(materialAllowed);
+  if(!state.member||!material)return;
+  $(`.toolBtn[data-tool="${material}"]`).click();selected=state.a;draw();toast('강조된 연결점에서 새 막대를 이어 주변을 보강하세요.');
+});
+
 canvas.addEventListener('pointerdown',e=>{
   if(sim||e.button===2)return;
   if(tutorialMode&&!tutorialCanvasInputAllowed()){toast('현재 튜토리얼 단계에서는 건설 입력이 잠겨 있습니다');return;}
   const p=screenToWorld(e.clientX,e.clientY);
+  if(repairReview?.active&&!selected&&!measureMode&&!['move','delete'].includes(tool)&&!findNode(p)){
+    const member=findMember(p),index=member?repairReview.records.findIndex(record=>record.id===member.id):-1;
+    if(index>=0){repairReview.index=index;updateRepairReview();draw();return}
+  }
   if(measureMode){
     const n=findNode(p,24);
     if(!n){toast('측정할 관절을 선택하세요');return;}
@@ -2397,9 +2515,10 @@ canvas.addEventListener('pointerdown',e=>{
     const deckN=nearestDeckJoint(p);
     if(deckN){snapshot();deckN.visible=true;deckN.activated=true;n=deckN;toast('도로 관절을 활성화했습니다');}
     else {
-      if(tutorialMode&&tutorialCurrentStep()?.key==='roadComplete'){toast('TUTORIAL // 점선 가이드의 도로 기준점만 클릭하세요');return}
+      if(tutorialMode){toast('동그라미로 표시된 기존 연결점을 눌러 주세요.');return}
       let q={x:snap(p.x),y:snap(p.y)};if(!canPlace(q)){toast('이 위치에는 관절을 놓을 수 없습니다');return} snapshot();n={id:Math.max(-1,...nodes.map(x=>x.id))+1,x:q.x,y:q.y,user:true,visible:true,deck:false,roadNode:isRoadTool(),support:null};nodes.push(n);history.pop();triggerNodeFx(n);playSfx('node');}
   }
+  if(tutorialMode&&['support','braceStart'].includes(tutorialCurrentStep()?.key)&&n.id!==(tutorialCurrentStep().key==='support'?0:1)){toast('동그라미로 표시된 시작점을 눌러 주세요.');return}
   addConnection(n);
 });
 function deleteJoint(n){
@@ -2411,7 +2530,7 @@ function deleteJoint(n){
 canvas.addEventListener('contextmenu',e=>{
   e.preventDefault();
   if(sim)return;
-  if(tutorialMode&&!['topChord','trussComplete','rightClick'].includes(tutorialCurrentStep()?.key))return;
+  if(tutorialMode){selected=null;updateTutorialGuide();draw();return;}
   if(measureMode&&(measureA||measureB)){measureA=null;measureB=null;updateMeasureTag();toast('측정을 초기화했습니다');draw();return;}
   // 자재 연속 설치 중에는 우클릭이 '설치 종료/선택 해제'로 동작한다.
   if(selected && isBuildTool()){
@@ -2856,7 +2975,7 @@ function createCollapsePhysics(reason,analysis=null,progress=0,brokenSeed=new Se
   });
   const physics={reason,particles,constraints,ropeChains,roadBends,fragments:[],broken,time:0,lastBreakTime:-9,dust:[],flashes:[],
     gravity:DEV_PHYSICS_TUNING.gravity,airDrag:DEV_PHYSICS_TUNING.airDrag,vehicle:{x,y,vx:devVehicleSpeed(stage)*simSpeed,vy:0,angle:0,angularVel:0,rot:0,wheelR,
-      attached:true,segmentId:null,bodyLift,mass:vehicleMass,airborneTime:0,fallStartY:y,impactSpeed:0},banks,maxDrop:0,roadBreaks:0,roadLoadDamage:new Map()};
+      attached:true,segmentId:null,bodyLift,mass:vehicleMass,airborneTime:0,fallStartY:y,impactSpeed:0,blockedTime:0},banks,maxDrop:0,roadBreaks:0,roadLoadDamage:new Map()};
   for(const constraint of constraints)if(constraint.broken)splitBrokenConstraint(physics,constraint);
   return physics;
 }
@@ -2944,7 +3063,7 @@ function findCollapseRoadSegment(physics,x,contactY=null,preferredId=null){
     let score=Math.abs(qx-x)*2;
     if(contactY!=null){
       const vertical=qy-contactY;
-      if(vertical<-18||vertical>165)continue;
+      if(vertical<-18||vertical>42)continue;
       score+=Math.abs(vertical);
     }else score+=Math.abs(qy-guideDeckYAt(x))*.10;
     if(c.id===preferredId)score-=18;
@@ -3310,7 +3429,28 @@ function stepCollapsePhysics(physics,dt){
   }
 
   const collision=findVehicleMemberCollision(previousPose,{...v,progress:0},null,physics);
-  if(collision){v.x=collision.pose.x;v.y=collision.pose.y;v.angle=collision.pose.angle;v.vx=0;v.vy=0;physics.vehicleCollision={...collision,poses:[{...v}]}}
+  if(collision){
+    const attemptedX=v.x,attemptedY=v.y;
+    v.x=collision.pose.x;v.y=collision.pose.y;v.angle=collision.pose.angle;
+    const obstacle=physics.constraints.find(c=>c.id===collision.memberId&&!c.broken)||physics.fragments.find(c=>c.m.id===collision.memberId);
+    if(obstacle){
+      const a=collapseParticle(physics,obstacle.a),b=collapseParticle(physics,obstacle.b),dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);
+      if(length>0){
+        let nx=-dy/length,ny=dx/length;
+        if((previousPose.x-a.x)*nx+(previousPose.y-a.y)*ny<0){nx=-nx;ny=-ny}
+        // Remove motion into the surface; a wall must not cancel gravity along it.
+        const normalSpeed=v.vx*nx+v.vy*ny;
+        if(normalSpeed<0){v.vx-=normalSpeed*nx;v.vy-=normalSpeed*ny}
+        const tangentTravel=(attemptedX-v.x)*-ny+(attemptedY-v.y)*nx;
+        v.x-=ny*tangentTravel;v.y+=nx*tangentTravel;
+      }
+    }
+    physics.vehicleCollision={...collision,poses:[{...v}]};
+  }else physics.vehicleCollision=null;
+  const driving=!DEV_STATE.vehicleFrozen;
+  const stopped=collision&&driving&&Math.hypot(v.x-previousPose.x,v.y-previousPose.y)<devVehicleSpeed(stage)*simSpeed*dt*.25;
+  v.blockedTime=stopped?v.blockedTime+dt:0;
+  if(stopped&&!v.attached)v.rot+=devVehicleSpeed(stage)*simSpeed*dt/v.wheelR;
   let maxDrop=0;for(const p of physics.particles.values())maxDrop=Math.max(maxDrop,p.y-p.oy);
   physics.maxDrop=Math.max(physics.maxDrop,maxDrop);updateCollapseEffects(physics,dt);
 }
@@ -3324,49 +3464,60 @@ function enterCollapseMode(s,reason,analysis,progress,now=performance.now()){
   setCoach('collapse',{sim:s,analysis:s.preCollapseAnalysis});
   toast(reason==='road-gap'?'OPEN DECK // 중력 기반 차량 물리 시뮬레이션':'DYNAMIC COLLAPSE // 중력 기반 물리 시뮬레이션');
 }
+function scheduleSimulationFrame(){
+  if(!sim)return;
+  if(sim.frame)cancelAnimationFrame(sim.frame);
+  sim.frame=requestAnimationFrame(tick);
+}
 function startUnstableCollapse(failureHint='missing-load-path'){
+  pauseBuildClock();
   setGamePhase(GAME_PHASE.TEST);
   const roadOpen=failureHint==='road-disconnected';
   const s={mode:'collapse',start:performance.now(),duration:0,progress:.02,shipProgress:stage.ship?0:null,maxRatio:0,maxDefl:0,worst:null,worstForce:0,failed:true,failReason:'collapse',last:null,broken:new Set(),brokenCount:0,serviceabilityFailed:false,vehiclePass:false,vesselPass:!stage.ship,vesselCollision:false,vesselClearance:Infinity,minVesselClearance:Infinity,maxDeckDefl:0,maxDeckCurvature:0,failureEvents:[],failureHint,roadPhysicsOnly:roadOpen};
   sim=s;enterCollapseMode(s,roadOpen?'road-gap':'unstable',null,.02,s.start);
   if(roadOpen)toast('OPEN ROAD // DYNAMIC VEHICLE PHYSICS');
-  ui.test.textContent='■ STOP';ui.test.classList.add('stop');updateTestTelemetry();requestAnimationFrame(tick);
+  ui.test.textContent='■ STOP';ui.test.classList.add('stop');updateTestTelemetry();scheduleSimulationFrame();
 }
 function tickCollapse(now){
   const s=sim;if(!s||s.mode!=='collapse')return;if(DEV_STATE.simPaused)return;
   const dt=(now-s.lastTick)/1000;s.lastTick=now;anim=now/16.67;
   stepCollapsePhysics(s.physics,dt);
-  if(s.physics.vehicleCollision){s.vehicleCollision=s.physics.vehicleCollision;s.failReason='vehicle-collision';draw();finishSimulation(false);return}
+  s.vehicleCollision=s.physics.vehicleCollision;
+  if(s.vehicleCollision)s.failReason='vehicle-collision';
+  else if(s.failReason==='vehicle-collision')s.failReason='collapse';
+  updateVehicleRetry(s.physics.vehicle.blockedTime>=VEHICLE_STALL_SECONDS);
   s.broken=s.physics.broken;s.brokenCount=s.broken.size;s.maxDefl=Math.max(s.maxDefl,s.physics.maxDrop);
   const deckMetrics=collapseDeckMetrics(s.physics);s.maxDeckDefl=Math.max(s.maxDeckDefl||0,deckMetrics.deckDeflection);s.maxDeckCurvature=Math.max(s.maxDeckCurvature||0,deckMetrics.deckCurvature);
-  const elapsed=(now-s.collapseStart)/1000;
   if(stage.ship){
     s.shipProgress=clamp((now-s.start)/(4300/(simSpeed*Math.max(.1,devVehicleSpeedScale(stage)))),0,1);
     const vc=evaluateVesselSweptClearance(s.shipProgress,null,s.physics);
     s.vesselClearance=vc.clearance;s.minVesselClearance=Math.min(s.minVesselClearance,vc.clearance);
-    if(vc.collision){s.vesselCollision=true;s.vesselPass=false;s.failReason='vessel-collision';draw();updateTestTelemetry();finishSimulation(false);return}
-    if(s.shipProgress>=.999)s.vesselPass=true;
+    if(vc.collision){s.vesselCollision=true;s.vesselPass=false;s.failReason='vessel-collision'}
+    if(s.shipProgress>=.999&&!s.vesselCollision)s.vesselPass=true;
   }
   draw();updateTestTelemetry();
   const vehicleGone=s.physics.vehicle.y>H+150;
-  const enoughTime=elapsed>3.15/Math.sqrt(simSpeed);
-  if((vehicleGone&&elapsed>1.7)||elapsed>4.45/Math.sqrt(simSpeed)){
+  const vehicleExited=s.physics.vehicle.attached&&s.physics.vehicle.x>=vehiclePoseAt(1,null,0).x;
+  if(vehicleGone||vehicleExited){
     finishSimulation(false);return;
   }
-  requestAnimationFrame(tick);
+  scheduleSimulationFrame();
 }
 function startSimulation(fromTutorial=false){
   if(tutorialMode&&!fromTutorial){tutorialHandleAction('test');return}
   if(sim){stopSimulation();return}
+  updateVehicleRetry();
+  pauseBuildClock();
+  clearRepairReview();
   if(!stage.sandbox && totalCost>stage.budget*2){const fs={mode:'static',failReason:'budget-overrun',maxRatio:0,maxDefl:0,maxDeckDefl:0,maxDeckCurvature:0,brokenCount:0,vehiclePass:false,vesselPass:!stage.ship,vesselCollision:false,minVesselClearance:Infinity,failureEvents:[]};toast('BUDGET OVERRUN // TEST BLOCKED');setCoach('budget');showResult(false,fs);return}
   setGamePhase(GAME_PHASE.TEST);
   selected=null;lastBroken=new Set();if(currentAnalysis)delete currentAnalysis.vehicleCollision;playSfx('test');
   const probe=assemble(vehiclePoseAt(0,null,0).x,lastBroken);
   if(!probe.ok){startUnstableCollapse(roadPathConnected()?'missing-load-path':'road-disconnected');return}
   sim={mode:'static',start:performance.now(),duration:6200/(simSpeed*Math.max(.1,devVehicleSpeedScale(stage))),progress:0,shipProgress:stage.ship?0:null,maxRatio:0,maxDefl:0,worst:null,worstForce:0,failed:false,failReason:null,last:probe,broken:new Set(),brokenCount:0,serviceabilityFailed:false,vehiclePass:false,vesselPass:!stage.ship,vesselCollision:false,vesselClearance:Infinity,minVesselClearance:Infinity,maxDeckDefl:0,maxDeckCurvature:0,failureEvents:[],failureHint:null,collapseReason:null,coachLastUpdate:0,coachHoldUntil:0};
-  ui.test.textContent='■ STOP';ui.test.classList.add('stop');stressMode=true;updateTestTelemetry();requestAnimationFrame(tick);
+  ui.test.textContent='■ STOP';ui.test.classList.add('stop');stressMode=true;updateTestTelemetry();scheduleSimulationFrame();
 }
-function stopSimulation(){setGamePhase(GAME_PHASE.BUILD);sim=null;ui.test.textContent='▶ 시험';ui.test.classList.remove('stop');updateTestTelemetry();draw()}
+function stopSimulation(){if(sim?.frame)cancelAnimationFrame(sim.frame);setGamePhase(GAME_PHASE.BUILD);sim=null;updateVehicleRetry();resumeBuildClock();ui.test.textContent='▶ 시험';ui.test.classList.remove('stop');updateTestTelemetry();draw()}
 function deterministicContractHash(text){let h=2166136261;for(const ch of String(text||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function applyScheduledMemberFailure(s,a,p,now){
   const evt=stage.forcedFailure;if(!evt||s.forcedFailureTriggered||p<(evt.progress??.55)||!a?.ok)return a;
@@ -3378,9 +3529,20 @@ function applyScheduledMemberFailure(s,a,p,now){
   return assemble(vehiclePoseAt(p,null,0).x,s.broken);
 }
 function tick(now){
-  if(!sim)return;if(DEV_STATE.simPaused)return;
+  if(!sim)return;
+  if(sim.frame){cancelAnimationFrame(sim.frame);sim.frame=0}
+  if(DEV_STATE.simPaused)return;
   if(sim.mode==='collapse'){tickCollapse(now);return}
   const s=sim,previousProgress=s.progress;anim=now/16.67;
+  if(s.vehicleCollision){
+    const dt=clamp((now-s.blockedLastTick)/1000,0,.03);s.blockedLastTick=now;
+    const scale=stage.vehicleRenderScale||devVehicleRenderScale(stage),wheelR=(stage.vehicle==='TRUCK'?14:stage.vehicle==='BUS'?10.5:9.5)*scale;
+    if(!DEV_STATE.vehicleFrozen){
+      s.blockedTime+=dt;
+      for(const pose of s.vehicleCollision.poses)pose.rot+=devVehicleSpeed(stage)*simSpeed*dt/wheelR;
+    }
+    updateVehicleRetry(s.blockedTime>=VEHICLE_STALL_SECONDS);draw();updateTestTelemetry();scheduleSimulationFrame();return;
+  }
   const raw=DEV_STATE.vehicleFrozen?clamp(s.progress||0,0,1):clamp((now-s.start)/s.duration,0,1);
   const p=raw<.12?(.5*(1-Math.cos(Math.PI*raw/.12))*.12):raw>.88?(.88+.5*(1-Math.cos(Math.PI*(raw-.88)/.12))*.12):raw;
   s.progress=p;
@@ -3393,11 +3555,11 @@ function tick(now){
     if(roadGap){s.failureHint='road-disconnected';s.roadPhysicsOnly=true}
     enterCollapseMode(s,roadGap?'road-gap':'solver-instability',s.last?.ok?s.last:null,p,now);
     if(roadGap)toast('ROAD EDGE // VEHICLE NOW FOLLOWS GRAVITY');
-    draw();requestAnimationFrame(tick);return
+    draw();scheduleSimulationFrame();return
   }
 
   a=applyScheduledMemberFailure(s,a,p,now);
-  if(!a.ok){enterCollapseMode(s,'post-fracture-instability',s.last?.ok?s.last:null,p,now);draw();requestAnimationFrame(tick);return}
+  if(!a.ok){enterCollapseMode(s,'post-fracture-instability',s.last?.ok?s.last:null,p,now);draw();scheduleSimulationFrame();return}
 
   // Capacity failure removes the member, then the remaining structure is re-evaluated.
   let breakPass=0;
@@ -3412,7 +3574,7 @@ function tick(now){
     toast(`${MAT[a.worst.mat].name} ${failLabel} // 남은 하중 경로 재해석`);kickShake(5.5,180);playSfx('break');
     const prior=a;
     a=assemble(x,s.broken);breakPass++;
-    if(!a.ok){enterCollapseMode(s,'post-fracture-instability',prior,p,now);draw();requestAnimationFrame(tick);return}
+    if(!a.ok){enterCollapseMode(s,'post-fracture-instability',prior,p,now);draw();scheduleSimulationFrame();return}
   }
 
   const offsets=stage.doubleVehicle?[0,stage.doubleVehicle.spacing||180]:[0];
@@ -3425,7 +3587,8 @@ function tick(now){
     s.progress=collision.pose.progress;s.last=a;lastFullAnalysis=a;s.failed=true;s.failReason='vehicle-collision';
     s.vehicleCollision={...collision,poses:offsets.map(offset=>vehiclePoseAt(s.progress,a,2.4,offset))};
     s.vehicleCollision.poses[offsets.indexOf(collision.offset)]=collision.pose;
-    draw();finishSimulation(false);return;
+    s.blockedTime=0;s.blockedLastTick=now;
+    draw();updateTestTelemetry();scheduleSimulationFrame();return;
   }
   s.last=a;lastFullAnalysis=a;
   if(a.maxRatio>s.maxRatio){s.maxRatio=a.maxRatio;s.worst=a.worst;s.worstForce=a.worst?a.forces.get(a.worst.id).force:0}
@@ -3449,7 +3612,7 @@ function tick(now){
   // running so students can observe the deformed structure. Only the larger
   // collapseDeflLimit hands the simulation over to Dynamic Physics.
   const collapseDeflLimit=getCollapseDeflLimit(stage);
-  if(!stage.sandbox && a.maxDefl>collapseDeflLimit){enterCollapseMode(s,'excessive-deflection',a,p,now);draw();requestAnimationFrame(tick);return}
+  if(!stage.sandbox && a.maxDefl>collapseDeflLimit){enterCollapseMode(s,'excessive-deflection',a,p,now);draw();scheduleSimulationFrame();return}
 
   currentAnalysis={ok:true,maxRatio:s.maxRatio,maxDefl:s.maxDefl,deckDeflection:s.maxDeckDefl||0,deckCurvature:s.maxDeckCurvature||0,brokenCount:s.brokenCount,serviceabilityFailed:s.serviceabilityFailed};
   
@@ -3459,10 +3622,12 @@ function tick(now){
   }
   updateTestTelemetry();draw();
   if(raw>=1){lastBroken=new Set(s.broken);s.vehiclePass=true;finishSimulation(true);return}
-  requestAnimationFrame(tick);
+  scheduleSimulationFrame();
 }
 function finishSimulation(vehicleSuccess){
   const s=sim;if(!s)return;
+  if(s.frame)cancelAnimationFrame(s.frame);
+  updateVehicleRetry();
   s.vehiclePass=!!vehicleSuccess;
   const vesselRequired=!!stage.ship,vesselPass=!vesselRequired||!!s.vesselPass;
   const serviceFail=!stage.sandbox&&s.mode!=='collapse'&&(s.maxDefl||0)>stage.maxDefl;
@@ -3480,7 +3645,7 @@ function finishSimulation(vehicleSuccess){
     const wasSuccess=!!vehicleSuccess;
     tutorialTestRunning=false;
     sim=null;draw();
-    if(wasSuccess){toast('훈련 시험 통과 // 차량 통과 확인');setTimeout(()=>finishTutorialStage(false),500)}
+    if(wasSuccess){toast('차가 건넜어요! 이제 AI에게 질문해 볼까요?');setGamePhase(GAME_PHASE.BUILD);const panel=$('#stageTutorial');panel.hidden=false;panel.style.display='';advanceTutorialStep()}
     else {tutorialTransitioning=false;const panel=$('#stageTutorial');if(panel){panel.hidden=false;panel.style.display='';}const badge=$('#tutorialStageBadge');if(badge)badge.style.opacity='1';toast('훈련 시험 실패 // 구조를 확인하세요');renderStageTutorialStep()}
     return;
   }
@@ -3674,9 +3839,22 @@ function completeEducationCourse(){localStorage.setItem('trusslab-education-comp
 
 
 function animateResultCounters(){
-  const els=[...ui.resultCard.querySelectorAll('[data-count]')];if(!els.length)return;
-  const start=performance.now(),dur=620;els.forEach(e=>e.classList.add('counting'));
-  const frame=now=>{const t=clamp((now-start)/dur,0,1),eased=1-Math.pow(1-t,3);els.forEach(el=>{const v=Number(el.dataset.count)||0;el.textContent=String(Math.round(v*eased))});if(t<1)requestAnimationFrame(frame);else els.forEach(e=>e.classList.remove('counting'))};requestAnimationFrame(frame)
+  if(animateResultCounters.raf)cancelAnimationFrame(animateResultCounters.raf);
+  animateResultCounters.raf=0;
+  const els=[...ui.resultCard.querySelectorAll('[data-count]')];
+  if(!els.length)return;
+  const finish=()=>els.forEach(el=>{el.textContent=String(Number(el.dataset.count)||0);el.classList.remove('counting')});
+  if(motionReduced()){finish();return}
+  const start=performance.now(),duration=480;
+  els.forEach(el=>el.classList.add('counting'));
+  const frame=now=>{
+    if(!ui.result.classList.contains('show')){finish();animateResultCounters.raf=0;return}
+    const progress=clamp((now-start)/duration,0,1),eased=1-Math.pow(1-progress,3);
+    els.forEach(el=>el.textContent=String(Math.round((Number(el.dataset.count)||0)*eased)));
+    if(progress<1&&!motionReduced())animateResultCounters.raf=requestAnimationFrame(frame);
+    else {finish();animateResultCounters.raf=0}
+  };
+  animateResultCounters.raf=requestAnimationFrame(frame);
 }
 
 function roadPathConnected(){
@@ -3718,7 +3896,7 @@ function classifyFailureCauses(s,success=false){
   if(!keys.length&&s.mode==='collapse'&&!s.vehicleCollision)add('missing-load-path');
   return keys.map(k=>({key:k,...failureLearningMap(k)}));
 }
-function failureLearningHTML(causes){if(!causes.length)return '';return `<div class="failureLearnPanel"><div class="failureLearnTitle">FAILURE DIAGNOSIS // LEARN WHY</div>${causes.map((c,i)=>`<div class="failureCauseRow"><div class="failureCauseName">${c.label.toUpperCase()}</div><div class="failureCauseDetail">RELATED MODULE // ${c.moduleName}</div><button class="learnWhyBtn" data-learn-cause="${c.key}" data-learn-module="${c.module}">LEARN WHY →</button></div>`).join('')}</div>`}
+function failureLearningHTML(causes){if(!causes.length)return '';return `<div class="failureLearnPanel"><div class="failureLearnTitle">먼저 확인할 부분</div>${causes.map((c,i)=>`<div class="failureCauseRow"><div class="failureCauseName">${c.label.toUpperCase()}</div><div class="failureCauseDetail">관련 학습 · ${c.moduleName}</div><button class="learnWhyBtn" data-learn-cause="${c.key}" data-learn-module="${c.module}">원리 알아보기 →</button></div>`).join('')}</div>`}
 
 function recommendedEducationModuleForLevel(level){
   if(!level)return 0;
@@ -3750,6 +3928,7 @@ function resultProgramNotice(level,success){
 }
 
 function showResult(success,s){
+  if(success)clearRepairReview();else captureRepairReview(s);
   bridgeRanking.stop();
   const rankingPanel=$('#rankingPanel'),rankingLayout=rankingPanel.parentElement;
   rankingPanel.hidden=true;rankingPanel.replaceChildren();rankingLayout.classList.remove('withRanking');
@@ -3765,6 +3944,7 @@ function showResult(success,s){
   const strengthPass=!collapsed&&(s.brokenCount||0)===0&&(s.maxRatio||0)<=1.02;
   const servicePass=!collapsed&&!serviceFail&&(s.maxDefl||0)<=stage.maxDefl;
   const stageTimeMs=stage.sandbox?null:(success?finalizeStageClock():pauseStageClock(true));
+  const buildTimeMs=stage.sandbox?null:Math.round(getBuildElapsed());
   const previousCampaignBest=level?levelProgressFor(level.id).bestTimeMs:null;
 
   const efficiency=clamp(Math.round(55+45*(1-totalCost/stage.budget)),0,100);
@@ -3812,7 +3992,8 @@ function showResult(success,s){
   let title,summary;
   if(s.vehicleCollision){title='차량 충돌';summary='차체 또는 바퀴가 구조 부재와 부딪혀 통과하지 못했습니다. 도로 위 차체 높이와 진입부의 통행 공간을 확보하세요.'}
   else if(stage.sandbox){title=success?'실험 완료':'동적 붕괴';summary='샌드박스 실험이 끝났습니다. 응력 색과 변형을 비교한 뒤 하중이나 구조를 바꿔 다시 시험해 보세요.'}
-  else if(vesselCollision){title='선박 충돌';summary='TEST FAILED // 최소 폭·높이와 선박 이동 범위를 포함한 navigation clearance envelope를 끝까지 확보해야 합니다.'}
+  else if(s.failReason==='budget-overrun'){title='시험 예산 초과';summary=`설계 비용이 시험 허용 한도 ₩${(stage.budget*2).toLocaleString()}을 넘었습니다. 중복 부재를 줄이거나 필요한 구간에만 강한 재료를 사용해 보세요.`}
+  else if(vesselCollision){title='선박 충돌';summary='선박이 지나는 공간에 다리가 닿았습니다. 교량의 변형까지 고려해 항로의 최소 폭과 높이를 확보해 보세요.'}
   else if(serviceFail){title='사용성 기준 실패';summary='차량은 끝까지 통과했지만 허용 변형 기준을 만족하지 못했습니다. 결과창을 닫으면 변형된 구조를 그대로 관찰할 수 있습니다.'}
   else if(level?.type==='bonus'){title=success?'보너스 계약 완료':'실험 실패';summary=success?`선택 실험을 완료했습니다. <strong style="color:#e3c45b">${koBadgeLabel(level.badge||'ENGINEERING BADGE')}</strong>가 Engineering Record에 기록되었습니다.`:'보너스 실험 실패는 메인 캠페인 진행도에 영향을 주지 않습니다. 원인을 분석하고 같은 실험을 다시 시도할 수 있습니다.'}
   else if(success){title=level?'계약 완료':'미션 성공';summary=`${stage.ship?'차량과 선박이 모두 끝까지 통과했습니다.':'차량이 끝까지 통과했습니다.'} ${s.brokenCount?`중간에 <strong style="color:#fff">${s.brokenCount}개 부재</strong>가 끊어졌지만 남은 구조가 하중을 전달했습니다. `:''}${level?`<strong style="color:#fff">${stars}</strong>`:''}`}
@@ -3839,21 +4020,32 @@ function showResult(success,s){
     const solverReport=`<div class="resultSolverSummary"><dl class="completionSolver">${[['최대 이용률',Math.round((s.maxRatio||0)*100)+'%'],['최대 변형',(s.maxDefl||0).toFixed(1)+' u'],['바닥판 변형',(s.maxDeckDefl||0).toFixed(1)+' u'],['곡률',(s.maxDeckCurvature||0).toFixed(2)+'°/100u'],['사용성 한계',stage.maxDefl.toFixed(1)+' u'],['붕괴 한계',collapseLimit.toFixed(1)+' u'],['파단 수',(s.brokenCount||0)+'개'],['설계 비용','₩'+totalCost.toLocaleString()]].map(([label,value])=>`<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}${stage.ship?`<div><dt>최소 통항 여유</dt><dd>${Number.isFinite(s.minVesselClearance)?Math.max(0,s.minVesselClearance).toFixed(1)+' u':'—'}</dd></div>`:''}</dl></div>`;
     ui.resultCard.innerHTML=`<button type="button" class="completionDismiss" id="closeResult" aria-label="결과 닫기" title="결과 닫기">${glyph(paths.close)}</button>
       <nav class="completionBreadcrumb" aria-label="완료한 계약 위치"><span>캠페인 기록</span><i aria-hidden="true">/</i>${set?`<span>세트 ${String(set.number).padStart(2,'0')}</span><i aria-hidden="true">/</i>`:''}<strong>${devEsc(contractLabel)}</strong></nav>
-      <header class="completionHero"><div class="completionHeading"><span class="completionSeal">${glyph(paths.check)}</span><div><span class="completionEyebrow">MISSION ACCOMPLISHED</span><h2>${title}</h2><p>${devEsc(level?.title||stage.title)}</p></div></div><aside class="completionAward">${award}</aside></header>
+      <header class="completionHero"><div class="completionHeading"><span class="completionSeal">${glyph(paths.check)}</span><div><span class="completionEyebrow">MISSION ACCOMPLISHED</span><h2 id="resultTitle">${title}</h2><p>${devEsc(level?.title||stage.title)}</p></div></div><aside class="completionAward">${award}</aside></header>
       <p class="completionSummary">${completionSummary}</p>${programNotice}
       <section class="completionRecords" aria-label="클리어 기록"><div class="completionCurrent"><span class="completionRecordLabel">${glyph(paths.clock)}이번 클리어 시간</span><strong class="completionTime">${formatStageTime(stageTimeMs)}</strong><span class="completionRecordMeta">${difficultyMode==='easy'?'쉬움':'어려움'} 난이도 <i aria-hidden="true">/</i> ${devEsc(contractLabel)}</span></div><div class="completionBest"><span class="completionRecordLabel">개인 최고 기록</span><strong class="completionBestTime">${formatStageTime(bestTimeMs)}</strong><span class="completionRecordState${newBest?' newBest':''}">${glyph(paths.check)}${newBest?(previousCampaignBest==null?'첫 클리어 기록':'개인 최고 기록 경신'):'최고 기록 저장됨'}</span></div></section>
       <div class="completionDiagnostics">${verdict}<div class="engineeringGrade"><span>설계 평가 // 추가 목표 ${achievements.earned}/3</span><strong class="${grade==='B'?'gradeB':grade==='C'?'gradeC':''}">${grade}</strong></div>${achievements.html}<div class="resultGrid"><div class="scoreBox"><b data-count="${safety}">0</b><span>안전성</span></div><div class="scoreBox"><b data-count="${efficiency}">0</b><span>효율</span></div><div class="scoreBox"><b data-count="${stiffness}">0</b><span>강성</span></div><div class="scoreBox"><b data-count="${triangleCount()}">0</b><span>삼각형</span></div></div>${solverReport}</div>
       <div class="completionNextSteps">${primaryAction}${extraActions}</div><footer class="completionFooter"><span>기록이 이 브라우저에 저장되었습니다.</span><div class="completionDesignActions">${designAction}${action('retryLevelBtn','처음부터 다시',paths.retry)}${action('resultLevelSelectBtn','계약 지도',paths.map)}</div></footer>`;
-  }else
-  ui.resultCard.innerHTML=`<button class="iconBtn resultCloseBtn" id="closeResult" title="결과 닫기">×</button><div class="resultKicker">${kicker} // ${success?'완료':'검토 필요'}</div><h1>${title}</h1>${success&&!stage.sandbox?`<div class="engineeringGrade"><span>설계 평가 // 추가 목표 ${achievements.earned}/3</span><strong class="${grade==='B'?'gradeB':grade==='C'?'gradeC':''}">${grade}</strong></div>`:''}${rewardLine}<div class="sub resultSummary">${summary}</div>${programNotice}${vesselNotice}${serviceNotice}${verdict}${failureLearn}${timePanel}${success&&!stage.sandbox?achievements.html:''}<div class="resultGrid"><div class="scoreBox"><b data-count="${safety}">0</b><span>안전성</span></div><div class="scoreBox"><b data-count="${efficiency}">0</b><span>효율</span></div><div class="scoreBox"><b data-count="${stiffness}">0</b><span>강성</span></div><div class="scoreBox"><b data-count="${triangleCount()}">0</b><span>삼각형</span></div></div><div class="sub resultSolverSummary">최대 이용률 <strong>${Math.round((s.maxRatio||0)*100)}%</strong> · 최대 변형 <strong>${(s.maxDefl||0).toFixed(1)} u</strong> · 바닥판 <strong>${(s.maxDeckDefl||0).toFixed(1)} u</strong> · 곡률 <strong>${(s.maxDeckCurvature||0).toFixed(2)}°/100u</strong> · 사용성 한계 <strong>${stage.maxDefl.toFixed(1)} u</strong> · 붕괴 한계 <strong>${collapseLimit.toFixed(1)} u</strong>${vesselStats} · 파단 수 <strong>${s.brokenCount||0}</strong> · 비용 <strong>₩${totalCost.toLocaleString()}</strong></div><div class="bigActions resultActions">${eduButton}${recommendedButton}${programButton}${continueButton}</div>`;
+  }else if(!stage.sandbox){
+    const failureMetrics=[['설계 비용','₩'+totalCost.toLocaleString()],['파단 부재',(s.brokenCount||0)+'개'],['최대 변형',(s.maxDefl||0).toFixed(1)+' u']];
+    ui.resultCard.innerHTML=`<button type="button" class="completionDismiss" id="closeResult" aria-label="결과 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+      <div class="completionBreadcrumb"><span>${devEsc(contractLabel)}</span><i aria-hidden="true">/</i><strong>설계 검토</strong></div>
+      <header class="failureHero"><span class="failureSeal" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4 30 28H2L16 4Zm0 8v7m0 3v2"/></svg></span><div><span class="failureEyebrow">다음 시험을 위한 발견</span><h2 id="resultTitle">${title}</h2><p>${devEsc(level?.title||stage.title)}</p></div></header>
+      <p class="failureSummary">${summary}</p>
+      <dl class="failureMetrics">${failureMetrics.map(([label,value])=>`<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl>
+      <div class="failureActions">${continueButton}</div><p class="failureFootnote">설계는 그대로 남아 있습니다. 수정한 뒤 다시 시험해 보세요.</p>
+      ${failureLearn}
+      <details class="failureDetails"><summary>구조 판정과 해석 수치</summary>${verdict}${vesselNotice}${serviceNotice}<p>최대 이용률 <b>${Math.round((s.maxRatio||0)*100)}%</b> · 사용성 한계 <b>${stage.maxDefl.toFixed(1)} u</b> · 붕괴 한계 <b>${collapseLimit.toFixed(1)} u</b> · 바닥판 변형 <b>${(s.maxDeckDefl||0).toFixed(1)} u</b> · 곡률 <b>${(s.maxDeckCurvature||0).toFixed(2)}°/100u</b>${vesselStats}</p></details>`;
+  }else ui.resultCard.innerHTML=`<button class="iconBtn resultCloseBtn" id="closeResult" title="결과 닫기">×</button><div class="resultKicker">${kicker} // ${success?'완료':'검토 필요'}</div><h1 id="resultTitle">${title}</h1>${success&&!stage.sandbox?`<div class="engineeringGrade"><span>설계 평가 // 추가 목표 ${achievements.earned}/3</span><strong class="${grade==='B'?'gradeB':grade==='C'?'gradeC':''}">${grade}</strong></div>`:''}${rewardLine}<div class="sub resultSummary">${summary}</div>${programNotice}${vesselNotice}${serviceNotice}${verdict}${failureLearn}${timePanel}${success&&!stage.sandbox?achievements.html:''}<div class="resultGrid"><div class="scoreBox"><b data-count="${safety}">0</b><span>안전성</span></div><div class="scoreBox"><b data-count="${efficiency}">0</b><span>효율</span></div><div class="scoreBox"><b data-count="${stiffness}">0</b><span>강성</span></div><div class="scoreBox"><b data-count="${triangleCount()}">0</b><span>삼각형</span></div></div><div class="sub resultSolverSummary">최대 이용률 <strong>${Math.round((s.maxRatio||0)*100)}%</strong> · 최대 변형 <strong>${(s.maxDefl||0).toFixed(1)} u</strong> · 바닥판 <strong>${(s.maxDeckDefl||0).toFixed(1)} u</strong> · 곡률 <strong>${(s.maxDeckCurvature||0).toFixed(2)}°/100u</strong> · 사용성 한계 <strong>${stage.maxDefl.toFixed(1)} u</strong> · 붕괴 한계 <strong>${collapseLimit.toFixed(1)} u</strong>${vesselStats} · 파단 수 <strong>${s.brokenCount||0}</strong> · 비용 <strong>₩${totalCost.toLocaleString()}</strong></div><div class="bigActions resultActions">${eduButton}${recommendedButton}${programButton}${continueButton}</div>`;
   previousGameScreen=GAME_SCREEN.GAME;currentGameScreen=GAME_SCREEN.RESULT;document.body.dataset.gameScreen=GAME_SCREEN.RESULT;ui.result.classList.add('show');animateResultCounters();playSfx(success?'success':'fail');
   if(success&&level&&!stage.sandbox&&projectSettings.ranking?.enabled){
     const indices=new Map(nodes.map((node,index)=>[node.id,index]));
     const design={nodes:nodes.map(node=>[node.x,node.y]),members:members.filter(member=>member.user).map(member=>[indices.get(member.a),indices.get(member.b),member.mat])};
     rankingLayout.classList.add('withRanking');
-    bridgeRanking.show(rankingPanel,{levelId:level.id,levelTitle:level.title,difficulty:difficultyMode,cost:totalCost,timeMs:Math.max(1,Math.round(stageTimeMs)),peakRatio:s.maxRatio||0,design,ineligible:!!projectSettings.developer?.enabled||devSessionActive()||JSON.stringify(MAT)!==JSON.stringify(DEV_DEFAULTS.materials)||JSON.stringify(DEV_PHYSICS_TUNING)!==JSON.stringify(DEV_DEFAULTS.physics)||JSON.stringify(DEV_VEHICLE_PROFILES)!==JSON.stringify(DEV_DEFAULTS.vehicles)||JSON.stringify(LEVEL_LIBRARY)!==JSON.stringify(DEV_DEFAULTS.levels)});
+    bridgeRanking.show(rankingPanel,{levelId:level.id,levelTitle:level.title,difficulty:difficultyMode,cost:totalCost,timeMs:Math.max(1,Math.round(stageTimeMs)),buildTimeMs,peakRatio:s.maxRatio||0,design,ineligible:!!projectSettings.developer?.enabled||devSessionActive()||JSON.stringify(MAT)!==JSON.stringify(DEV_DEFAULTS.materials)||JSON.stringify(DEV_PHYSICS_TUNING)!==JSON.stringify(DEV_DEFAULTS.physics)||JSON.stringify(DEV_VEHICLE_PROFILES)!==JSON.stringify(DEV_DEFAULTS.vehicles)||JSON.stringify(LEVEL_LIBRARY)!==JSON.stringify(DEV_DEFAULTS.levels)});
   }
-  const closeResult=()=>{setGamePhase(GAME_PHASE.BUILD);ui.result.classList.remove('show');currentGameScreen=GAME_SCREEN.GAME;document.body.dataset.gameScreen=GAME_SCREEN.GAME;if(!success)resumeClockAfterFailedResult();draw()};
+  const closeResult=()=>{setGamePhase(GAME_PHASE.BUILD);ui.result.classList.remove('show');currentGameScreen=GAME_SCREEN.GAME;document.body.dataset.gameScreen=GAME_SCREEN.GAME;if(!success){beginRepairReview();resumeClockAfterFailedResult()}resumeBuildClock();draw();ui.test.focus({preventScroll:true})};
+  if(!success&&repairReview&&$('#returnDesignBtn'))$('#returnDesignBtn').textContent='파단 부위 수정';
+  $('#closeResult').focus({preventScroll:true});
   $('#closeResult').onclick=closeResult;$('#returnDesignBtn')?.addEventListener('click',closeResult);$('#retryStage')?.addEventListener('click',closeResult);
   $('#retryLevelBtn')?.addEventListener('click',()=>{setGamePhase(GAME_PHASE.BUILD);ui.result.classList.remove('show');currentGameScreen=GAME_SCREEN.GAME;document.body.dataset.gameScreen=GAME_SCREEN.GAME;resetStage(stageIndex)});
   $('#resultLevelSelectBtn')?.addEventListener('click',()=>{ui.result.classList.remove('show');openLevelSelect(level?.setId||'set01')});
@@ -3863,6 +4055,16 @@ function showResult(success,s){
   $('#programSummaryBtn')?.addEventListener('click',()=>{ui.result.classList.remove('show');changeGameScreen(GAME_SCREEN.PROGRAM_COMPLETE)});
   $$('.learnWhyBtn').forEach(btn=>btn.addEventListener('click',()=>openEducationCenter(Number(btn.dataset.learnModule),btn.dataset.learnCause,true)));
 }
+
+ui.result.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){event.preventDefault();event.stopPropagation();$('#closeResult').click()}
+  if(event.key==='Tab'){
+    const targets=[...ui.result.querySelectorAll('button:not(:disabled),input:not(:disabled),summary,a[href]')].filter(element=>element.getClientRects().length);
+    const first=targets[0],last=targets[targets.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+  }
+});
 
 function draw(){
   lastEnvironmentDraw=performance.now();
@@ -3893,7 +4095,7 @@ function draw(){
     else if(analysis){const i=analysis.index.get(n.id);p={x:n.x+analysis.U[2*i]*deformScale,y:n.y+analysis.U[2*i+1]*deformScale}}
     drawNodeVisual(n,p);
   });
-  drawBuildFx();
+  drawBuildFx();drawRepairReview();
 
   if(!physics){
     drawPlacementGuide();
@@ -4233,13 +4435,13 @@ function shade(h,amt){let rgb;if(h.startsWith('#'))rgb=hex(h);else{const m=h.mat
 function poly(pts,fill,stroke=null){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath(); if(fill){ctx.fillStyle=fill;ctx.fill()} if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
 
 function drawBackground(){
-  winterEnvironment.draw(ctx,camera,stage,graphicsPrefs,accessibilityPrefs.reducedMotion,dpr*scaleX,dpr*scaleY,performance.now());
+  winterEnvironment.draw(ctx,camera,stage,graphicsPrefs,motionReduced(),dpr*scaleX,dpr*scaleY,performance.now());
   drawSiteEnvironmentOverlay();
 }
 
 function drawSiteEnvironmentOverlay(){
   ctx.save();
-  const weatherTime=accessibilityPrefs.reducedMotion?0:performance.now()/16.67;
+  const weatherTime=motionReduced()?0:performance.now()/16.67;
   const weatherDetail=graphicsPrefs.simple?(graphicsPrefs.optimized?2:4):(graphicsPrefs.optimized?6:12);
   const waterRect=stage?.forbidden?.find(r=>r.kind==='water'),waterY=stage?.navigationClearance?.waterY??waterRect?.y;
   if(Number.isFinite(waterY)){
@@ -4712,7 +4914,7 @@ window.addEventListener('keydown',e=>{
   if(k==='ArrowUp')panCamera(0,-55);else if(k==='ArrowDown')panCamera(0,55);else if(k==='ArrowLeft')panCamera(-70,0);else if(k==='ArrowRight')panCamera(70,0);else if(k==='+'||k==='=')zoomCamera(1.12);else if(k==='-')zoomCamera(.89);else if(k==='0')resetCamera();else if(k.toLowerCase()==='g')toggleGrid();else if(k.toLowerCase()==='m')toggleSnap();else if(k.toLowerCase()==='l')toggleLoadPath();else if(k.toLowerCase()==='s'){if(isAdvancedUI()||tutorialMode)scanStructure();else toast('SCAN // Advanced Mode에서 활성화됩니다')}else if(k.toLowerCase()==='r'){if(isAdvancedUI()||tutorialMode)toggleMeasure();else toast('MEASURE // Advanced Mode에서 활성화됩니다')}else if(k.toLowerCase()==='f')toggleFullscreen();
 });
 
-$$('.toolBtn').forEach(b=>b.addEventListener('click',()=>{if(sim)return;playSfx('select');if(measureMode){measureMode=false;measureA=null;measureB=null;$('#measureBtn').classList.remove('isOn');updateMeasureTag();}tool=b.dataset.tool;selected=null;dragging=null;$$('.toolBtn').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});updateModeBadge();updateCanvasCursor(pointerWorld);draw()}));
+$$('.toolBtn').forEach(b=>b.addEventListener('click',()=>{if(sim||(tutorialMode&&tutorialCurrentStep()?.tool!==b.dataset.tool))return;playSfx('select');if(measureMode){measureMode=false;measureA=null;measureB=null;$('#measureBtn').classList.remove('isOn');updateMeasureTag();}tool=b.dataset.tool;selected=null;dragging=null;$$('.toolBtn').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))});updateModeBadge();updateCanvasCursor(pointerWorld);draw()}));
 $$('.stageBtn').forEach((b,i)=>b.addEventListener('click',()=>{if(sim)return;const level=levelForStageIndex(i);if(level){if(!isLevelUnlocked(level.id)){toast('LEVEL LOCKED');return}openLevelBriefing(level.id)}else resetStage(i)}));
 $('#resetBtn').onclick=()=>{if(sim)stopSimulation();resetStage(stageIndex);toast('스테이지를 초기화했습니다')};
 $('#quickResetBtn').onclick=()=>$('#resetBtn')?.click();
@@ -4746,18 +4948,17 @@ $('#endingTitleBtn').onclick=()=>{$('#endingScreen').hidden=true;$('#educationSc
 
 const TUTORIAL_TRUSS_TOPS=[[350,525],[525,525],[675,525],[850,525]];
 const STAGE_TUTORIAL_STEPS=[
-  {key:'camera',title:'01 · 방향키로 카메라 이동',text:'키보드의 <strong>↑ ↓ ← → 방향키</strong> 중 하나를 눌러 화면을 직접 움직여 보세요. 이 단계에서는 캔버스에 자재를 설치할 수 없습니다.',hint:'카메라 // 카메라 조작만 활성화되어 있습니다.',mini:'camera',ui:'camera'},
-  {key:'grid',title:'02 · 격자 표시 켜기',text:'왼쪽 카메라 패널의 <strong>⌗ 격자</strong> 버튼을 누르거나 키보드 <strong>G</strong>를 눌러 격자를 켜세요. 아직 건설 입력은 잠겨 있습니다.',hint:'격자 // 격자는 관절 높이와 패널 간격을 맞추는 기준선입니다.',mini:'grid',ui:'grid'},
-  {key:'snap',title:'03 · 스냅 설정 켜기',text:'<strong>⊕ 스냅</strong> 버튼 또는 <strong>M</strong> 키를 눌러 스냅을 켜세요. 이 단계가 끝나기 전까지 자재 배치는 차단됩니다.',hint:'스냅 // 켜짐 상태에서는 25 단위 격자에 관절이 정렬됩니다.',mini:'snap',ui:'snap'},
-  {key:'roadTool',title:'04 · 일반 도로 도구 선택',text:'아래 툴바에서 <strong>일반도로</strong>를 선택하세요. 도구를 고르는 동안에는 아직 캔버스 건설이 시작되지 않습니다.',hint:'도로 // 도로도 직접 만들어야 하는 구조 부재입니다.',mini:'road',tool:'road'},
-  {key:'support',title:'05 · 왼쪽 지지점 선택',text:'이제 건설 입력이 열렸습니다. 왼쪽 빨간 <strong>핀 지지점</strong>을 클릭해 도로의 시작점을 선택하세요.',hint:'입력 // 첫 클릭은 시작 관절을 선택합니다.',mini:'start',canvas:[280,390],tool:'road'},
-  {key:'roadComplete',title:'06 · 도로를 끝까지 직접 연결',text:'점선 가이드 위의 <strong>정해진 도로 기준점만 차례대로</strong> 클릭해 왼쪽 지지점부터 오른쪽 지지점까지 정확히 4개 도로 패널을 완성하세요. 가이드 밖의 임의 도로는 인정되지 않습니다.',hint:'바닥판 // 0→1→2→3→4의 정확한 4개 가이드 패널과 일반 도로 사용 여부를 검사합니다.',mini:'deck',tool:'road'},
-  {key:'woodTool',title:'07 · 목재 구조재 선택',text:'도로가 완성됐습니다. <strong>목재</strong>를 선택하세요. 다음 단계에서 도로 아래 청록색 설계도를 따라 완성형 워런 트러스를 직접 건설합니다. 도로 위는 차량이 통과할 공간입니다.',hint:'재료 // 목재 최대 길이 270. 이 훈련장 치수는 목재로 완성할 수 있습니다.',mini:'tool',tool:'wood'},
-  {key:'topChord',title:'08 · 완성형 워런 트러스 건설',text:'청록색 점선 설계도와 똑같이 <strong>도로 아래 관절 4개, 하부 코드, 모든 대각재</strong>를 직접 연결하세요. 완전한 트러스와 구조 안정성이 모두 확인되면 자동으로 다음 단계로 넘어갑니다.',hint:'설계도 // 한 번에 이어지지 않는 부재는 우클릭으로 연속 설치를 종료한 뒤 다른 관절에서 다시 시작하세요.',mini:'triangle',tool:'wood',blueprint:true},
-  {key:'rightClick',title:'09 · 우클릭으로 연속 설치 종료',text:'완성형 트러스가 만들어졌습니다. 캔버스에서 <strong>마우스 오른쪽 버튼</strong>을 눌러 연속 설치를 종료하세요.',hint:'입력 // 우클릭 = 현재 설치 연결 종료.',mini:'chain',tool:'wood',blueprint:true},
-  {key:'moveTool',title:'10 · GRAB / 이동 도구 선택',text:'훈련용으로 <strong>하부 관절 하나가 설계선에서 살짝 벗어나 있습니다.</strong> 아래의 <strong>이동 ✥</strong> 도구를 선택해서 위치 보정 준비를 하세요.',hint:'이동 // 어긋난 관절을 원래 설계 위치로 되돌리는 훈련입니다.',mini:'move',tool:'move',blueprint:true},
-  {key:'dragNode',title:'11 · 어긋난 관절을 목표 위치로 복원',text:'설계선에서 벗어난 하부 관절을 드래그해 <strong>청록색 목표 링의 정확한 위치</strong>로 다시 옮기세요. 목표 위치에 충분히 가까워져야 완료됩니다.',hint:'이동 // 단순히 움직이기만 해서는 완료되지 않습니다. 목표 좌표로 복원해야 합니다.',mini:'move',tool:'move',blueprint:true},
-  {key:'test',title:'12 · 완성된 트러스 TEST',text:'도로와 워런 트러스가 모두 준비됐습니다. 오른쪽 위 <strong>▶ 시험</strong>를 직접 눌러 차량이 다리를 끝까지 통과하는지 확인하세요. 차량 주행이 실제로 끝난 뒤 튜토리얼이 완료됩니다.',hint:'준비 완료 // 시험 버튼을 누르면 실제 차량 주행 시뮬레이션이 실행됩니다.',mini:'test',ui:'test',blueprint:true}
+  {key:'welcome',title:'도로와 삼각형 하나부터',text:'처음에는 작은 다리 하나만 만들어 볼게요. <strong>도로 연결 → 삼각형 보강 → 차량 시험 → AI에게 질문</strong> 순서로 연습합니다.',hint:'준비 // 격자와 점 맞추기는 미리 켜 두었습니다. 화면은 방향키로 움직일 수 있어요.',mini:'road',button:'연습 시작'},
+  {key:'roadTool',title:'일반 도로를 골라요',text:'아래 도구에서 <strong>일반 도로</strong>를 눌러 주세요. 차가 달릴 길을 만드는 도구예요.',hint:'도구 // 빛나는 버튼을 찾으면 됩니다.',mini:'road',tool:'road'},
+  {key:'support',title:'왼쪽 빨간 점에서 시작해요',text:'표시된 <strong>왼쪽 빨간 점</strong>을 한 번 눌러 주세요. 도로를 연결할 시작점이에요.',hint:'클릭 // 한 번 누르면 시작점이 선택됩니다.',mini:'start',canvas:[280,390],tool:'road'},
+  {key:'roadComplete',title:'다음 점으로 길을 이어요',text:'표시가 옮겨 가는 점을 <strong>왼쪽부터 하나씩</strong> 눌러 주세요. 오른쪽 빨간 점에 도착하면 도로가 완성돼요.',hint:'도로 // 네 칸을 연결하면 됩니다. 잘못 선택했다면 우클릭으로 선택을 풀 수 있어요.',mini:'deck',tool:'road'},
+  {key:'woodTool',title:'이제 목재를 골라요',text:'길이 완성됐어요. 받침 구조는 미리 놓아 두었습니다. 아래의 <strong>목재</strong>를 눌러 빈 삼각형 하나를 채워 볼게요.',hint:'연습용 구조 // 모든 막대를 처음부터 만들 필요는 없습니다.',mini:'tool',tool:'wood'},
+  {key:'braceStart',title:'표시된 도로 연결점을 눌러요',text:'표시된 <strong>도로 위 연결점</strong>을 눌러 주세요. 여기서 아래쪽 점을 향해 목재를 연결합니다.',hint:'시작점 // 다음 단계에서 두 개의 막대만 이어 볼 거예요.',mini:'start',tool:'wood',blueprint:true},
+  {key:'triangle',title:'두 번 연결해 삼각형을 만들어요',text:'먼저 표시된 <strong>아래쪽 점</strong>, 그다음 <strong>도로 위 점</strong>을 눌러 주세요. 도로와 목재가 삼각형을 만들면 완료예요.',hint:'삼각형 // 아직 없는 두 막대만 점선으로 표시합니다.',mini:'triangle',tool:'wood',blueprint:true},
+  {key:'test',title:'차가 지나가는지 시험해요',text:'삼각형이 완성됐어요. 오른쪽 위 <strong>▶ 시험</strong>을 눌러 차가 끝까지 건너는지 지켜보세요.',hint:'시험 // 막대의 움직임을 관찰하세요. 통과하면 AI 사용 편으로 이어집니다.',mini:'test',ui:'test'},
+  {key:'aiOpen',title:'오른쪽 AI 핸들을 열어요',text:'차가 무사히 건넜어요! 이번에는 화면 <strong>오른쪽 가장자리의 AI 도움 핸들</strong>을 눌러 보세요.',hint:'AI 도움 // 다리를 만들다가 궁금한 점을 물어볼 수 있어요.',mini:'tool',ai:true},
+  {key:'aiAsk',title:'현재 다리에 대해 질문해요',text:'아래의 <strong>질문 예시 넣기</strong>를 누르거나 직접 질문을 적고, AI 창의 <strong>전송</strong>을 눌러 주세요.',hint:'질문 예시 // 이 다리에서 삼각형은 어떤 역할을 하나요? 쉬운 말로 설명해 주세요.',mini:'triangle',ai:true,button:'질문 예시 넣기'},
+  {key:'aiRead',title:'AI 답변을 읽고 마무리해요',text:'AI의 답변에서 삼각형의 역할을 찾아보세요. AI가 알려 주는 방법도 <strong>직접 바꿔 보고 다시 시험</strong>해 확인하는 것이 중요해요.',hint:'연결이 안 되나요? // AI 체험은 나중에 해도 훈련을 마칠 수 있습니다.',mini:'test',ai:true,button:'답변을 읽었어요 · 훈련 마치기'}
 ];
 
 function tutorialMiniSvg(type){
@@ -4780,7 +4981,7 @@ function tutorialCurrentStep(){return STAGE_TUTORIAL_STEPS[tutorialStep]||null}
 function tutorialCanvasInputAllowed(){
   if(!tutorialMode)return true;
   const key=tutorialCurrentStep()?.key;
-  return ['support','roadComplete','topChord','dragNode'].includes(key);
+  return ['support','roadComplete','braceStart','triangle'].includes(key);
 }
 function tutorialTopNodes(){
   const pool=nodes.filter(n=>n.user&&!n.roadNode&&!n.deck&&!n.support);
@@ -4819,23 +5020,49 @@ function prepareTutorialMoveChallenge(){
   tutorialFlags.moved=false;selected=null;currentAnalysis=null;lastFullAnalysis=null;
 }
 
+function prepareTutorialScaffold(){
+  const topNodes=TUTORIAL_TRUSS_TOPS.map(([x,y])=>{
+    const node={id:Math.max(-1,...nodes.map(node=>node.id))+1,x,y,user:true,visible:true,deck:false,support:null};nodes.push(node);return node;
+  });
+  function connect(a,b){members.push({id:'u'+cryptoRandom(),a,b,mat:'wood',user:true,road:false})}
+  for(let i=0;i<4;i++)if(i!==1){connect(i,topNodes[i].id);connect(topNodes[i].id,i+1)}
+  for(let i=0;i<3;i++)connect(topNodes[i].id,topNodes[i+1].id);
+  // Undo in the next exercise must keep the supplied practice scaffold.
+  history=[];redoHistory=[];
+  selected=null;currentAnalysis=null;lastFullAnalysis=null;updateHUD();
+}
+function tutorialGuideTarget(){
+  const key=tutorialCurrentStep()?.key;
+  if(key==='support')return nodes[0];
+  if(key==='roadComplete'){
+    for(let i=0;i<stage.deck.length-1;i++)if(!tutorialMemberExists(i,i+1,'road'))return nodeById(selected?.id===i?i+1:i);
+  }
+  const top=tutorialTopNodes()?.[1];
+  if(key==='braceStart')return nodes[1];
+  if(key==='triangle'&&top){
+    if(!tutorialMemberExists(1,top.id))return selected?.id===1?top:nodes[1];
+    if(!tutorialMemberExists(top.id,2))return selected?.id===top.id?nodes[2]:top;
+  }
+  return null;
+}
+function updateTutorialGuide(){
+  if(!tutorialMode||tutorialTestRunning)return;
+  const target=tutorialGuideTarget();
+  if(target)positionTutorialMarker([target.x,target.y]);else $('#tutorialCanvasMarker').hidden=true;
+  const key=tutorialCurrentStep()?.key;
+  if(key==='roadComplete'){
+    const count=members.filter(member=>member.road).length;
+    $('#tutorialStatus span').textContent=`도로 ${count} / ${stage.deck.length-1}칸 연결`;
+  }
+}
 function drawTutorialBlueprint(){
   if(!tutorialMode||tutorialTestRunning||!tutorialCurrentStep()?.blueprint)return;
-  const pts=TUTORIAL_TRUSS_TOPS.map(([x,y])=>({x,y}));
-  ctx.save();ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.strokeStyle='rgba(98,225,174,.58)';ctx.fillStyle='rgba(98,225,174,.16)';
-  for(let i=0;i<4;i++){
-    const a={x:stage.deck[i][0],y:stage.deck[i][1]},b={x:stage.deck[i+1][0],y:stage.deck[i+1][1]},t=pts[i];
-    line(a,t);line(t,b);
-  }
-  for(let i=0;i<3;i++)line(pts[i],pts[i+1]);
-  ctx.setLineDash([]);
-  for(const p of pts){ctx.beginPath();ctx.arc(p.x,p.y,10,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(98,225,174,.9)';ctx.stroke()}
-  if(tutorialMoveTarget&&['moveTool','dragNode','test'].includes(tutorialCurrentStep()?.key)){
-    ctx.setLineDash([4,4]);ctx.lineWidth=2.5;ctx.strokeStyle='rgba(215,185,77,.95)';ctx.beginPath();ctx.arc(tutorialMoveTarget.x,tutorialMoveTarget.y,16,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='rgba(215,185,77,.95)';ctx.font='800 9px monospace';ctx.fillText('ALIGN',tutorialMoveTarget.x,tutorialMoveTarget.y-22);
-  }
-  ctx.font='800 10px var(--mono), monospace';ctx.fillStyle='rgba(98,225,174,.9)';ctx.textAlign='center';ctx.fillText('TARGET WARREN TRUSS',600,220);ctx.restore();
+  const top=tutorialTopNodes()?.[1];if(!top)return;
+  ctx.save();ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.strokeStyle='rgba(98,225,174,.85)';
+  for(const id of [1,2])if(!tutorialMemberExists(id,top.id))line(nodeById(id),top);
+  ctx.restore();
 }
+
 function tutorialRoadGuideSegmentOK(a,b){
   if(!tutorialMode||tutorialCurrentStep()?.key!=='roadComplete')return true;
   if(tool!=='road')return false;
@@ -4882,6 +5109,8 @@ function setTutorialStepUI(s){
   if(s.ui==='grid')$('#gridBtn')?.classList.add('tutorialFocus');
   if(s.ui==='snap')$('#snapBtn')?.classList.add('tutorialFocus');
   if(s.ui==='test')ui.test?.classList.add('tutorialFocus');
+  if(s.key==='aiOpen')localAiUI.tab.classList.add('tutorialFocus');
+  if(s.key==='aiAsk')localAiUI.send.classList.add('tutorialFocus');
 }
 function renderStageTutorialStep(){
   const t=$('#stageTutorial');if(!tutorialMode||!t||t.hidden)return;
@@ -4895,31 +5124,45 @@ function renderStageTutorialStep(){
   const stat=$('#tutorialStatus');if(stat){stat.className='stageTutorialStatus';stat.innerHTML='<i></i><span>입력을 기다리는 중</span>'}
   setTutorialStepUI(s);
   tutorialWindowOnStepChange(s);
-  if(s.canvas)positionTutorialMarker(s.canvas);
+  const aiStep=!!s.ai;document.body.classList.toggle('tutorial-ai',aiStep);
+  const primary=$('#tutorialPrimary');primary.hidden=!s.button;primary.textContent=s.button||'';primary.disabled=s.key==='aiRead'&&!tutorialFlags.aiAnswered;
+  $('#tutorialAiLater').hidden=!aiStep;
+  $('#tutorialSkip').hidden=aiStep;
+  if(s.key==='aiRead')$('#tutorialStatus span').textContent=tutorialFlags.aiAnswered?'답변이 도착했어요. 읽고 마무리해 주세요.':'AI 답변을 기다리는 중 · 연결이 안 되면 나중에 체험할 수 있어요.';
+  localAiSyncTutorialVisibility();updateTutorialGuide();
 }
 function tutorialActionSatisfied(key,action){
-  if(key==='camera')return action==='camera';
-  if(key==='grid')return gridVisible;
-  if(key==='snap')return snapEnabled;
+  if(key==='welcome')return action==='continue';
   if(key==='roadTool')return tool==='road';
-  if(key==='support')return !!selected&&selected.id===0;
+  if(key==='support')return selected?.id===0;
   if(key==='roadComplete')return tutorialRoadConnected();
   if(key==='woodTool')return tool==='wood';
-  if(key==='topChord')return tutorialPerfectTruss();
-  if(key==='rightClick')return tutorialFlags.rightClick;
-  if(key==='moveTool')return tool==='move';
-  if(key==='dragNode'){const n=tutorialMoveTarget?nodeById(tutorialMoveTarget.id):null;return !!(tutorialFlags.moved&&n&&Math.hypot(n.x-tutorialMoveTarget.x,n.y-tutorialMoveTarget.y)<=14);}
+  if(key==='braceStart')return selected?.id===1;
+  if(key==='triangle')return tutorialPerfectTruss();
   if(key==='test')return action==='test'&&tutorialPerfectTruss();
+  if(key==='aiOpen')return localAiUI.dock.classList.contains('open');
+  if(key==='aiAsk')return !!tutorialFlags.aiAsked;
+  if(key==='aiRead')return action==='continue'&&!!tutorialFlags.aiAnswered;
   return false;
 }
+function advanceTutorialStep(){
+  hideInspector();
+  tutorialStep=Math.min(STAGE_TUTORIAL_STEPS.length-1,tutorialStep+1);
+  const step=tutorialCurrentStep();
+  if(step.key==='woodTool')prepareTutorialScaffold();
+  if(['woodTool','test','aiOpen'].includes(step.key))selected=null;
+  if(step.ai){tutorialWindowResetPosition();tutorialWindowRestore()}
+  tutorialTransitioning=false;
+  renderStageTutorialStep();draw();
+}
+
 function tutorialHandleAction(action='state'){
   if(!tutorialMode||tutorialTransitioning)return false;
   const s=STAGE_TUTORIAL_STEPS[tutorialStep];
-  if(!tutorialActionSatisfied(s.key,action))return false;
+  if(!tutorialActionSatisfied(s.key,action)){updateTutorialGuide();return false}
   tutorialTransitioning=true;
   const stat=$('#tutorialStatus');if(stat){stat.className='stageTutorialStatus done';stat.innerHTML='<i></i><span>입력 확인 완료</span>'}
-  if(s.key==='camera')setTimeout(()=>resetCamera(),120);
-  if(s.key==='woodTool')selected=null;
+  if(s.key==='aiRead'){finishTutorialStage(false);return true}
   if(s.key==='test'){
     tutorialTransitioning=true;
     tutorialTestRunning=true;
@@ -4935,18 +5178,11 @@ function tutorialHandleAction(action='state'){
     }));
     return true;
   }
-  setTimeout(()=>{
-    tutorialStep=Math.min(STAGE_TUTORIAL_STEPS.length-1,tutorialStep+1);
-    if(STAGE_TUTORIAL_STEPS[tutorialStep]?.key==='rightClick')tutorialFlags.rightClick=false;
-    if(STAGE_TUTORIAL_STEPS[tutorialStep]?.key==='moveTool')prepareTutorialMoveChallenge();
-    tutorialTransitioning=false;
-    renderStageTutorialStep();
-    draw();
-  },420);
+  advanceTutorialStep();
   return true;
 }
 function leaveTutorialVisualMode(){
-  document.body.classList.remove('tutorial-mode');
+  document.body.classList.remove('tutorial-mode','tutorial-ai');
   requestAnimationFrame(()=>resize());
   clearTutorialFocus();
   $$('.tutorialStepHidden').forEach(el=>el.classList.remove('tutorialStepHidden'));
@@ -4955,10 +5191,12 @@ function leaveTutorialVisualMode(){
   $('#coachPanel')?.removeAttribute('aria-hidden');
 }
 function startTutorialStage(force=false){
+  if(sim?.frame)cancelAnimationFrame(sim.frame);
+  clearRepairReview();
   setGamePhase(GAME_PHASE.BUILD);
   if(currentGameScreen!==GAME_SCREEN.GAME)changeGameScreen(GAME_SCREEN.GAME);
   tutorialPreviousUIMode=uiMode;
-  tutorialMode=true;tutorialStep=0;tutorialTransitioning=false;tutorialFlags={camera:false,rightClick:false,moved:false};tutorialDragStart=null;tutorialMoveTarget=null;tutorialTestRunning=false;
+  tutorialRunId++;tutorialMode=true;tutorialStep=0;tutorialTransitioning=false;tutorialFlags={camera:false,rightClick:false,moved:false,aiAsked:false,aiAnswered:false};tutorialDragStart=null;tutorialMoveTarget=null;tutorialTestRunning=false;
   setUIMode('basic',{persist:false,silent:true});
   document.body.classList.add('tutorial-mode');
   tutorialWindowPrepareForStart();
@@ -4966,18 +5204,19 @@ function startTutorialStage(force=false){
   stageIndex=-1;stage=TUTORIAL_STAGE;nodes=[];members=[];history=[];redoHistory=[];selected=null;sim=null;currentAnalysis=null;lastFullAnalysis=null;totalCost=0;stressMode=false;loadPathMode=false;measureMode=false;measureA=null;measureB=null;lastBroken=new Set();
   stage.deck.forEach((pt,i)=>nodes.push({id:i,x:pt[0],y:pt[1],deck:true,support:i===0?'pin':i===stage.deck.length-1?'roller':null,user:false,visible:i===0||i===stage.deck.length-1,activated:false}));
   tool='wood';$$('.toolBtn').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));
-  gridVisible=false;snapEnabled=false;$('#gridBtn')?.classList.remove('toggled');$('#snapBtn')?.classList.remove('toggled');
+  gridVisible=true;snapEnabled=true;$('#gridBtn')?.classList.add('toggled');$('#snapBtn')?.classList.add('toggled');
   resetStageClock(false);resetCamera();updateHUD();updateModeBadge();
   $('#coachPanel')?.setAttribute('aria-hidden','true');
   let badge=$('#tutorialStageBadge');if(!badge){badge=document.createElement('div');badge.id='tutorialStageBadge';badge.className='tutorialStageBadge';document.querySelector('.main')?.appendChild(badge)}
-  badge.innerHTML='<b>TRAINING ENVIRONMENT</b>AUTO-PROGRESS // LIVE INPUT CHECK';
+  badge.innerHTML='<b>처음 만드는 다리</b>도로 → 삼각형 → 시험 → AI 질문';
   const t=$('#stageTutorial');if(t){t.hidden=false;t.style.display='';}
   renderStageTutorialStep();draw();
   if(force)toast('TUTORIAL STAGE // 직접 조작하면 자동 진행됩니다');
 }
 function finishTutorialStage(skipped=false){
   if(!tutorialMode)return;
-  tutorialMode=false;leaveTutorialVisualMode();
+  localAiSetOpen(false,{restoreFocus:false});
+  tutorialRunId++;tutorialMode=false;leaveTutorialVisualMode();
   const restoreMode=tutorialPreviousUIMode||'basic';tutorialPreviousUIMode=null;
   setUIMode(restoreMode,{persist:false,silent:true});markTutorialComplete();
   if($('#app'))$('#app').style.visibility='hidden';
@@ -4985,14 +5224,21 @@ function finishTutorialStage(skipped=false){
 }
 function startStageOneTutorial(force=false){startTutorialStage(force)}
 function closeStageTutorial(){finishTutorialStage(true)}
+$('#tutorialPrimary').addEventListener('click',()=>{
+  if(!tutorialMode)return;
+  if(tutorialCurrentStep().key==='aiAsk'){
+    localAiSetOpen(true);localAiUI.input.value='이 다리에서 삼각형은 어떤 역할을 하나요? 쉬운 말로 설명해 주세요.';localAiUI.input.focus({preventScroll:true});
+  }else tutorialHandleAction('continue');
+});
+$('#tutorialAiLater').addEventListener('click',()=>{if(tutorialMode&&tutorialCurrentStep()?.ai)finishTutorialStage(false)});
 
-// Tutorial action observers: no NEXT button. Real input is the progression trigger.
-document.addEventListener('click',e=>{if(!tutorialMode)return;setTimeout(()=>tutorialHandleAction('click'),0)});
-window.addEventListener('keydown',e=>{if(!tutorialMode)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))setTimeout(()=>tutorialHandleAction('camera'),0);else setTimeout(()=>tutorialHandleAction('key'),0)});
-canvas.addEventListener('pointerdown',()=>{if(!tutorialMode)return;setTimeout(()=>tutorialHandleAction('canvas'),0)});
-canvas.addEventListener('contextmenu',()=>{if(!tutorialMode)return;tutorialFlags.rightClick=true;setTimeout(()=>tutorialHandleAction('rightClick'),0)});
+// Construction advances on real input; introduction and AI reading use explicit confirmation.
+document.addEventListener('click',e=>{if(!tutorialMode)return;queueMicrotask(()=>tutorialHandleAction('click'))});
+window.addEventListener('keydown',e=>{if(!tutorialMode)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))queueMicrotask(()=>tutorialHandleAction('camera'));else queueMicrotask(()=>tutorialHandleAction('key'))});
+canvas.addEventListener('pointerdown',()=>{if(!tutorialMode)return;queueMicrotask(()=>tutorialHandleAction('canvas'))});
+canvas.addEventListener('contextmenu',()=>{if(!tutorialMode)return;tutorialFlags.rightClick=true;queueMicrotask(()=>tutorialHandleAction('rightClick'))});
 canvas.addEventListener('pointerdown',()=>{if(!tutorialMode||tool!=='move'||!dragging)return;tutorialDragStart={id:dragging.id,x:dragging.x,y:dragging.y}});
-canvas.addEventListener('pointerup',()=>{if(!tutorialMode||!tutorialDragStart)return;const n=nodeById(tutorialDragStart.id);if(n&&Math.hypot(n.x-tutorialDragStart.x,n.y-tutorialDragStart.y)>6)tutorialFlags.moved=true;tutorialDragStart=null;setTimeout(()=>tutorialHandleAction('drag'),0)});
+canvas.addEventListener('pointerup',()=>{if(!tutorialMode||!tutorialDragStart)return;const n=nodeById(tutorialDragStart.id);if(n&&Math.hypot(n.x-tutorialDragStart.x,n.y-tutorialDragStart.y)>6)tutorialFlags.moved=true;tutorialDragStart=null;queueMicrotask(()=>tutorialHandleAction('drag'))});
 
 function beginGameSequence(){
   applyDifficultyProfile();pauseStageClock(false);
@@ -5170,6 +5416,7 @@ function updateSandboxSetup(){
   else $('#sandboxPreview').innerHTML=level?levelThumbSVG(level):`<svg viewBox="0 0 320 170" fill="none"><path d="M20 130H300M20 150H300M20 145v10M300 145v10" stroke="#49636b"/><path d="${diagrams[preset]}" stroke="#8ecab3" stroke-width="2"/><text x="160" y="166" text-anchor="middle" fill="#a1b7bc" font-size="11" font-family="monospace">${span} GU</text></svg>`;
 }
 function applySandboxSetup(){
+  clearRepairReview();
   const sb=stages[4],preset=sandboxSelectedPreset(),keep=preset==='current'&&hasSandboxDesign();
   sb.load=Number($('#sandboxLoad').value)*1000;sb.wind=Number($('#sandboxWind').value)*1000;sb.vehicleSpeed=Number($('#sandboxSpeed').value);
   sb.vehicle=$('#sandboxModal .vehicleModelBtn.active').dataset.vehicle;sb.vehicleLabel=sb.vehicle;sb.vehicleHidden=false;
@@ -5436,23 +5683,32 @@ const localAiUI={
 };
 let localAiBusy=false,localAiHistory=[],localAiMarkdown=null;
 
-function localAiSetOpen(open){
+function localAiSetOpen(open,{restoreFocus=true}={}){
+  if(open&&(currentGameScreen!==GAME_SCREEN.GAME||(document.body.classList.contains('tutorial-mode')&&!document.body.classList.contains('tutorial-ai'))))return;
+  if(open){localAiUI.dock.hidden=false;localAiUI.dock.inert=false;localAiUI.dock.setAttribute('aria-hidden','false')}
+  const panelFocused=localAiUI.panel.contains(document.activeElement);
   localAiUI.dock?.classList.toggle('open',!!open);
   localAiUI.tab?.setAttribute('aria-expanded',open?'true':'false');
   localAiUI.panel.inert=!open;
   localAiUI.panel.setAttribute('aria-hidden',String(!open));
-  if(open)setTimeout(()=>localAiUI.input?.focus(),90);
+  localAiUI.tab.setAttribute('aria-label',open?'AI 대화창 닫기':'AI 대화창 열기');
+  localAiUI.tab.title=open?'AI 대화창 닫기':'AI 대화창 열기';
+  if(open)localAiUI.input.focus({preventScroll:true});
+  else if(panelFocused&&restoreFocus)localAiUI.tab.focus({preventScroll:true});
+  if(open&&tutorialMode)tutorialHandleAction('aiOpen');
 }
 function localAiSyncTutorialVisibility(){
   const inTutorial=document.body.classList.contains('tutorial-mode');
+  const available=(!inTutorial||document.body.classList.contains('tutorial-ai'))&&currentGameScreen===GAME_SCREEN.GAME;
+  if(!available&&localAiUI.dock.classList.contains('open'))localAiSetOpen(false,{restoreFocus:false});
   if(localAiUI.dock){
-    localAiUI.dock.setAttribute('aria-hidden',inTutorial?'true':'false');
-    if('inert' in localAiUI.dock)localAiUI.dock.inert=inTutorial;
+    localAiUI.dock.hidden=!available;
+    localAiUI.dock.setAttribute('aria-hidden',String(!available));
+    localAiUI.dock.inert=!available;
   }
-  if(inTutorial&&localAiUI.dock?.classList.contains('open'))localAiSetOpen(false);
 }
 function localAiSetStatus(text,tone=''){
-  if(localAiUI.status)localAiUI.status.textContent=text;
+  if(localAiUI.status){localAiUI.status.textContent=text;localAiUI.status.parentElement.hidden=!text}
   if(localAiUI.device){localAiUI.device.classList.remove('ok','warn','bad');if(tone)localAiUI.device.classList.add(tone)}
 }
 function localAiSetBusy(busy){
@@ -5495,7 +5751,7 @@ function localAiReadableAnswer(text,context){
 }
 function localAiResetChat(){
   localAiHistory=[];
-  if(localAiUI.messages)localAiUI.messages.innerHTML='<div class="localAiMsg system"><span class="who">GEMINI // CHAT RESET</span>새 대화를 시작합니다. 현재 게임 상태는 질문을 보낼 때마다 다시 읽습니다.</div>';
+  localAiUI.messages.replaceChildren();localAiSetStatus('');
 }
 function localAiBridgeContext(){
   const physics=sim?.mode==='collapse'?sim.physics:null;
@@ -5602,11 +5858,15 @@ async function localAiCheckOnline(){
 }
 async function localAiSendOnline(text,target){
   const context=localAiBridgeContext();
+  const tutorialRequestRun=tutorialMode?tutorialRunId:null;
+  if(tutorialMode&&tutorialCurrentStep()?.key==='aiAsk'){tutorialFlags.aiAsked=true;tutorialHandleAction('aiAsk')}
   const payload={message:text,context,explanationLevel:localAiUI.level.value,history:localAiHistory.slice(0,-1).slice(-10).map(entry=>({role:entry.role,content:entry.content.slice(0,4000)})),client:'truss-lab-github-pages'};
   const data=await localAiRequestOnline('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const answer=String(data?.answer||'').trim();if(!answer)throw new Error('온라인 AI가 빈 답변을 반환했습니다.');
   const readable=localAiReadableAnswer(answer,JSON.parse(context));
-  if(target)localAiRenderAnswer(target,readable);return readable;
+  if(target)localAiRenderAnswer(target,readable);
+  if(tutorialMode&&tutorialRunId===tutorialRequestRun&&tutorialFlags.aiAsked){tutorialFlags.aiAnswered=true;renderStageTutorialStep()}
+  return readable;
 }
 async function localAiSend(textOverride=''){
   const text=String(textOverride||localAiUI.input?.value||'').trim();if(!text||localAiBusy)return;
@@ -5616,7 +5876,7 @@ async function localAiSend(textOverride=''){
   localAiSetBusy(true);const target=localAiAddMessage('assistant','온라인 구조 코치가 분석하는 중…');
   try{
     const answer=await localAiSendOnline(text,target);
-    localAiSetStatus('ONLINE · GEMINI · 다음 질문 때 현재 교량 상태를 다시 읽습니다.','ok');
+    localAiSetStatus('');
     localAiHistory.push({role:'assistant',content:answer});if(localAiHistory.length>14)localAiHistory=localAiHistory.slice(-14);
   }catch(err){
     console.error('[TRUSS LAB AI CHAT]',err);const msg=`답변 생성 중 오류가 발생했습니다: ${err?.message||String(err)}`;if(target)target.textContent=msg;else localAiAddMessage('system',msg);
@@ -5636,8 +5896,9 @@ function initLocalAiBridgeChat(){
   localAiUI.input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();localAiSend()}});$$('[data-local-ai-prompt]').forEach(b=>b.addEventListener('click',()=>localAiSend(b.dataset.localAiPrompt||'')));
   localAiUI.endpoint?.addEventListener('change',()=>{const e=localAiNormalizeEndpoint(localAiUI.endpoint.value);localAiUI.endpoint.value=e;localStorage.setItem('trusslab-ai-endpoint',e)});
   localAiSyncTutorialVisibility();
-  new MutationObserver(localAiSyncTutorialVisibility).observe(document.body,{attributes:true,attributeFilter:['class']});
-  localAiSetStatus(endpoint?'설정된 서버로 Gemini를 사용할 수 있습니다. 질문을 보내거나 연결을 확인하세요.':'Cloudflare Worker 주소를 입력한 뒤 연결 확인을 누르세요.',endpoint?'ok':'warn');
+  new MutationObserver(localAiSyncTutorialVisibility).observe(document.body,{attributes:true,attributeFilter:['class','data-game-screen']});
+  localAiUI.dock.addEventListener('keydown',event=>{if(event.key==='Escape'&&localAiUI.dock.classList.contains('open')){event.preventDefault();event.stopPropagation();localAiSetOpen(false)}});
+  localAiSetStatus(endpoint?'':'Cloudflare Worker 주소를 입력한 뒤 연결 확인을 누르세요.',endpoint?'ok':'warn');
 }
 initLocalAiBridgeChat();
 
@@ -5665,7 +5926,7 @@ function tutorialWindowToggleManual(){
 }
 function tutorialWindowUsesBridgeWorkspace(step){
   if(!step)return false;
-  return ['support','roadComplete','topChord','rightClick','dragNode','test'].includes(step.key);
+  return ['support','roadComplete','braceStart','triangle','test'].includes(step.key);
 }
 function tutorialWindowAutoMinimizeForWork(){
   if(!tutorialMode||!tutorialWindowAutoHide)return;
