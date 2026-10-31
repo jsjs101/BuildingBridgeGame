@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090c10">
+  <title>첫 연결 — TRUSS LAB</title>
+  <link rel="preload" as="image" href="assets/valley.png">
+  <link rel="stylesheet" href="scene.css">
+  <script src="scene.js" defer></script>
+</head>
+<body data-state="loading">
+  <header class="masthead">
+    <a class="brand" href="../index.html" aria-label="TRUSS LAB 타이틀로 이동"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 26 16 5l12 21H4Zm6-10h12M10 26l6-10 6 10"/></svg><span>TRUSS LAB</span></a>
+    <span class="edition">PROLOGUE <i>/</i> 첫 연결</span>
+    <a class="direct-entry" href="../index.html">게임으로 바로 가기 <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main class="film" aria-label="첫 연결: 겨울 계곡의 교량을 담은 35초 오프닝">
+    <div class="shots" aria-hidden="true">
+      <div class="shot is-visible" data-shot="0"><img src="assets/valley.png" alt="" fetchpriority="high"></div>
+      <div class="shot" data-shot="1"><img src="assets/joint.png" alt=""></div>
+      <div class="shot" data-shot="2"><img src="assets/crossing.png" alt=""></div>
+      <div class="shot" data-shot="3"><img src="assets/valley.png" alt=""></div>
+    </div>
+    <div class="atmosphere" aria-hidden="true"><div class="mist mist-far"></div><div class="mist mist-near"></div></div>
+    <canvas id="snow" aria-hidden="true"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="film-shade" aria-hidden="true"></div>
+
+    <section class="start-card" aria-labelledby="openingTitle">
+      <p class="eyebrow"><span></span> A BRIDGE BETWEEN TWO WORLDS</p>
+      <h1 id="openingTitle">TRUSS LAB</h1>
+      <p class="opening-subtitle">첫 연결</p>
+      <div class="start-rule"></div>
+      <p class="opening-description">차가운 계곡 위에, 하나의 길이 놓이기까지.</p>
+      <button id="start" class="start-button" type="button" disabled><span class="play-icon" aria-hidden="true"></span><span id="startLabel">장면을 준비하고 있습니다</span><span class="duration">00:35</span></button>
+      <p id="loadStatus" class="load-status" role="status">세 장의 일러스트를 불러오는 중</p>
+      <button id="retry" class="text-button" type="button" hidden>다시 불러오기</button>
+    </section>
+
+    <div class="chapter" aria-hidden="true"><span id="chapterNumber">01</span><span class="chapter-rule"></span><span id="chapterName">THE VALLEY</span></div>
+    <div class="caption" aria-live="off"><p id="captionText"></p></div>
+    <div class="end-title" aria-hidden="true"><p>작은 연결이 만드는 단단한 구조</p><h2>TRUSS LAB</h2><span>설계하고. 시험하고. 다시 연결하다.</span></div>
+    <div class="paused-label" aria-hidden="true">일시정지 <span>SPACE TO RESUME</span></div>
+    <section class="end-card" aria-label="오프닝 재생 완료" hidden>
+      <p class="eyebrow">END OF PROLOGUE</p><h2>이제, 당신의 연결을.</h2>
+      <div><a class="enter-button" href="../index.html">설계실로 들어가기 <span aria-hidden="true">→</span></a><button id="replay" class="text-button" type="button">다시 보기</button></div>
+    </section>
+    <div class="curtain" aria-hidden="true"></div>
+  </main>
+
+  <footer class="transport">
+    <div class="film-info"><span class="status-dot"></span><span id="playbackStatus" role="status">OPENING FILM</span><span class="film-credit">WINTER VALLEY / FIRST CONNECTION</span></div>
+    <div class="playback-controls">
+      <button id="pause" class="control-button" type="button" aria-label="일시정지" disabled>Ⅱ</button>
+      <span class="timecode"><span id="elapsed">00:00</span><span class="time-divider">/</span>00:35</span>
+      <label class="seek-label"><span class="sr-only">재생 위치, 초</span><input id="seek" type="range" min="0" max="35" step="0.1" value="0" disabled></label>
+      <button id="sound" class="control-button sound-button" type="button" aria-pressed="true" aria-label="소리 끄기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4V9Zm12-2c3 3 3 7 0 10m3-13c5 5 5 11 0 16"/></svg><span id="soundLabel">SOUND ON</span></button>
+      <a class="skip" href="../index.html">건너뛰기 <kbd>ESC</kbd></a>
+    </div>
+    <div class="footer-note"><span>ILLUSTRATED PROLOGUE</span><span id="motionNote">소리와 함께 감상하는 것을 권장합니다</span><span>TRUSS LAB / 01</span></div>
+  </footer>
+  <noscript><div class="no-script">오프닝 재생에는 JavaScript가 필요합니다. <a href="../index.html">게임으로 이동</a></div></noscript>
+</body>
+</html>

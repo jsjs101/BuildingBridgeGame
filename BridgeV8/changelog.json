@@ -1,0 +1,155 @@
+{
+  "_guide": [
+    "changelog 배열에 기록을 추가하세요. 배열의 순서대로 표시하며, 같은 major와 minor를 기준으로 묶습니다.",
+    "type=major: major만 입력합니다. type=minor: major와 minor를 입력합니다. type=patch: major, minor, patch를 모두 입력합니다. 하위 버전 키는 생략하세요.",
+    "TBU가 true가 아닌 기록에는 description 문자열과 changes 문자열 배열이 필요합니다. changes는 빈 배열도 가능합니다.",
+    "TBU는 선택 boolean입니다. true이면 해당 버전의 설명과 변경 목록 대신 개발 중 안내 카드를 표시합니다. description과 changes는 생략할 수 있습니다. false 또는 생략이면 기존 내용을 표시합니다. 상위 버전의 TBU는 하위 버전 기록을 숨기지 않습니다.",
+    "date는 선택 사항이며 YYYY-MM-DD 형식입니다. HTML은 실행되지 않고 일반 텍스트로 표시됩니다.",
+    "이 파일은 변경 기록 창을 열 때마다 다시 읽습니다. 표시 버전은 별도로 project-settings.json의 display_version에서 설정하세요."
+  ],
+  "changelog": [
+    {
+      "type": "major",
+      "major": "V7",
+      "description": "TRUSS LAB V7 서비스를 시작했습니다!",
+      "changes": [
+        "Gemini Skill을 활용한 AI 도우미",
+        "사용자 경험(UX)을 대폭 개선",
+        "인게임 백그라운드 그래픽 퀄리티 향상 및 최적화"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "minor",
+      "major": "V7",
+      "minor": "V7.0",
+      "description": "가독성을 높인 UI 도입",
+      "changes": [
+        "제목과 구조 도면을 나란히 배치 및 안내 문구의 가독성 개선",
+        "모달(Modal)창의 비정형된 레이아웃 정돈",
+        "project-settings.json의 display_version으로 표시 버전을 설정하도록 변경"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.0",
+      "patch": "V7.0.1",
+      "description": "시작 화면의 배치와 구조 도면 정형화",
+      "changes": [
+        "시작 버튼 디자인 획일화"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "minor",
+      "major": "V7",
+      "minor": "V7.1",
+      "description": "체인지로그와 JSON 최적화",
+      "changes": [
+        "버전별 정보 확인이 가능한 체인지로그 도입",
+        "기존 JSON의 Array 방식 대신 Key-Value 방식으로 변경"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.1",
+      "patch": "V7.1.1",
+      "description": "차량 충돌 매커니즘 강화",
+      "changes": [
+        "차량 경사로 진입 시 충돌 판정 버그 수정"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "minor",
+      "major": "V7",
+      "minor": "V7.2",
+      "description": "Gemini, Cloudflare Workers 기반으로 변경",
+      "changes": [
+        "Cloudflare Workers 기반으로 서버리스 아키텍처 변경"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.2",
+      "patch": "V7.2.1",
+      "description": "AI 사용 편리성 강화",
+      "changes": [
+        "AI 사용 시 자동 URL 입력 기능 추가"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.2",
+      "patch": "V7.2.2",
+      "description": "AI 텍스트 마크다운(MarkDown) 렌더링 추가",
+      "changes": [
+        "AI 텍스트에 플레인 텍스트(**-**)로 나오던 텍스트가 마크다운(MarkDown) 형식으로 렌더링되도록 변경"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "minor",
+      "major": "V7",
+      "minor": "V7.3",
+      "description": "Gemini의 사용 편리성 대폭 강화",
+      "changes": [
+        "Gemini의 아키텍처 기반을 전반적으로 수정",
+        "교량과 Gemini의 연결성을 강화하여 AI 사용 편리성 향상"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.3",
+      "patch": "V7.3.1",
+      "description": "AI 답변 수준 선택 기능 추가",
+      "changes": [
+        "AI 탭에서 AI의 답변 수준을 선택할 수 있는 기능 추가"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.3",
+      "patch": "V7.3.2",
+      "description": "AI의 쓸데없는 답변을 줄이는 최적화 진행",
+      "changes": [
+        "AI가 Javascript에서 자재 및 부재의 ID를 텍스트로 출력하는 문제 해결"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "patch",
+      "major": "V7",
+      "minor": "V7.3",
+      "patch": "V7.3.3",
+      "description": "AI에 다리의 직접적인 Raw 데이터 제공",
+      "changes": [
+        "AI에게 교량 자재 위치, 노드 위치 등의 Raw 데이터를 직접 제공하여 AI가 교량 구조를 더 정확히 이해하도록 개선"
+      ],
+      "TBU": false
+    },
+    {
+      "type": "major",
+      "major": "V8",
+      "description": "TRUSS LAB V8 서비스를 즐겨보세요!",
+      "changes": [
+        "대규모 최적화로 성능 대폭 상승",
+        "시즌 랭킹 도입",
+        "UI 편의성 강화"
+      ],
+      "TBU": false
+    }
+  ]
+}
