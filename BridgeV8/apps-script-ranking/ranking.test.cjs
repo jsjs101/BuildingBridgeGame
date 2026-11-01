@@ -142,3 +142,19 @@ test('old price season records stay intact and outside the new ranking',()=>{
   api.cache.clear();assert.equal(api.post(record()).total,1);
   assert.equal(JSON.stringify(api.rows[1]),previous);
 });
+
+
+test('booth boards accept new designs and remain separate from campaigns and each other',()=>{
+  const api=server();
+  for(const levelId of ['booth_v2_long','booth_v2_weather','booth_v2_harbor']){
+    api.cache.clear();
+    const response=api.post(record({levelId,buildTimeMs:12000}));
+    assert.equal(response.registered,true);
+    assert.equal(response.total,1);
+    assert.equal(response.entries[0].buildTimeMs,12000);
+    assert.equal(api.get({levelId,difficulty:'hard'}).total,0);
+  }
+  assert.equal(api.get().total,0);
+  assert.equal(api.get({levelId:'booth_v2_long'}).total,1);
+  for(const levelId of ['booth_v2_other','booth_v1_long','set07_level01','booth_v2_long/extra'])assert.equal(api.get({levelId}).ok,false);
+});

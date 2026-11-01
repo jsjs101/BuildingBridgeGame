@@ -35,7 +35,7 @@ function rankingJson_(result) {
 
 function rankingBoardId_(input) {
   if (input.season !== RANKING_SEASON) throw new Error('랭킹 시즌이 다릅니다. 게임 설정을 확인하세요.');
-  if (!/^set0[1-6]_(level0[1-6]|bonus0[12])$/.test(input.levelId)) throw new Error('지원하지 않는 계약입니다.');
+  if (!/^(set0[1-6]_(level0[1-6]|bonus0[12])|booth_v2_(long|weather|harbor))$/.test(input.levelId)) throw new Error('지원하지 않는 계약입니다.');
   if (!['easy','hard'].includes(input.difficulty)) throw new Error('난이도를 확인하세요.');
   return [input.season,input.levelId,input.difficulty].join('/');
 }

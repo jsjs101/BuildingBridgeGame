@@ -1,5 +1,6 @@
-function createBridgeRanking(settings, formatTime) {
+function createBridgeRanking(settings, formatTime, storage) {
   'use strict';
+  storage=storage||localStorage;
   let request = null;
   const money = cost => '₩' + cost.toLocaleString('ko-KR');
   const buildTime = ms => Number.isFinite(ms)&&ms>=0?formatTime(ms):'—';
@@ -33,7 +34,7 @@ function createBridgeRanking(settings, formatTime) {
     let pending=false,registered=false,timeSupported=false;
     const attemptId=Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
     const form=element('form','rankingSubmit'), label=element('label','','공개 닉네임'), input=element('input');
-    input.type='text';input.maxLength=20;input.required=true;input.autocomplete='nickname';input.value=localStorage.getItem('trusslab-ranking-name')||'';
+    input.type='text';input.maxLength=20;input.required=true;input.autocomplete='nickname';input.value=storage.getItem('trusslab-ranking-name')||'';
     label.append(input);
     const submit=element('button','completionAction isPrimary','기록 등록');submit.type='submit';
     const retry=element('button','completionAction','새로고침');retry.type='button';
@@ -78,8 +79,8 @@ function createBridgeRanking(settings, formatTime) {
         const url=new URL(settings.webAppUrl);
         let options={signal:controller.signal,redirect:'follow',credentials:'omit'};
         if(submitting||registered) {
-          let token=localStorage.getItem('trusslab-ranking-token');
-          if(!token){token=Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');localStorage.setItem('trusslab-ranking-token',token)}
+          let token=storage.getItem('trusslab-ranking-token');
+          if(!token){token=Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');storage.setItem('trusslab-ranking-token',token)}
           options={...options,method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...snapshot,action:'submit',season:settings.season,token,attemptId,nickname:input.value.trim()})};
         } else {
           for(const [key,value] of Object.entries({season:settings.season,levelId:snapshot.levelId,difficulty:snapshot.difficulty,cost:snapshot.cost}))url.searchParams.set(key,value);
@@ -95,7 +96,7 @@ function createBridgeRanking(settings, formatTime) {
         status.hidden=!submitting&&timeSupported;
         status.textContent=!timeSupported?'건설 시간을 저장하려면 랭킹 서버를 업데이트해 주세요.':submitting?'기록을 등록했습니다.':'';
         panel.scrollTop=0;
-        if(submitting){registered=true;submit.textContent='등록 완료';input.disabled=true;localStorage.setItem('trusslab-ranking-name',input.value.trim())}
+        if(submitting){registered=true;submit.textContent='등록 완료';input.disabled=true;storage.setItem('trusslab-ranking-name',input.value.trim())}
       } catch(error) {
         if(request!==controller || !panel.isConnected || !panel.closest('.show'))return;
         status.textContent=controller.signal.aborted?'요청이 종료되었습니다. 결과창을 다시 열어 주세요.':'랭킹 연결 실패: '+error.message+' 새로고침으로 다시 시도할 수 있습니다.';
