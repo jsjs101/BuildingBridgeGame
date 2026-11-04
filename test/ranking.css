@@ -1,0 +1,32 @@
+:root{color-scheme:dark;--line:#344c56;--mint:#99e0c5;--muted:#a6bbc3;--mono:"Consolas","D2Coding",monospace}
+*{box-sizing:border-box}
+body{margin:0;background:#0b1419;color:#e5f0f2;font:400 15px/1.6 "Noto Sans KR","Malgun Gothic",sans-serif}
+.rankingPage{min-height:100vh;max-width:1680px;margin:auto;padding:clamp(16px,4vw,64px)}
+.rankingPageHeader{border-top:3px solid var(--mint);border-bottom:1px solid var(--line);padding:24px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.rankingEyebrow{color:var(--mint);font:700 12px/1.6 var(--mono);letter-spacing:.1em}
+h1{font-size:clamp(32px,6vw,66px);line-height:1.15;margin:8px 0}
+h2{font-size:22px;margin:0 0 4px}
+p{margin:0;color:var(--muted)}
+#rankingBack{color:#e5f0f2;text-decoration:none;border:1px solid var(--line);background:#12242c;padding:11px 16px;border-radius:4px}
+#rankingBack:hover,#rankingBack:focus-visible{border-color:var(--mint)}
+.rankingPageGrid{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,3fr);align-items:start;gap:20px;margin-top:24px}
+.rankingPageGrid[hidden],.rankingEmptyPage[hidden]{display:none}
+.rankingPageSummary,.rankingPageList,.rankingEmptyPage{border:1px solid var(--line);background:#101e25;padding:clamp(12px,2vw,24px)}
+.rankingEmptyPage{margin-top:24px}
+.rankingStanding{display:grid;grid-template-columns:20px minmax(0,1fr);gap:16px;align-items:center;background:#152d26;padding:16px}
+.rankingStanding strong{font-size:clamp(21px,3vw,34px);color:var(--mint)}
+.rankingPercentBar{height:100px;display:flex;align-items:end;background:#091a16;border:1px solid #537a6c}
+.rankingPercentBar span{width:100%;background:var(--mint)}
+dl{margin:14px 0 0}
+dl div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+dt{color:var(--muted)}
+dd{margin:0;font:700 15px var(--mono)}
+table{border-collapse:collapse;width:100%;margin-top:16px}
+th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{color:var(--muted);font-size:13px}
+th:nth-child(n+3),td:nth-child(n+3){text-align:right;white-space:nowrap}
+td:first-child{width:12%;white-space:nowrap}
+td:nth-child(n+3){font:600 14px var(--mono)}
+.isMine{background:#19342b;color:#aee7d1}
+@media(max-width:750px){.rankingPageGrid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:400px){th,td{padding-inline:4px}td:nth-child(n+3){font-size:12px}}
