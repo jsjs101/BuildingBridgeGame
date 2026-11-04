@@ -1324,9 +1324,11 @@ window.TRUSSLAB_DEV={
 
 
 const STAGE_BASE = stages.map(s=>({budget:s.budget,load:s.load,maxDefl:s.maxDefl}));
+const TEST_BUDGET_PERCENT=165;
+function stageTestBudget(){return Math.floor(stage.budget*TEST_BUDGET_PERCENT/100)}
 const DIFFICULTY = {
-  easy:{key:'easy',label:'초등학생용 // 쉬움',budgetMul:1.35,loadMul:.78,deflMul:1.18,summary:'기본 예산 +35% · 차량 하중 -22% · 허용 변형 +18%'},
-  hard:{key:'hard',label:'중·고등학생용 // 어려움',budgetMul:1.00,loadMul:1.05,deflMul:1.00,summary:'기본 예산 ±0% · 차량 하중 +5% · 표준 허용 변형'}
+  easy:{key:'easy',label:'초등학생용 // 쉬움',budgetMul:1.15,loadMul:.78,deflMul:1.18,summary:'기본 예산 +15% · 차량 하중 -22% · 허용 변형 +18%'},
+  hard:{key:'hard',label:'중·고등학생용 // 어려움',budgetMul:.85,loadMul:1.05,deflMul:1.00,summary:'기본 예산 -15% · 차량 하중 +5% · 표준 허용 변형'}
 };
 let difficultyMode=localStorage.getItem('trusslab-difficulty')||projectSettings.difficultyDefault||'easy';
 if(!DIFFICULTY[difficultyMode])difficultyMode='easy';
@@ -1981,10 +1983,10 @@ function updateHUD(){
   const ctxSet=$('#topContextSet'),ctxTitle=$('#topContextTitle'),campaignLevel=currentCampaignLevel?.();
   if(ctxSet)ctxSet.textContent=tutorialMode?'훈련 // 단계별 안내':stage.sandbox?'샌드박스 // 자유 실험':campaignLevel?`세트 ${String(getGameSet(campaignLevel.setId)?.number||1).padStart(2,'0')} // ${campaignLevel.type==='bonus'?'보너스':'계약'} ${displayContractId(campaignLevel)}`:`${stage.name} // ${difficultyMode==='easy'?'쉬움':'어려움'}`;
   if(ctxTitle)ctxTitle.textContent=tutorialMode?'구조 설계 훈련':stage.sandbox?'구조 실험실':stage.title;
-  ui.budgetText.textContent=stage.sandbox?`₩${totalCost.toLocaleString()} · 자유 설계`:`₩${totalCost.toLocaleString()} / ₩${stage.budget.toLocaleString()} (최대 ₩${(stage.budget*2).toLocaleString()})`; ui.budgetText.className=totalCost<=stage.budget?'good':totalCost<=stage.budget*2?'warn':'bad';
-  if(ui.budgetRail&&ui.budgetRailFill){const cap=stage.sandbox?Math.max(totalCost,1):stage.budget*2;const pct=stage.sandbox?0:clamp(totalCost/cap*100,0,100);ui.budgetRailFill.style.width=`${pct}%`;ui.budgetRail.classList.toggle('warn',!stage.sandbox&&totalCost>stage.budget&&totalCost<=stage.budget*2);ui.budgetRail.classList.toggle('bad',!stage.sandbox&&totalCost>stage.budget*2);ui.budgetRail.style.opacity=stage.sandbox?'.25':'1'}
+  ui.budgetText.textContent=stage.sandbox?`₩${totalCost.toLocaleString()} · 자유 설계`:`₩${totalCost.toLocaleString()} / ₩${stage.budget.toLocaleString()} (최대 ₩${stageTestBudget().toLocaleString()})`; ui.budgetText.className=totalCost<=stage.budget?'good':totalCost<=stageTestBudget()?'warn':'bad';
+  if(ui.budgetRail&&ui.budgetRailFill){const cap=stage.sandbox?Math.max(totalCost,1):stageTestBudget();const pct=stage.sandbox?0:clamp(totalCost/cap*100,0,100);ui.budgetRailFill.style.width=`${pct}%`;ui.budgetRail.classList.toggle('warn',!stage.sandbox&&totalCost>stage.budget&&totalCost<=stageTestBudget());ui.budgetRail.classList.toggle('bad',!stage.sandbox&&totalCost>stageTestBudget());ui.budgetRail.style.opacity=stage.sandbox?'.25':'1'}
   updateStageButtons();
-  ui.test?.classList.toggle('testReady',stage.sandbox||totalCost<=stage.budget*2);
+  ui.test?.classList.toggle('testReady',stage.sandbox||totalCost<=stageTestBudget());
   
 }
 
@@ -2124,7 +2126,7 @@ function coachAnalyzeStructure(a,{simState=null,source='구조 해석',forceKey=
   }
   if(!stage.sandbox&&totalCost>stage.budget){
     const pct=totalCost/stage.budget*100;
-    issues.push({key:'budget',score:totalCost>stage.budget*2?118:48,kicker:'BUDGET EFFICIENCY',headline:totalCost>stage.budget*2?'TEST LIMIT EXCEEDED':'BASE BUDGET EXCEEDED',metrics:[['CURRENT COST',`₩${Math.round(totalCost).toLocaleString()}`],['BASE BUDGET',`₩${stage.budget.toLocaleString()}`],['BUDGET USAGE',`${pct.toFixed(0)}%`]],reason:totalCost>stage.budget*2?'현재 비용은 TEST가 허용되는 기본 예산 200% 상한을 초과합니다.':'구조 시험은 가능하지만 현재 설계는 기본 예산을 초과해 비용 효율이 낮아집니다.',advice:['이용률이 낮은 중복 부재가 있는지 응력 보기에서 확인해보세요.','하중 경로를 유지하면서 효과가 작은 부재를 하나씩 비교 제거해볼 수 있습니다.']});
+    issues.push({key:'budget',score:totalCost>stageTestBudget()?118:48,kicker:'BUDGET EFFICIENCY',headline:totalCost>stageTestBudget()?'TEST LIMIT EXCEEDED':'BASE BUDGET EXCEEDED',metrics:[['CURRENT COST',`₩${Math.round(totalCost).toLocaleString()}`],['BASE BUDGET',`₩${stage.budget.toLocaleString()}`],['BUDGET USAGE',`${pct.toFixed(0)}%`]],reason:totalCost>stageTestBudget()?`현재 비용은 TEST가 허용되는 기본 예산 ${TEST_BUDGET_PERCENT}% 상한을 초과합니다.`:'구조 시험은 가능하지만 현재 설계는 기본 예산을 초과해 비용 효율이 낮아집니다.',advice:['이용률이 낮은 중복 부재가 있는지 응력 보기에서 확인해보세요.','하중 경로를 유지하면서 효과가 작은 부재를 하나씩 비교 제거해볼 수 있습니다.']});
   }
   if(forceKey){const forced=issues.find(x=>x.key===forceKey);if(forced)return forced}
   issues.sort((x,y)=>y.score-x.score);
@@ -2199,8 +2201,8 @@ function setCoach(kind,data={}){
     }return;
   }
   if(kind==='budget'){
-    const pct=stage.sandbox?0:totalCost/Math.max(1,stage.budget)*100,hard=totalCost>stage.budget*2;
-    const issue={kicker:'BUDGET CHECK',headline:hard?'TEST LIMIT EXCEEDED':'BASE BUDGET EXCEEDED',metrics:[['CURRENT COST',`₩${Math.round(totalCost).toLocaleString()}`],['BASE BUDGET',`₩${stage.budget.toLocaleString()}`],['BUDGET USAGE',`${pct.toFixed(0)}%`],['TEST LIMIT','200%']],reason:hard?'현재 비용이 TEST 허용 상한을 넘어 구조 시험을 시작할 수 없습니다.':'TEST는 가능하지만 비용 효율 평가에서는 불리한 상태입니다.',advice:['Stress View에서 utilization이 매우 낮은 부재부터 효과를 비교해보세요.','하중 경로를 유지하는 범위에서 중복도가 실제로 필요한 부재인지 하나씩 검토할 수 있습니다.']};
+    const pct=stage.sandbox?0:totalCost/Math.max(1,stage.budget)*100,hard=totalCost>stageTestBudget();
+    const issue={kicker:'BUDGET CHECK',headline:hard?'TEST LIMIT EXCEEDED':'BASE BUDGET EXCEEDED',metrics:[['CURRENT COST',`₩${Math.round(totalCost).toLocaleString()}`],['BASE BUDGET',`₩${stage.budget.toLocaleString()}`],['BUDGET USAGE',`${pct.toFixed(0)}%`],['TEST LIMIT',`${TEST_BUDGET_PERCENT}%`]],reason:hard?'현재 비용이 TEST 허용 상한을 넘어 구조 시험을 시작할 수 없습니다.':'TEST는 가능하지만 비용 효율 평가에서는 불리한 상태입니다.',advice:['Stress View에서 utilization이 매우 낮은 부재부터 효과를 비교해보세요.','하중 경로를 유지하는 범위에서 중복도가 실제로 필요한 부재인지 하나씩 검토할 수 있습니다.']};
     ui.coach.innerHTML=coachReportHTML(issue,null,'DESIGN REVIEW');return;
   }
   if(kind==='unstable'){
@@ -2308,7 +2310,7 @@ function updateInspector(clientX,clientY,p){
     const cls=preview.valid?'ok':'danger';
     let why='설치 가능';
     if(!preview.lengthOK)why='재료 최대 길이 초과';else if(preview.duplicate)why='이미 연결된 관절';else if(preview.same)why='같은 관절';else if(!preview.placeOK)why='설치 불가 영역';else if(!preview.pathOK)why='자재가 건설 불가 구간을 통과함';
-    const projected=totalCost+preview.addCost;const budgetClass=stage.sandbox?'dim':projected>stage.budget*2?'danger':projected>stage.budget?'warn':'dim';
+    const projected=totalCost+preview.addCost;const budgetClass=stage.sandbox?'dim':projected>stageTestBudget()?'danger':projected>stage.budget?'warn':'dim';
     html=`<div class="inspectorPreview"><b>${MAT[tool].name} 설치 미리보기</b><span class="mono">길이 ${Math.round(preview.L)}${lenLimit}</span><br><span class="dim">추가 비용 약 ₩${preview.addCost.toLocaleString()}</span>${stage.sandbox?'':`<br><span class="${budgetClass}">설치 후 ₩${projected.toLocaleString()}</span>`}<br><span class="${cls}">${why}</span></div>`;
   }else if(hoverMember?.road){
     const a=nodeById(hoverMember.a),b=nodeById(hoverMember.b),L=dist(a,b),analysis=inspectorAnalysisData();
@@ -3667,7 +3669,7 @@ function startSimulation(fromTutorial=false){
   updateVehicleRetry();
   pauseBuildClock();
   clearRepairReview();
-  if(!stage.sandbox && totalCost>stage.budget*2){const fs={mode:'static',failReason:'budget-overrun',maxRatio:0,maxDefl:0,maxDeckDefl:0,maxDeckCurvature:0,brokenCount:0,vehiclePass:false,vesselPass:!stage.ship,vesselCollision:false,minVesselClearance:Infinity,failureEvents:[]};toast('BUDGET OVERRUN // TEST BLOCKED');setCoach('budget');showResult(false,fs);return}
+  if(!stage.sandbox && totalCost>stageTestBudget()){const fs={mode:'static',failReason:'budget-overrun',maxRatio:0,maxDefl:0,maxDeckDefl:0,maxDeckCurvature:0,brokenCount:0,vehiclePass:false,vesselPass:!stage.ship,vesselCollision:false,minVesselClearance:Infinity,failureEvents:[]};toast('BUDGET OVERRUN // TEST BLOCKED');setCoach('budget');showResult(false,fs);return}
   setGamePhase(GAME_PHASE.TEST);
   selected=null;lastBroken=new Set();if(currentAnalysis)delete currentAnalysis.vehicleCollision;playSfx('test');
   const probe=assemble(vehiclePoseAt(0,null,0).x,lastBroken,0);
@@ -4171,7 +4173,7 @@ function showResult(success,s){
   let title,summary;
   if(s.vehicleCollision){title='차량 충돌';summary='차체 또는 바퀴가 구조 부재와 부딪혀 통과하지 못했습니다. 도로 위 차체 높이와 진입부의 통행 공간을 확보하세요.'}
   else if(stage.sandbox){title=success?'실험 완료':'동적 붕괴';summary='샌드박스 실험이 끝났습니다. 응력 색과 변형을 비교한 뒤 하중이나 구조를 바꿔 다시 시험해 보세요.'}
-  else if(s.failReason==='budget-overrun'){title='시험 예산 초과';summary=`설계 비용이 시험 허용 한도 ₩${(stage.budget*2).toLocaleString()}을 넘었습니다. 중복 부재를 줄이거나 필요한 구간에만 강한 재료를 사용해 보세요.`}
+  else if(s.failReason==='budget-overrun'){title='시험 예산 초과';summary=`설계 비용이 시험 허용 한도 ₩${stageTestBudget().toLocaleString()}을 넘었습니다. 중복 부재를 줄이거나 필요한 구간에만 강한 재료를 사용해 보세요.`}
   else if(vesselCollision){title='선박 충돌';summary='선박이 지나는 공간에 다리가 닿았습니다. 교량의 변형까지 고려해 항로의 최소 폭과 높이를 확보해 보세요.'}
   else if(serviceFail){title='사용성 기준 실패';summary='차량은 끝까지 통과했지만 허용 변형 기준을 만족하지 못했습니다. 결과창을 닫으면 변형된 구조를 그대로 관찰할 수 있습니다.'}
   else if(level?.type==='bonus'){title=success?'보너스 계약 완료':'실험 실패';summary=success?`선택 실험을 완료했습니다. <strong style="color:#e3c45b">${koBadgeLabel(level.badge||'ENGINEERING BADGE')}</strong>가 Engineering Record에 기록되었습니다.`:'보너스 실험 실패는 메인 캠페인 진행도에 영향을 주지 않습니다. 원인을 분석하고 같은 실험을 다시 시도할 수 있습니다.'}
@@ -5024,7 +5026,7 @@ function toggleMeasure(){
 function scanStructure(){
   if(!isAdvancedUI()&&!tutorialMode){toast('SCAN // ADVANCED MODE에서 사용할 수 있습니다');return}
   if(sim){toast('TEST가 끝난 뒤 SCAN을 사용할 수 있습니다');return}
-  if(!stage.sandbox&&totalCost>stage.budget*2){toast('기본 예산의 200%를 초과했습니다');return}
+  if(!stage.sandbox&&totalCost>stageTestBudget()){toast(`기본 예산의 ${TEST_BUDGET_PERCENT}%를 초과했습니다`);return}
   selected=null;measureA=null;measureB=null;updateMeasureTag();
   const x=(stage.deck[0][0]+stage.deck.at(-1)[0])/2;
   const a=assemble(x,new Set());
