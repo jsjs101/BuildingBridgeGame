@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>설계 랭킹 · TRUSS LAB</title>
+  <link rel="stylesheet" href="ranking.css?v=bc36bc62a013">
+  <script src="ranking.js?v=61af65ff6587" defer></script>
+</head>
+<body>
+  <main id="rankingPage" class="rankingPage">
+    <header class="rankingPageHeader">
+      <div>
+        <p class="rankingEyebrow">TRUSS LAB / LEADERBOARD</p>
+        <h1>설계 랭킹</h1>
+        <p id="rankingContract"></p>
+      </div>
+      <a id="rankingBack" href="Bridge.html">← 게임으로 돌아가기</a>
+    </header>
+    <p id="rankingEmpty" class="rankingEmptyPage">계약 완료 화면에서 기록을 등록하면 이곳에서 순위를 볼 수 있습니다.</p>
+    <div id="rankingContent" class="rankingPageGrid" hidden>
+      <aside class="rankingPageSummary" aria-label="내 기록">
+        <div class="rankingStanding">
+          <div id="rankingPercentBar" class="rankingPercentBar" role="img"><span></span></div>
+          <div><strong id="rankingPercentile">—</strong><p id="rankingPlace"></p></div>
+        </div>
+        <dl>
+          <div><dt>설계 비용</dt><dd id="rankingCost"></dd></div>
+          <div><dt>건설 시간</dt><dd id="rankingTime"></dd></div>
+        </dl>
+      </aside>
+      <section class="rankingPageList" aria-labelledby="rankingListTitle">
+        <h2 id="rankingListTitle">플레이어 순위</h2>
+        <label class="rankingSortControl">순위 기준
+          <select id="rankingSort">
+            <option value="cost">비용순</option>
+            <option value="time">건설 시간순</option>
+          </select>
+        </label>
+        <p id="rankingSortNote" hidden>건설 시간순을 사용하려면 랭킹 서버를 업데이트한 뒤 새 기록을 등록해 주세요.</p>
+        <p id="rankingCount"></p>
+        <table>
+          <thead><tr><th scope="col">순위</th><th scope="col">닉네임</th><th scope="col">비용</th><th scope="col">건설 시간</th></tr></thead>
+          <tbody id="rankingRows"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
