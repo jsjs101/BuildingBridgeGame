@@ -2775,3 +2775,24 @@ body[data-game-phase="test"] #testBtn{border-color:#c5a46c}
   .dioramaArrow{width:36px;height:36px}
   .dioramaGuide{top:10px;left:12px;right:12px}
 }
+
+/* Inventory readout stays inside each material button. */
+.materialStock{display:inline-flex;align-items:center;gap:4px;flex:none;min-height:25px;padding:3px 6px;border:1px solid #456657;border-radius:5px;background:#1a3028;color:#bde5cf;line-height:1;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
+.materialStock[hidden]{display:none}
+.materialStockLabel{font:600 10px/1 "Malgun Gothic",sans-serif;color:#acc2b7}
+.materialStockValue{min-width:1ch;text-align:center;font:750 14px/1 var(--mono)}
+.materialStockTotal{font:500 10px/1 var(--mono);color:#94b0a3}
+.materialStock.isLow{border-color:#7e7149;background:#302c20;color:#ead9a4}
+.materialStock.isEmpty{border-color:#78534e;background:#302321;color:#e3ada1}
+.materialStock.isEmpty .materialStockLabel,.materialStock.isEmpty .materialStockTotal{color:#c7a49d}
+.materialStock.isUnlimited{border-color:#40565f;background:#17272e;color:#b6ccd4}
+.materialStock.isUnlimited .materialStockValue{font-size:19px}
+@media(max-width:1199px){.materialStock{gap:3px;padding-inline:5px}.materialStockLabel{font-size:9px}}
+
+.localAiQuick{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;overflow:visible;padding:10px 12px;background:#101a1e}
+.localAiQuick::before{content:'이 단계 추천 질문';color:#a7bdb7;font:600 11px/1.5 "Malgun Gothic",sans-serif;letter-spacing:.03em}
+.localAiQuick button{display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0;text-align:left;white-space:normal;padding:8px 10px;border:1px solid #344a47;border-radius:5px;background:#152421;color:#c2d9d0;font:600 12px/1.5 "Malgun Gothic",sans-serif;transition:background .16s,border-color .16s}
+.localAiQuick button::after{content:'+';flex:none;color:#9ac6b3;font:400 17px/1 var(--mono)}
+.localAiQuick button:hover:not(:disabled){background:#1c312a;border-color:#709c89;color:#e1eee7}
+.localAiQuick button:focus-visible{outline:2px solid #a3d6bd;outline-offset:2px}
+.localAiQuick button:disabled{opacity:.45;cursor:default}

@@ -29,13 +29,30 @@ function rankingSheet_() {
   return sheet;
 }
 
+function checkRankingConnection() {
+  const id=PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if(!id)throw new Error('setupRanking을 먼저 실행하세요.');
+  const spreadsheet=SpreadsheetApp.openById(id);
+  const sheet=rankingSheet_();
+  const active=SpreadsheetApp.getActiveSpreadsheet();
+  const report={
+    rankingSpreadsheet:'https://docs.google.com/spreadsheets/d/'+spreadsheet.getId()+'/edit',
+    activeSpreadsheet:active?'https://docs.google.com/spreadsheets/d/'+active.getId()+'/edit':null,
+    sameSpreadsheet:active?active.getId()===id:null,
+    sheetName:RANKING_SHEET,
+    records:Math.max(0,sheet.getLastRow()-1)
+  };
+  console.log(JSON.stringify(report,null,2));
+  return report;
+}
+
 function rankingJson_(result) {
   return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
 }
 
 function rankingBoardId_(input) {
   if (input.season !== RANKING_SEASON) throw new Error('랭킹 시즌이 다릅니다. 게임 설정을 확인하세요.');
-  if (!/^(set0[1-6]_(level0[1-6]|bonus0[12])|booth_v2_(long|weather|harbor))$/.test(input.levelId)) throw new Error('지원하지 않는 계약입니다.');
+  if (!/^(set0[1-6]_(level0[1-6]|bonus0[12])|booth_v2_(long|weather|harbor|cable))$/.test(input.levelId)) throw new Error('지원하지 않는 계약입니다.');
   if (!['easy','hard'].includes(input.difficulty)) throw new Error('난이도를 확인하세요.');
   return [input.season,input.levelId,input.difficulty].join('/');
 }
@@ -125,6 +142,12 @@ function doPost(e) {
     if (!/^[a-f0-9]{64}$/.test(input.attemptId)) throw new Error('게임을 새로고침한 뒤 새 클리어 기록을 등록하세요.');
     if (typeof input.nickname !== 'string' || !input.nickname.trim() || input.nickname.length > 20 || /^[=+\-@]/.test(input.nickname.trim()) || /[\x00-\x1f<>]/.test(input.nickname)) throw new Error('닉네임은 특수 명령문을 제외한 1~20자로 입력하세요.');
     const design=rankingDesign_(input.design);
+    if(input.levelId==='booth_v2_cable'){
+      for(const [material,limit] of Object.entries({roadHeavy:6,steel:1})){
+        if(design.design.members.filter(member=>member[2]===material).length>limit)throw new Error('자재 개수 제한을 초과했습니다.');
+      }
+      if(design.design.members.some(member=>!['roadHeavy','steel','cable'].includes(member[2])))throw new Error('이 단계에서 사용할 수 없는 자재입니다.');
+    }
     if (input.cost !== design.cost) throw new Error('설계 비용이 일치하지 않습니다. 기본 재료 설정으로 다시 시험하세요.');
     rankingNumber_(input.timeMs,1,604800000);
     if (input.buildTimeMs!==undefined && input.buildTimeMs!==null) rankingNumber_(input.buildTimeMs,0,604800000);

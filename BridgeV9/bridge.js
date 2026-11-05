@@ -38,16 +38,27 @@ function createBridgeBooth(engine){
       vehicle:'TRUCK',load:18000,budget:68000,serviceDeflection:46,materials:['road','roadHeavy','steel'],conditionCodes:['NAVIGATION_CLEARANCE','HEAVY_TRUCK'],axles:[[-42,.24],[-5,.34],[38,.42]],
       weather:'clear',
       tip:'큰 선박 위로 도로가 아치처럼 솟도록 연결하세요. 노란 항로를 비우고 강철로 보강해 보세요.',
-      prompt:'가운데로 큰 배가 지나가고 18 kN 화물차가 다리를 건너야 합니다. 항로 위로 아치형 도로와 강철 골조를 어떻게 만들면 좋을지 쉬운 말로 설명해 주세요.'}
+      prompt:'가운데로 큰 배가 지나가고 18 kN 화물차가 다리를 건너야 합니다. 항로 위로 아치형 도로와 강철 골조를 어떻게 만들면 좋을지 쉬운 말로 설명해 주세요.'},
+    {number:5,id:'booth_v2_cable',stageIndex:3,type:'main',globalNumber:5,title:'아래에서 당기는 케이블',concept:'케이블 인장과 강철 압축',
+      objective:'강화 도로 가운데에서 아래로 강철 기둥을 내리고, 그 아래 끝을 양쪽 지지점에 케이블로 연결해 버스를 통과시키세요.',
+      site:{kind:'flat',leftX:200,rightX:1000,leftY:390,rightY:390,segments:6},
+      vehicle:'BUS',load:13000,budget:22000,serviceDeflection:64,materials:['roadHeavy','steel','cable'],
+      conditionCodes:['ROAD_REQUIRED'],materialLimits:{roadHeavy:6,steel:1},axles:[[-34,.28],[0,.34],[34,.38]],weather:'clear',snowfall:true,bridgeStyle:'underslung',
+      tip:'강화 도로는 최대 6개, 강철은 최대 1개입니다. 가운데에서 아래로 강철 약 140u → 아래 끝과 양쪽 빨간 지지점을 케이블로 연결하세요.',
+      prompt:'강화 도로 최대 6개, 강철 최대 1개만 사용할 수 있는 하부 케이블 교량을 처음 만들고 있어요. 가운데 강철 기둥의 아래 끝을 양쪽 지지점에 케이블로 잇는 순서와 케이블의 인장·기둥의 압축 원리를 쉬운 말로 설명하고, 현재 설계에서 다음에 연결할 위치를 알려 주세요.'}
   ];
   const labels=['첫 다리 연습',...missions.map(mission=>mission.title)];
-  const fresh=()=>({version:2,current:0,furthest:0,started:false,finished:false,statuses:['ready','ready','ready','ready'],results:{},drafts:{}});
-  let state=fresh(),loaded=false,resetting=false,unmountMap=null,pendingUnlock=null;
+  const lastStage=labels.length-1;
+  const fresh=()=>({version:3,current:0,furthest:0,started:false,finished:false,statuses:labels.map(()=>'ready'),results:{},drafts:{},designs:{}});
+  let state=fresh(),loaded=false,resetting=false,unmountMap=null,pendingUnlock=null,closeEnding=null,endingOpening=false;
   try{
     const saved=JSON.parse(storage.getItem(storageKey)||'null');
-    if(saved&&saved.version===2&&Number.isInteger(saved.current)&&saved.current>=0&&saved.current<4&&saved.statuses?.length===4)state=saved;
+    if(saved&&[2,3].includes(saved.version)&&Number.isInteger(saved.current)&&saved.current>=0&&saved.current<labels.length&&Array.isArray(saved.statuses)&&saved.statuses.length>=4){
+      state={...fresh(),...saved,version:3,statuses:labels.map((_,i)=>saved.statuses[i]||'ready')};
+      if(saved.version===2&&saved.finished){state.finished=false;state.current=lastStage;state.furthest=lastStage}
+    }
   }catch(error){console.warn('[TRUSS LAB] 시연 기록을 새로 시작합니다.',error)}
-  state.furthest=Math.min(3,Math.max(state.current,state.furthest||0,...state.statuses.map((status,index)=>status==='ready'?0:index+1)));
+  state.furthest=Math.min(lastStage,Math.max(state.current,state.furthest||0,...state.statuses.map((status,index)=>status==='ready'?0:index+1)));
   const save=()=>storage.setItem(storageKey,JSON.stringify(state));
   const screen=$('#boothScreen'),hud=$('#boothHUD'),intro=$('#titleScreen'),introStart=$('#titleStartBtn');
   let introLeaving=false;
@@ -464,7 +475,7 @@ function createBridgeBooth(engine){
   function launch(){
     if(!state.started||state.finished)return;
     if(state.current===0){engine.startTutorial();loaded=true}
-    else {engine.startMission(missions[state.current-1],state.drafts[state.current]);loaded=true}
+    else {engine.startMission(missions[state.current-1],state.drafts[state.current],labels.length);loaded=true}
     save();
   }
   function enterBooth(){
@@ -504,24 +515,55 @@ function createBridgeBooth(engine){
   }
   const isUnlocked=index=>index<=state.furthest;
   function unlockNext(index){
-    if(index>=3||isUnlocked(index+1))return;
+    if(index>=lastStage||isUnlocked(index+1))return;
     state.furthest=index+1;
     pendingUnlock={from:String(index),to:String(index+1)};
   }
   function next(skipped=false){
     const previous=state.current;
     if(skipped&&state.statuses[state.current]!=='complete')state.statuses[state.current]='skipped';
-    if(state.current===3){end();return}
+    if(state.current===lastStage){end();return}
     unlockNext(previous);
     pause();state.current=previous+1;save();engine.showScreen('booth');
   }
   function end(){
     pause();state.finished=true;save();hud.hidden=true;engine.showScreen('booth');
+    if(state.statuses[lastStage]==='complete')showEnding();
+  }
+  async function showEnding(){
+    if(closeEnding||endingOpening)return;
+    endingOpening=true;
+    const music=new Audio('source/Truss.mp3');
+    music.loop=true;
+    music.volume=.65;
+    try{
+      // Start within the click handler, before fetching the credits.
+      const musicStarted=music.play().then(()=>true,error=>{
+        console.warn('[TRUSS LAB] 엔딩 음악 재생이 시작되지 않았습니다.',error);
+        return false;
+      });
+      const credits=await loadBoothCredits();
+      for(let index=0;index<labels.length;index++){
+        const draft=state.drafts[index];
+        if(state.designs[index]||state.statuses[index]!=='complete'||!draft)continue;
+        const design=typeof draft.design==='string'?JSON.parse(draft.design):draft.design;
+        const deck=engine.previewDeck(missions[index-1]);
+        state.designs[index]={deck,nodes:[...deck.map(([x,y],id)=>({id,x,y})),...design.nodes],members:design.members};
+      }
+      save();
+      unmountMap?.();unmountMap=null;screen.inert=true;
+      closeEnding=mountBoothEnding({
+        bridges:labels.map((title,index)=>({title,design:state.designs[index],environment:boothEnvironment(index,missions[index-1]),completed:state.statuses[index]==='complete'})),
+        credits,reducedMotion:engine.reducedMotion(),music,musicStarted,
+        close:()=>{closeEnding();closeEnding=null;screen.inert=false;render();screen.querySelector('[data-launch]').focus({preventScroll:true})}
+      });
+    }catch(error){music.pause();console.error('[TRUSS LAB] 엔딩을 열지 못했습니다.',error);alert('엔딩을 불러오지 못했습니다. 페이지 연결을 확인한 뒤 다시 시도해 주세요.')}
+    finally{endingOpening=false}
   }
   function reset(){resetting=true;storage.clear();location.reload()}
   function askAI(){
     if(state.current===0)return;
-    engine.openAI(missions[state.current-1].prompt);
+    engine.openAI();
   }
   function play(index){
     if(!isUnlocked(index))return;
@@ -549,7 +591,7 @@ function createBridgeBooth(engine){
         record:record?'최소 비용 ₩'+record.cost.toLocaleString('ko-KR')+' · '+engine.formatTime(record.buildTimeMs):feature,
         actionLabel:completed?'다시 도전 →':index===0?'연습 시작 →':state.drafts[index]||loaded&&index===state.current?'설계 계속하기 →':'다리 설계하기 →',
         deck:engine.previewDeck(mission),ship:mission?.ship,vehicle:mission?.vehicle||'CAR',materials:mission?.materials||['road','wood'],
-        snowfall:mission?.snowfall,environment:boothEnvironment(index,mission)
+        snowfall:mission?.snowfall,bridgeStyle:mission?.bridgeStyle,environment:boothEnvironment(index,mission)
       };
     });
     screen.innerHTML=`<section class="dioramaGallery boothDiorama" aria-label="시연 단계 지도">
@@ -558,7 +600,7 @@ function createBridgeBooth(engine){
         <button class="dioramaArrow" data-step="-1" aria-label="이전 단계">‹</button>
         <button class="dioramaArrow" data-step="1" aria-label="다음 단계">›</button>
       </div>
-      <header class="boothMapBrand"><span>TRUSS LAB</span><strong>교량 현장 지도</strong><small>${state.finished?'체험 완료 · ':''}${passed} / 4 단계 완료</small></header>
+      <header class="boothMapBrand"><span>TRUSS LAB</span><strong>교량 현장 지도</strong><small>${state.finished?'체험 완료 · ':''}${passed} / ${labels.length} 단계 완료</small></header>
       <div class="dioramaDetails" aria-live="polite"><div><div class="dioramaIdentity"><span data-number></span><b data-status></b></div><h2></h2><p data-summary></p><p data-record></p></div></div>
       <footer class="boothMapFooter">
         <div class="dioramaIndex" role="group" aria-label="시연 단계 바로 선택">
@@ -570,7 +612,8 @@ function createBridgeBooth(engine){
     </section>`;
     const gallery=screen.querySelector('.boothDiorama');
     const utilities=screen.querySelector('.boothMapUtilities');
-    if(state.current>0&&!state.finished)utilities.append(button(state.current===3?'체험 마무리':'다음 단계 둘러보기',()=>next(true)));
+    if(state.current>0&&!state.finished)utilities.append(button(state.current===lastStage?'체험 마무리':'다음 단계 둘러보기',()=>next(true)));
+    if(state.finished&&state.statuses[lastStage]==='complete')utilities.append(button('엔딩 다시 보기',showEnding));
     utilities.append(button(state.finished?'다음 체험자 · 새로 시작':'다음 체험자 · 초기화',()=>{
       if(state.finished||confirm('현재 시연 기록과 대화를 비우고 새 체험을 시작할까요?'))reset();
     }));
@@ -603,7 +646,7 @@ function createBridgeBooth(engine){
       if(state.finished)engine.showScreen('booth');
     }
     if(name==='game'){
-      $('#boothStepLabel').textContent=`${state.current+1} / 4 · ${labels[state.current]}`;
+      $('#boothStepLabel').textContent=`${state.current+1} / ${labels.length} · ${labels[state.current]}`;
       $('#boothAskAI').hidden=state.current===0;
     }
   }
@@ -618,6 +661,7 @@ function createBridgeBooth(engine){
     screenChanged('result');
     if(success){
       state.statuses[state.current]='complete';
+      state.designs[state.current]=engine.captureBridge();
       unlockNext(state.current);
       const previous=state.results[state.current];
       if(!previous||metrics.cost<previous.cost||metrics.cost===previous.cost&&metrics.buildTimeMs<previous.buildTimeMs)state.results[state.current]=metrics;
@@ -631,7 +675,7 @@ function createBridgeBooth(engine){
     const learn=$('#goEducationBtn');if(learn){learn.textContent='AI에게 물어보기';learn.onclick=askAI}
     for(const learnButton of document.querySelectorAll('.learnWhyBtn')){learnButton.textContent='AI에게 물어보기';learnButton.onclick=askAI}
     if(success){
-      const action=button(state.current===3?'체험 마치기':'다음 단계 →',()=>next(false),true);
+      const action=button(state.current===lastStage?'체험 마치기':'다음 단계 →',()=>next(false),true);
       action.id='boothResultNext';$('#resultCard .completionNextSteps').prepend(action);
       $('#resultTitle').textContent=`${state.current+1}단계 완료`;
     }
@@ -641,7 +685,7 @@ function createBridgeBooth(engine){
   window.addEventListener('pagehide',()=>{if(!resetting)remember()});
   return {
     begin,route,screenChanged,result,askAI,
-    tutorialFinished(skipped){state.statuses[0]=skipped?'skipped':'complete';next(false)},
+    tutorialFinished(skipped){state.statuses[0]=skipped?'skipped':'complete';if(!skipped)state.designs[0]=engine.captureBridge();next(false)},
     currentMission(){return state.current>0?missions[state.current-1]:null}
   };
 }

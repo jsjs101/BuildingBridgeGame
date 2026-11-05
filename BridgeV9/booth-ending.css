@@ -1,0 +1,32 @@
+.boothEnding{position:fixed;inset:0;z-index:10000;background:#111e25;color:#edf0e9;isolation:isolate;font-family:"Malgun Gothic",sans-serif;overflow:hidden;animation:endingAppear .9s ease both}
+.boothEnding canvas{display:block;width:100%;height:100%;position:absolute;inset:0;background:transparent;pointer-events:none}
+.endingShade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#0d1a2544,transparent 30%,transparent 52%,#0c182dcc);box-shadow:inset 0 0 160px #10212b55}
+.endingTop{position:absolute;inset:28px 36px auto;display:flex;justify-content:space-between;align-items:center;gap:20px;font:500 11px/1.5 var(--mono);letter-spacing:.18em;color:#d3e0d9}
+.endingControls{display:flex;gap:8px;letter-spacing:0}
+.endingControls button,.endingReturn{border:1px solid #c7dcd144;background:#13242a99;color:#e4ece4;border-radius:4px;min-height:38px;padding:8px 14px;font:500 12px/1.5 "Malgun Gothic",sans-serif;cursor:pointer;transition:background .2s,border-color .2s}
+.endingControls button:hover,.endingReturn:hover{background:#344a47;border-color:#b4cdb8}
+.boothEnding button:focus-visible{outline:2px solid #d8e5bf;outline-offset:4px}
+.endingCaption{position:absolute;left:8%;bottom:13%;width:min(740px,80%);transition:opacity .55s,transform .55s;pointer-events:none}
+.endingCaption.isHidden{opacity:0;transform:translateY(10px)}
+.endingCaption small{display:block;margin-bottom:18px;font:500 11px/1.5 var(--mono);letter-spacing:.16em;color:#b8cec4}
+.endingCaption h1{margin:0 0 16px;font-size:clamp(26px,3vw,46px);font-weight:500;line-height:1.4;letter-spacing:-.055em;word-break:keep-all}
+.endingCaption p{margin:0;max-width:620px;color:#d1ddd5;font-size:clamp(13px,1.1vw,17px);line-height:1.85;word-break:keep-all}
+.endingProgress{position:absolute;bottom:28px;left:8%;right:8%;display:flex;gap:7px}
+.endingProgress span{flex:1;height:2px;background:#d9e2cc33;overflow:hidden}
+.endingProgress i{display:block;height:100%;width:100%;background:#d2dfbd;transform:scaleX(0);transform-origin:left}
+.endingCredits{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b1925d9;opacity:0;visibility:hidden;transition:opacity 1.8s,visibility 1.8s;pointer-events:none;text-align:center;padding:70px 24px 32px}
+.endingCredits.isVisible{opacity:1;visibility:visible;pointer-events:auto}
+.endingCredits>small{font:500 11px/1.5 var(--mono);letter-spacing:.3em;color:#a6c6b8}
+.endingCredits h2{margin:15px 0 26px;font-size:clamp(25px,3vw,42px);line-height:1.35;font-weight:500;letter-spacing:-.05em}
+.endingCreditWindow{width:min(600px,92vw);height:min(40vh,330px);overflow:hidden;position:relative;mask-image:linear-gradient(transparent,#000 10%,#000 88%,transparent)}
+.endingCreditRoll{padding:15px 0 32px}
+.endingCreditRoll section{margin:0 0 30px}
+.endingCreditRoll h3{margin:0 0 9px;color:#a3b8b5;font-size:12px;font-weight:400;letter-spacing:.08em}
+.endingCreditRoll p{margin:4px 0;color:#e3e9dd;font-size:15px;line-height:1.7}
+.endingMessage{white-space:pre-line;color:#bfcec4;font-size:14px;line-height:1.9;margin:24px 0}
+.endingReturn{position:relative;background:#acc9b3;color:#142a29;border-color:transparent;min-width:172px;font-size:13px}
+.endingCredits.isVisible~.endingTop{opacity:.7}
+@keyframes endingAppear{from{opacity:0}to{opacity:1}}
+@media(max-height:680px){.endingCredits{padding-top:45px}.endingCredits h2{margin:10px 0 14px}.endingCreditWindow{height:32vh}.endingMessage{margin:12px 0}.endingCaption{bottom:12%}}
+@media(max-width:700px){.endingTop{inset:18px 18px auto}.endingTop>span{display:none}.endingControls{margin-left:auto}.endingCaption{left:7%;width:86%}.endingCaption h1{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.boothEnding,.boothEnding *{animation:none;transition:none}}

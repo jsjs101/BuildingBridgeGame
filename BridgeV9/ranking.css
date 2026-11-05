@@ -34,3 +34,9 @@ td:nth-child(n+3){font:600 14px var(--mono)}
 .rankingSortControl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0;color:var(--muted)}
 .rankingSortControl select{font:inherit;color:#e5f0f2;background:#142832;border:1px solid var(--line);border-radius:4px;padding:6px 10px}
 #rankingSortNote{font-size:13px}
+
+.rankingFilters{display:flex;flex-wrap:wrap;gap:14px;align-items:end;margin-top:20px}
+.rankingFilters label{display:grid;gap:5px;color:var(--muted);min-width:130px}
+.rankingFilters select,.rankingFilters button{font:inherit;color:#e5f0f2;background:#142832;border:1px solid var(--line);border-radius:4px;padding:8px 12px;min-height:43px;max-width:100%}
+.rankingFilters label:first-child{flex:1;min-width:220px}
+.rankingFilters button{cursor:pointer}.rankingFilters button:disabled{opacity:.5}

@@ -142,10 +142,10 @@ const MAT = {
   // a larger effective E·I even with its own tuned scale.
   wood:{name:'목재', color:'#d9a15b', EA:650000, E:650, I:184742, K:1.0, weight:.8, tension:26000, compression:23000, cost:3.8, maxLen:270},
   steel:{name:'강철', color:'#cbd1da', EA:900000, E:900, I:232305, K:1.0, weight:1.3, tension:36000, compression:31000, cost:8.5, maxLen:350},
-  cable:{name:'케이블', color:'#f1d874', EA:520000, E:520, I:6331, K:1.0, weight:.2, tension:43000, compression:900, cost:4.8, maxLen:Infinity},
+  cable:{name:'케이블', color:'#f1d874', EA:1200000, E:1200, I:6331, K:1.0, weight:.2, tension:86000, compression:900, cost:4.8, maxLen:Infinity},
   // weight: N/u, momentCapacity: N·u, shearCapacity: N in the game's relative units.
   road:{name:'일반 도로', color:'#66524a', EA:1080000, E:1080, I:302613, K:1.0, beamScale:.675, weight:2, momentCapacity:700000, shearCapacity:12000, tension:56000, compression:56000, cost:4.0, maxLen:180, roadWidth:16},
-  roadHeavy:{name:'강화 도로', color:'#53606a', EA:1700000, E:1700, I:461143, K:1.0, beamScale:.42, weight:3.5, momentCapacity:1400000, shearCapacity:20000, tension:92000, compression:92000, cost:9.5, maxLen:220, roadWidth:22}
+  roadHeavy:{name:'강화 도로', color:'#53606a', EA:1700000, E:1700, I:461143, K:1.0, beamScale:.52, weight:3.5, momentCapacity:1400000, shearCapacity:20000, tension:92000, compression:92000, cost:9.5, maxLen:220, roadWidth:22}
 };
 
 function eulerBucklingLimit(matKey,L,KOverride=null){
@@ -296,7 +296,7 @@ function runtimeStageForLevel(level,{difficulty=true}={}){
     extraRoadLoad:level.extraRoadLoad||0,snowfall:!!level.snowfall,
     wind:level.wind||0,windRamp:clonePlain(level.windRamp||null),weather:level.weather||'clear',environment:getGameSet(level.setId)?.environment||'',ship,navigationClearance,
     axles:clonePlain(vehicleAxles),doubleVehicle:clonePlain(level.doubleVehicle||null),forcedFailure:clonePlain(level.forcedFailure||null),
-    maxMemberCount:level.maxMemberCount??null,maxCableCount:level.maxCableCount??null,targetMaterialLength:level.targetMaterialLength??null,
+    materialLimits:level.materialLimits?clonePlain(level.materialLimits):null,maxMemberCount:level.maxMemberCount??null,maxCableCount:level.maxCableCount??null,targetMaterialLength:level.targetMaterialLength??null,
     extraSupports,sandbox:false,bg:site.navigation?'obstacle':base.bg
   };
 }
@@ -1592,7 +1592,58 @@ function zoomCamera(factor,anchorScreen=null){const old=camera.zoom;const next=c
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function getCollapseDeflLimit(s=stage){return Number.isFinite(s?.collapseDeflLimit)?s.collapseDeflLimit:(s?.maxDefl||0)*2.2}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function snap(v,g=25){const step=snapEnabled?g:5;return Math.round(v/step)*step}
+let constructionGridCache=null;
+function constructionGrid(){
+  const deck=stage.deck;
+  if(constructionGridCache&&constructionGridCache.deck===deck&&
+    constructionGridCache.points.every(([x,y],i)=>deck[i]?.[0]===x&&deck[i]?.[1]===y)&&
+    constructionGridCache.points.length===deck.length)return constructionGridCache;
+  const xs=[...new Set(deck.map(point=>point[0]))].sort((a,b)=>a-b);
+  const panel=Math.max(25,...xs.slice(1).map((x,i)=>x-xs[i]));
+  const base=panel/Math.max(1,Math.round(panel/25));
+  function axis(coordinates){
+    const anchors=[...new Set(coordinates)].sort((a,b)=>a-b);
+    const steps=anchors.slice(1).map((end,i)=>{
+      const length=end-anchors[i];
+      return length/Math.max(1,Math.round(length/base));
+    });
+    const edgeStep=step=>step>=base/2?step:base;
+    return {anchors,steps,base,before:edgeStep(steps[0]),after:edgeStep(steps.at(-1))};
+  }
+  constructionGridCache={deck,points:deck.map(point=>point.slice()),x:axis(deck.map(point=>point[0])),y:axis(deck.map(point=>point[1]))};
+  return constructionGridCache;
+}
+function snapAxis(coordinate,axis){
+  const {anchors,steps,base,before,after}=axis;
+  let index=0;
+  while(index<anchors.length-2&&coordinate>anchors[index+1])index++;
+  const origin=coordinate<anchors[0]?anchors[0]:coordinate>anchors.at(-1)?anchors.at(-1):anchors[index];
+  const step=coordinate<anchors[0]?before:coordinate>anchors.at(-1)?after:(steps[index]??base);
+  return origin+Math.round((coordinate-origin)/step)*step;
+}
+function snapPoint(point){
+  if(!snapEnabled)return {x:point.x,y:point.y};
+  const grid=constructionGrid();
+  return {x:snapAxis(point.x,grid.x),y:snapAxis(point.y,grid.y)};
+}
+function gridAxisLines(axis,min,max){
+  const {anchors,steps,before,after}=axis,lines=[];
+  function interval(origin,step,start,end){
+    const first=Math.ceil((start-origin)/step-1e-8),last=Math.floor((end-origin)/step+1e-8);
+    for(let i=first;i<=last;i++){
+      const coordinate=origin+i*step;
+      if(lines.length&&Math.abs(lines.at(-1).coordinate-coordinate)<1e-7)continue;
+      const anchor=anchors.some(value=>Math.abs(value-coordinate)<1e-7);
+      lines.push({coordinate,major:anchor||i%4===0});
+    }
+  }
+  interval(anchors[0],before,min,Math.min(max,anchors[0]));
+  for(let i=0;i<steps.length;i++){
+    interval(anchors[i],steps[i],Math.max(min,anchors[i]),Math.min(max,anchors[i+1]));
+  }
+  interval(anchors.at(-1),after,Math.max(min,anchors.at(-1)),max);
+  return lines;
+}
 function toast(msg){ui.toast.textContent=msg;ui.toast.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>ui.toast.classList.remove('show'),1600)}
 function pointInRect(p,r){return p.x>r.x&&p.x<r.x+r.w&&p.y>r.y&&p.y<r.y+r.h}
 function pointInRectInclusive(p,r){return p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h}
@@ -1766,10 +1817,41 @@ function roadReachableNodeIds(broken=new Set()){
   return seen;
 }
 function hasCompleteRoadPath(broken=new Set()){return roadReachableNodeIds(broken).has(rightSupportId())}
+function drivableRoadPath(broken){
+  const start=leftSupportId(),end=rightSupportId(),outgoing=new Map();
+  for(const member of members){
+    if(!member.road||broken.has(member.id))continue;
+    let a=nodeById(member.a),b=nodeById(member.b);
+    if(!a||!b)continue;
+    if(a.x>b.x)[a,b]=[b,a];
+    if(b.x-a.x<5||Math.abs(Math.atan2(b.y-a.y,b.x-a.x))>=1.10)continue;
+    if(!outgoing.has(a.id))outgoing.set(a.id,[]);
+    outgoing.get(a.id).push({member,a,b});
+  }
+  const costs=new Map([[end,0]]),next=new Map();
+  for(const node of nodes.slice().sort((a,b)=>b.x-a.x)){
+    if(node.id===end)continue;
+    for(const edge of outgoing.get(node.id)||[]){
+      if(!costs.has(edge.b.id))continue;
+      const cost=costs.get(edge.b.id)+(edge.a.y+edge.b.y)*.5*(edge.b.x-edge.a.x);
+      if(!costs.has(node.id)||cost<costs.get(node.id)){
+        costs.set(node.id,cost);next.set(node.id,edge);
+      }
+    }
+  }
+  if(!next.has(start))return null;
+  const path=new Set();
+  for(let id=start;id!==end;){
+    const edge=next.get(id);
+    path.add(edge.member.id);id=edge.b.id;
+  }
+  return path;
+}
 function findRoadSegmentAtX(x,broken=new Set(),reachable=roadReachableNodeIds(broken)){
   let best=null,bestScore=Infinity;
+  const path=drivableRoadPath(broken);
   for(const m of members){
-    if(!m.road||broken.has(m.id)||!reachable.has(m.a)||!reachable.has(m.b))continue;
+    if(!m.road||broken.has(m.id)||!reachable.has(m.a)||!reachable.has(m.b)||path&&!path.has(m.id))continue;
     const a=nodeById(m.a),b=nodeById(m.b);if(!a||!b)continue;
     const minX=Math.min(a.x,b.x)-3,maxX=Math.max(a.x,b.x)+3,dx=b.x-a.x;
     if(x<minX||x>maxX||Math.abs(dx)<5)continue;
@@ -1782,7 +1864,46 @@ function findRoadSegmentAtX(x,broken=new Set(),reachable=roadReachableNodeIds(br
 
 // Reusable contract-constraint gate. It centralizes restrictions so future
 // contracts add data instead of one-off Stage-specific if chains.
+const materialStockBadges=Array.from(document.querySelectorAll('.toolBtn'),button=>{
+  const material=button.dataset.tool;
+  if(!MAT[material])return null;
+  const badge=document.createElement('span');
+  badge.className='materialStock';badge.hidden=true;badge.setAttribute('aria-hidden','true');
+  const label=document.createElement('span');label.className='materialStockLabel';label.textContent='남음';
+  const count=document.createElement('b');count.className='materialStockValue';
+  const total=document.createElement('span');total.className='materialStockTotal';
+  badge.append(label,count,total);button.append(badge);
+  return {button,material,badge,count,total,originalLabel:button.getAttribute('aria-label')};
+}).filter(Boolean);
+function updateMaterialStockBadges(){
+  for(const {button,material,badge,count,total,originalLabel} of materialStockBadges){
+    const shown=!!stage.materialLimits&&materialAllowed(material);
+    badge.hidden=!shown;
+    if(!shown){
+      if(originalLabel===null)button.removeAttribute('aria-label');else button.setAttribute('aria-label',originalLabel);
+      continue;
+    }
+    const limit=stage.materialLimits[material],remaining=limit===undefined?null:Math.max(0,limit-materialCount(material));
+    const number=remaining===null?'∞':String(remaining);
+    if(count.textContent!==number)count.textContent=number;
+    const maximum=limit===undefined?'':'/'+limit;
+    if(total.textContent!==maximum)total.textContent=maximum;
+    badge.classList.toggle('isEmpty',remaining===0);
+    badge.classList.toggle('isLow',remaining===1&&limit>1);
+    badge.classList.toggle('isUnlimited',remaining===null);
+    button.setAttribute('aria-label',MAT[material].name+(remaining===null?' · 개수 제한 없음':' · 남은 '+remaining+'개 / 총 '+limit+'개'));
+  }
+}
+function materialCount(material){return members.filter(member=>member.user&&member.mat===material).length}
+function materialCountAvailable(material){
+  const limit=stage.materialLimits?.[material];
+  return limit===undefined||materialCount(material)<limit;
+}
+function materialLimitMessage(material){
+  return MAT[material].name+'은 최대 '+stage.materialLimits[material]+'개까지 사용할 수 있습니다.';
+}
 const CONTRACT_CONSTRAINT_HANDLERS={
+  MAX_MATERIAL_COUNT:({mat})=>materialCountAvailable(mat),
   MATERIAL_AVAILABILITY:({mat})=>['move','delete'].includes(mat)||((MAT[mat]?.enabled!==false)&&(!stage?.materials||stage.materials.includes(mat))),
   MAX_MEMBER_COUNT:()=>!Number.isFinite(stage?.maxMemberCount)||members.filter(m=>m.user).length<stage.maxMemberCount,
   MAX_CABLE_COUNT:({mat})=>mat!=='cable'||!Number.isFinite(stage?.maxCableCount)||members.filter(m=>m.user&&m.mat==='cable').length<stage.maxCableCount,
@@ -1905,7 +2026,7 @@ function drawInteractionReticle(){
   const n=findNode(pointerWorld,19);
   if(n){target={x:n.x,y:n.y};kind=n.support?'지지점':(n.deck?'도로 관절':'관절')}
   else if(['wood','steel','cable','road','roadHeavy'].includes(tool)){
-    const dn=nearestDeckJoint(pointerWorld);if(dn){target={x:dn.x,y:dn.y};kind='도로 가이드'}else target={x:snap(pointerWorld.x),y:snap(pointerWorld.y)};
+    const dn=nearestDeckJoint(pointerWorld);if(dn){target={x:dn.x,y:dn.y};kind='도로 가이드'}else target=snapPoint(pointerWorld);
   }else if(tool==='move'&&hoverNode){target={x:hoverNode.x,y:hoverNode.y};kind='관절 이동'}
   if(!target)return;
   let valid=canPlace(target)||!!n;
@@ -1986,6 +2107,7 @@ function updateHUD(){
   ui.budgetText.textContent=stage.sandbox?`₩${totalCost.toLocaleString()} · 자유 설계`:`₩${totalCost.toLocaleString()} / ₩${stage.budget.toLocaleString()} (최대 ₩${stageTestBudget().toLocaleString()})`; ui.budgetText.className=totalCost<=stage.budget?'good':totalCost<=stageTestBudget()?'warn':'bad';
   if(ui.budgetRail&&ui.budgetRailFill){const cap=stage.sandbox?Math.max(totalCost,1):stageTestBudget();const pct=stage.sandbox?0:clamp(totalCost/cap*100,0,100);ui.budgetRailFill.style.width=`${pct}%`;ui.budgetRail.classList.toggle('warn',!stage.sandbox&&totalCost>stage.budget&&totalCost<=stageTestBudget());ui.budgetRail.classList.toggle('bad',!stage.sandbox&&totalCost>stageTestBudget());ui.budgetRail.style.opacity=stage.sandbox?'.25':'1'}
   updateStageButtons();
+  updateMaterialStockBadges();
   ui.test?.classList.toggle('testReady',stage.sandbox||totalCost<=stageTestBudget());
   
 }
@@ -2253,7 +2375,7 @@ function getPreviewState(p){
   else{
     const deckN=nearestDeckJoint(p);
     if(deckN){targetNode=deckN;targetType='deck';targetPoint={x:deckN.x,y:deckN.y};}
-    else{targetType='new';targetPoint={x:snap(p.x),y:snap(p.y)};}
+    else{targetType='new';targetPoint=snapPoint(p);}
   }
   const L=dist(selected,targetPoint), limit=maxLengthForTool();
   const duplicate=!!(targetNode&&members.some(m=>memberKey(m.a,m.b)===memberKey(selected.id,targetNode.id)));
@@ -2261,7 +2383,7 @@ function getPreviewState(p){
   const placeOK=targetType!=='new'||canPlace(targetPoint);
   const pathOK=!connectionBlocked(selected,targetPoint,tool);
   const lengthOK=!Number.isFinite(limit)||L<=limit;
-  const valid=!same&&!duplicate&&placeOK&&pathOK&&lengthOK&&L>4;
+  const valid=!same&&!duplicate&&placeOK&&pathOK&&lengthOK&&L>4&&materialCountAvailable(tool);
   const addCost=Math.round((L*MAT[tool].cost)/10)*10;
   return {targetNode,targetType,targetPoint,L,limit,duplicate,same,placeOK,pathOK,lengthOK,valid,addCost};
 }
@@ -2418,7 +2540,7 @@ function drawPlacementGuide(){
   else{
     const deckN=nearestDeckJoint(pointerWorld);
     if(deckN){p={x:deckN.x,y:deckN.y};kind='deck'}
-    else{p={x:snap(pointerWorld.x),y:snap(pointerWorld.y)};kind='new';ok=canPlace(p)}
+    else{p=snapPoint(pointerWorld);kind='new';ok=canPlace(p)}
   }
   ctx.save();
   ctx.lineWidth=1.5;ctx.strokeStyle=ok?'rgba(98,225,174,.76)':'rgba(238,100,114,.8)';
@@ -2463,6 +2585,7 @@ function addConnection(target){
     draw();
     return;
   }
+  if(!evaluateContractConstraint('MAX_MATERIAL_COUNT',{mat:tool})){toast(materialLimitMessage(tool));return}
   if(!evaluateContractConstraint('MAX_MEMBER_COUNT',{mat:tool})){toast(`MEMBER LIMIT // ${stage.maxMemberCount}`);return}
   if(!evaluateContractConstraint('MAX_CABLE_COUNT',{mat:tool})){toast(`CABLE LIMIT // ${stage.maxCableCount}`);return}
   snapshot();
@@ -2577,7 +2700,8 @@ canvas.addEventListener('pointerdown',e=>{
     if(deckN){snapshot();deckN.visible=true;deckN.activated=true;n=deckN;toast('도로 관절을 활성화했습니다');}
     else {
       if(tutorialMode){toast('동그라미로 표시된 기존 연결점을 눌러 주세요.');return}
-      let q={x:snap(p.x),y:snap(p.y)};if(!canPlace(q)){toast('이 위치에는 관절을 놓을 수 없습니다');return} snapshot();n={id:Math.max(-1,...nodes.map(x=>x.id))+1,x:q.x,y:q.y,user:true,visible:true,deck:false,roadNode:isRoadTool(),support:null};nodes.push(n);history.pop();triggerNodeFx(n);playSfx('node');}
+      if(!materialCountAvailable(tool)){toast(materialLimitMessage(tool));return}
+      let q=snapPoint(p);if(!canPlace(q)){toast('이 위치에는 관절을 놓을 수 없습니다');return} snapshot();n={id:Math.max(-1,...nodes.map(x=>x.id))+1,x:q.x,y:q.y,user:true,visible:true,deck:false,roadNode:isRoadTool(),support:null};nodes.push(n);history.pop();triggerNodeFx(n);playSfx('node');}
   }
   if(tutorialMode&&['support','braceStart'].includes(tutorialCurrentStep()?.key)&&n.id!==(tutorialCurrentStep().key==='support'?0:1)){toast('동그라미로 표시된 시작점을 눌러 주세요.');return}
   addConnection(n);
@@ -2607,7 +2731,7 @@ canvas.addEventListener('contextmenu',e=>{
 });
 canvas.addEventListener('pointermove',e=>{
   const p=screenToWorld(e.clientX,e.clientY);pointerWorld=p;
-  if(dragging){let q={x:snap(p.x),y:snap(p.y)};if(canPlace(q)&&nodeMoveKeepsClear(dragging,q)){dragging.x=q.x;dragging.y=q.y;currentAnalysis=null;updateHUD();}hoverNode=dragging;hoverMember=null;updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);draw();return;}
+  if(dragging){let q=snapPoint(p);if(canPlace(q)&&nodeMoveKeepsClear(dragging,q)){dragging.x=q.x;dragging.y=q.y;currentAnalysis=null;updateHUD();}hoverNode=dragging;hoverMember=null;updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);draw();return;}
   hoverNode=findNode(p);hoverMember=hoverNode?null:findMember(p);updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);draw();
 });
 canvas.addEventListener('pointerup',e=>{if(dragging){dragging=null;canvas.releasePointerCapture?.(e.pointerId);updateHUD();updateCanvasCursor(pointerWorld);draw();toast('관절 위치를 변경했습니다')}});
@@ -3013,8 +3137,8 @@ function createCollapsePhysics(reason,analysis=null,progress=0,brokenSeed=new Se
     nodeMass.set(m.b,(nodeMass.get(m.b)||.55)+mm*.5);
   }
 
-  // Do not start the dynamic solver from a linear result beyond its collapse limit.
-  const seedScale=analysis?.ok?Math.min(analysis.shapeScale,getCollapseDeflLimit(stage)/Math.max(analysis.maxDefl,1)):0;
+  // The dynamic model must inherit the rendered shape, including its display scale.
+  const seedScale=analysis?.ok?analysis.shapeScale:0;
   for(const n of nodes){
     let x=n.x,y=n.y;
     if(analysis?.ok){
@@ -3172,9 +3296,12 @@ function findCollapseRoadSegment(physics,x,contactY=null,preferredId=null){
     return {...bank,t:(x-bank.a.x)/(bank.b.x-bank.a.x),x,y:bank.a.y,angle:0,bank:true};
   }
   let best=null,bestScore=Infinity;
+  if(physics.pathBrokenCount!==physics.broken.size){
+    physics.drivePath=drivableRoadPath(physics.broken);physics.pathBrokenCount=physics.broken.size;
+  }
   const intactRoads=[];
   for(const c of physics.constraints){
-    if(!c.m.road||c.broken)continue;
+    if(!c.m.road||c.broken||physics.drivePath&&!physics.drivePath.has(c.id))continue;
     const a=collapseParticle(physics,c.a),b=collapseParticle(physics,c.b);if(!a||!b)continue;
     intactRoads.push({c,a,b});
     const minX=Math.min(a.x,b.x)-12,maxX=Math.max(a.x,b.x)+12;if(x<minX||x>maxX)continue;
@@ -3427,15 +3554,29 @@ function collapseKineticEnergy(physics){
   return energy;
 }
 function limitCollapseEnergy(physics,available){
-  const energy=collapseKineticEnergy(physics);
+  let movementEnergy=0;
+  for(const p of physics.particles.values()){
+    if(!p.invMass)continue;
+    if(p.stepDX!==undefined){
+      const dx=p.x-p.stepX,dy=p.y-p.stepY;
+      // A shape projection cannot reverse motion supplied by gravity and inertia.
+      if(dx*p.stepDX+dy*p.stepDY<0){
+        p.x=p.stepX+p.stepDX;p.y=p.stepY+p.stepDY;
+        p.px=p.stepX;p.py=p.stepY;
+      }
+    }
+    movementEnergy+=p.mass*((p.x-(p.stepX??p.px))**2+(p.y-(p.stepY??p.py))**2);
+  }
+  const energy=Math.max(collapseKineticEnergy(physics),movementEnergy);
   if(energy<=available)return;
-  // Projection can correct existing strain or overlap, but it cannot supply
-  // more kinetic energy than gravity and the other applied forces just added.
+  // Limit the actual position correction as well as Verlet velocity.
   const scale=Math.sqrt(available/energy);
   for(const p of physics.particles.values()){
     if(!p.invMass)continue;
-    p.px=p.x-(p.x-p.px)*scale;
-    p.py=p.y-(p.y-p.py)*scale;
+    const vx=(p.x-p.px)*scale,vy=(p.y-p.py)*scale;
+    const x=p.stepX??p.px,y=p.stepY??p.py;
+    p.x=x+(p.x-x)*scale;p.y=y+(p.y-y)*scale;
+    p.px=p.x-vx;p.py=p.y-vy;
   }
 }
 function solveCollapseConstraints(physics){
@@ -3516,6 +3657,7 @@ function stepCollapsePhysics(physics,dt){
       if(p.invMass<=0)continue;
       const velocityScale=drag*(s===0?stepRatio:1);
       const vx=(p.x-p.px)*velocityScale,vy=(p.y-p.py)*velocityScale;
+      p.stepX=p.x;p.stepY=p.y;
       p.px=p.x;p.py=p.y;
       let ax=windAcc,ay=physics.gravity;
       // Apply vehicle weight as force/mass and distribute it according to the
@@ -3526,6 +3668,7 @@ function stepCollapsePhysics(physics,dt){
         if(p.id===seg.b.id)ay+=contactForce*seg.t/Math.max(.35,p.mass);
       }
       p.x+=vx+ax*h*h;p.y+=vy+ay*h*h;
+      p.stepDX=p.x-p.stepX;p.stepDY=p.y-p.stepY;
     }
     const availableEnergy=collapseKineticEnergy(physics);
     enforceCollapseLocks(physics);
@@ -3617,7 +3760,9 @@ function stepCollapsePhysics(physics,dt){
 function enterCollapseMode(s,reason,analysis,progress,now=performance.now()){
   s.mode='collapse';s.failReason='collapse';s.collapseReason=reason;s.failed=true;s.collapseStart=now;s.lastTick=now;
   s.preCollapseAnalysis=analysis?.ok?analysis:(s.preCollapseAnalysis||null);
-  s.physics=createCollapsePhysics(reason,analysis,progress,s.broken||new Set());
+  const displayed=s.last?.ok?s.last:analysis;
+  const displayedProgress=s.last?.ok?(s.renderedProgress??progress):progress;
+  s.physics=createCollapsePhysics(reason,displayed,displayedProgress,s.broken||new Set());
   s.broken=s.physics.broken;s.last=null;s.maxDefl=Math.max(s.maxDefl||0,s.physics.maxDrop||0);
   if(analysis?.ok){s.maxDeckDefl=Math.max(s.maxDeckDefl||0,analysis.deckDeflection||0);s.maxDeckCurvature=Math.max(s.maxDeckCurvature||0,analysis.deckCurvature||0)}
   stressMode=false;loadPathMode=false;lastFullAnalysis=null;currentAnalysis={ok:false};
@@ -3664,6 +3809,8 @@ function tickCollapse(now){
   scheduleSimulationFrame();
 }
 function startSimulation(fromTutorial=false){
+  const excess=Object.entries(stage.materialLimits||{}).find(([material,limit])=>materialCount(material)>limit);
+  if(excess){toast(materialLimitMessage(excess[0]));return}
   if(tutorialMode&&!fromTutorial){tutorialHandleAction('test');return}
   if(sim){stopSimulation();return}
   updateVehicleRetry();
@@ -4256,6 +4403,7 @@ function draw(){
   const physics=sim?.mode==='collapse'?sim.physics:null;
   const analysis=physics?null:(sim?.last?.ok?sim.last:(((stressMode||loadPathMode)&&lastFullAnalysis?.ok)?lastFullAnalysis:null));
   const deformScale=analysis?.shapeScale??0;
+  if(sim&&analysis?.ok)sim.renderedProgress=sim.progress;
   drawSupports();
   drawTutorialBlueprint();
   if(loadPathMode&&analysis)drawLoadPath(analysis,deformScale);
@@ -4576,23 +4724,19 @@ function drawSiteEnvironmentOverlay(){
 
 
 function drawGridOverlay(){
-  // CAD grid: minor density adapts to zoom while major lines stay at 100u.
-  const zoom=camera?.zoom||1,minor=zoom<.72?50:zoom>1.55?12.5:25,major=100;
+  const grid=constructionGrid(),zoom=camera.zoom;
+  const left=camera.x-W/(2*zoom),right=camera.x+W/(2*zoom);
+  const top=camera.y-H/(2*zoom),bottom=camera.y+H/(2*zoom);
   ctx.save();
-  for(let x=0;x<=W;x+=minor){
-    const isMajor=Math.abs((x/major)-Math.round(x/major))<1e-6;
-    ctx.strokeStyle=isMajor?'rgba(148,188,198,.105)':'rgba(186,213,219,.035)';ctx.lineWidth=isMajor?1.15:.7;
-    ctx.beginPath();ctx.moveTo(x,74);ctx.lineTo(x,H-48);ctx.stroke();
-  }
-  for(let y=75;y<=H-48;y+=minor){
-    const isMajor=Math.abs((y/major)-Math.round(y/major))<1e-6;
-    ctx.strokeStyle=isMajor?'rgba(148,188,198,.105)':'rgba(186,213,219,.035)';ctx.lineWidth=isMajor?1.15:.7;
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
-  }
-  if(zoom>=.82){
-    ctx.fillStyle='rgba(153,176,184,.22)';ctx.font='700 7px ui-monospace,monospace';ctx.textAlign='left';ctx.textBaseline='top';
-    for(let x=100;x<W;x+=200)ctx.fillText(String(x),x+4,82);
-    for(let y=100;y<H-60;y+=200)ctx.fillText(String(y),6,y+4);
+  for(const [axis,min,max] of [[grid.x,left,right],[grid.y,top,bottom]]){
+    for(const {coordinate,major} of gridAxisLines(axis,min,max)){
+      ctx.strokeStyle=major?'rgba(148,188,198,.15)':'rgba(186,213,219,.07)';
+      ctx.lineWidth=(major?1:.65)/zoom;
+      ctx.beginPath();
+      if(axis===grid.x){ctx.moveTo(coordinate,top);ctx.lineTo(coordinate,bottom)}
+      else{ctx.moveTo(left,coordinate);ctx.lineTo(right,coordinate)}
+      ctx.stroke();
+    }
   }
   ctx.restore();
 }
@@ -5106,18 +5250,18 @@ $('#endingLabBtn').onclick=leaveEducationToLab;
 $('#endingEduBtn').onclick=()=>openEducationCenter(0);
 $('#endingTitleBtn').onclick=()=>{$('#endingScreen').hidden=true;$('#educationScreen').hidden=true;runLoadingSequence({title:'RETURNING TO MAIN TITLE',statuses:['[01] SAVE COMPLETION','[02] CLOSE EDUCATION','[03] RESET TITLE SYSTEM','[04] VERIFY PROFILE','[05] TITLE READY'],duration:800,hint:'TRUSS LAB'},()=>{updateEducationAccess();$('#titleScreen').hidden=false})};
 
-const TUTORIAL_TRUSS_TOPS=[[350,525],[525,525],[675,525],[850,525]];
+const TUTORIAL_TRUSS_TOPS=[[350,255],[525,255],[675,255],[850,255]];
 const STAGE_TUTORIAL_STEPS=[
   {key:'welcome',title:'도로와 삼각형부터 시작해요',text:'도로를 잇고, 삼각형으로 보강한 뒤 차를 보내 볼게요.',hint:'도로 연결 → 삼각형 보강 → 차량 시험 → AI 질문 순서로 연습합니다. 격자와 점 맞추기는 미리 켜 두었어요.',mini:'road',button:'연습 시작'},
   {key:'roadTool',title:'일반 도로 선택',text:'아래 도구 모음에서 <strong>일반 도로</strong>를 클릭하거나 <strong>4</strong>를 눌러 주세요.',hint:'강조된 버튼이 지금 사용할 도구입니다. 도로 위로 차량이 달립니다.',mini:'road',tool:'road'},
   {key:'support',title:'왼쪽 빨간 점 선택',text:'표시된 <strong>왼쪽 빨간 점</strong>을 눌러 주세요.',hint:'한 번 누르면 도로의 시작점이 선택됩니다.',mini:'start',canvas:[280,390],tool:'road'},
   {key:'roadComplete',title:'오른쪽까지 도로 잇기',text:'표시된 점을 <strong>왼쪽부터 차례로</strong> 눌러 주세요.',hint:'도로 네 칸을 연결하면 됩니다. 잘못 선택했다면 우클릭으로 선택을 풀 수 있어요.',mini:'deck',tool:'road'},
-  {key:'woodTool',title:'목재 선택',text:'아래 도구 모음에서 <strong>목재</strong>를 클릭하거나 <strong>1</strong>을 눌러 주세요.',hint:'연습용 받침 구조는 준비해 두었습니다. 비어 있는 삼각형 하나만 채워 볼 거예요.',mini:'tool',tool:'wood'},
-  {key:'braceStart',title:'목재의 시작점 선택',text:'표시된 <strong>도로 위 연결점</strong>을 눌러 주세요.',hint:'이 점에서 아래쪽 점으로 목재를 연결합니다. 두 개의 막대를 더하면 삼각형이 완성돼요.',mini:'start',tool:'wood',blueprint:true},
-  {key:'triangle',title:'삼각형 채우기',text:'<strong>아래쪽 점 → 도로 위 점</strong> 순서로 눌러 주세요.',hint:'아직 연결하지 않은 두 막대를 점선으로 표시합니다. 도로와 목재가 삼각형을 만들면 다음 단계로 넘어갑니다.',mini:'triangle',tool:'wood',blueprint:true},
+  {key:'woodTool',title:'목재 선택',text:'아래 도구 모음에서 <strong>목재</strong>를 클릭하거나 <strong>1</strong>을 눌러 주세요.',hint:'도로 위 연습용 골조는 준비해 두었습니다. 비어 있는 삼각형 하나만 채워 볼 거예요.',mini:'tool',tool:'wood'},
+  {key:'braceStart',title:'목재의 시작점 선택',text:'표시된 <strong>도로 위 연결점</strong>을 눌러 주세요.',hint:'이 점에서 위쪽 점으로 목재를 연결합니다. 두 개의 막대를 더하면 삼각형이 완성돼요.',mini:'start',tool:'wood',blueprint:true},
+  {key:'triangle',title:'삼각형 채우기',text:'<strong>위쪽 점 → 도로 위 점</strong> 순서로 눌러 주세요.',hint:'아직 연결하지 않은 두 막대를 점선으로 표시합니다. 도로와 목재가 삼각형을 만들면 다음 단계로 넘어갑니다.',mini:'triangle',tool:'wood',blueprint:true},
   {key:'test',title:'차량 보내기',text:'오른쪽 위 <strong>시험</strong>을 누르고 차가 건너는 모습을 보세요.',hint:'차량이 지나갈 때 막대가 어떻게 움직이는지 관찰하세요. 통과하면 AI 도움을 연습합니다.',mini:'test',ui:'test'},
   {key:'aiOpen',title:'AI 도움 열기',text:'화면 오른쪽 가장자리의 <strong>AI 도움</strong>을 눌러 주세요.',hint:'현재 다리에서 궁금한 점을 물어볼 수 있어요.',mini:'tool',ai:true},
-  {key:'aiAsk',title:'다리에 대해 질문하기',text:'질문을 적고 AI 창의 <strong>전송</strong>을 눌러 주세요.',hint:'질문이 떠오르지 않으면 ‘질문 예시 넣기’를 눌러 보세요. 예시가 입력되면 직접 전송해 주세요.',mini:'triangle',ai:true,button:'질문 예시 넣기'},
+  {key:'aiAsk',title:'다리에 대해 질문하기',text:'질문을 적고 AI 창의 <strong>전송</strong>을 눌러 주세요.',hint:'질문이 떠오르지 않으면 ‘추천 질문 보기’를 눌러 보세요. 추천 질문을 선택하면 입력됩니다. 전송은 직접 눌러 주세요.',mini:'triangle',ai:true,button:'추천 질문 보기'},
   {key:'aiRead',title:'답변 읽고 마무리',text:'삼각형에 대한 답변을 읽고 <strong>훈련 마치기</strong>를 눌러 주세요.',hint:'AI의 제안은 직접 바꾸고 다시 시험해 확인하세요. 연결이 안 되면 ‘AI 체험은 나중에’를 눌러도 됩니다.',mini:'test',ai:true,button:'훈련 마치기'}
 ];
 
@@ -5131,7 +5275,7 @@ function tutorialMiniSvg(type){
   if(type==='start')return common+'<path class="solid" d="M18 65H104"/><circle class="support" cx="22" cy="65" r="7"/><path class="cursor" d="M39 47l15 8-8 3 4 10-5 2-4-10-6 6z"/>'+end;
   if(type==='deck')return common+'<path class="solid" d="M14 64H106"/><g fill="#f0d84b" stroke="#11171a" stroke-width="2"><circle cx="16" cy="64" r="4"/><circle cx="45" cy="64" r="4"/><circle cx="74" cy="64" r="4"/><circle cx="104" cy="64" r="4"/></g><path class="ghost" d="M16 64H104"/>'+end;
   if(type==='node')return common+'<path class="solid" d="M15 67H105"/><circle class="node" cx="48" cy="67" r="5"/><circle class="node" cx="76" cy="34" r="5"/><path class="cursor" d="M82 17l15 8-8 3 4 10-5 2-4-10-6 6z"/>'+end;
-  if(type==='triangle')return common+'<path class="solid" d="M18 30H102M28 30L60 68L94 30"/><circle class="node" cx="28" cy="30" r="5"/><circle class="node" cx="60" cy="68" r="5"/><circle class="node" cx="94" cy="30" r="5"/>'+end;
+  if(type==='triangle')return common+'<path class="solid" d="M18 68H102M28 68L60 30L94 68"/><circle class="node" cx="28" cy="68" r="5"/><circle class="node" cx="60" cy="30" r="5"/><circle class="node" cx="94" cy="68" r="5"/>'+end;
   if(type==='chain')return common+'<path class="solid" d="M14 68L38 37L62 68L86 37L108 68"/><text x="20" y="84" fill="#d7b94d" font-size="8" font-family="monospace">RIGHT CLICK</text>'+end;
   if(type==='move')return common+'<circle class="node" cx="47" cy="52" r="7"/><path d="M57 48h34m-8-7l8 7-8 7" stroke="#62e1ae" stroke-width="3" fill="none"/><path class="cursor" d="M30 28l15 8-8 3 4 10-5 2-4-10-6 6z"/><text x="34" y="82" fill="#d7b94d" font-size="8" font-family="monospace">GRAB / MOVE</text>'+end;
   return common+'<path class="solid" d="M12 66H108M20 66L45 37L70 66L94 37"/><rect x="45" y="54" width="23" height="10" fill="#53aee6"/><circle cx="50" cy="66" r="4" fill="#2d3337"/><circle cx="64" cy="66" r="4" fill="#2d3337"/>'+end;
@@ -5391,7 +5535,7 @@ function closeStageTutorial(){finishTutorialStage(true)}
 $('#tutorialPrimary').addEventListener('click',()=>{
   if(!tutorialMode)return;
   if(tutorialCurrentStep().key==='aiAsk'){
-    localAiSetOpen(true);localAiUI.input.value='이 다리에서 삼각형은 어떤 역할을 하나요? 쉬운 말로 설명해 주세요.';localAiUI.input.focus({preventScroll:true});
+    localAiSetOpen(true);
   }else tutorialHandleAction('continue');
 });
 $('#tutorialAiLater').addEventListener('click',()=>{if(tutorialMode&&tutorialCurrentStep()?.ai)finishTutorialStage(false)});
@@ -5439,7 +5583,7 @@ function configureSandboxStartingSite(levelId='empty'){
     sb.deck=clonePlain(src.deck);sb.forbidden=clonePlain(src.forbidden||[]);sb.ship=clonePlain(src.ship||null);sb.navigationClearance=clonePlain(src.navigationClearance||null);sb.bg=src.bg;sb.weather=src.weather;sb.environment=`SANDBOX // ${src.environment||getGameLevel(levelId).title}`;sb.extraSupports=clonePlain(src.extraSupports||[]);sb.startingSiteId=levelId;
   }
   // Sandbox remains unrestricted: only site geometry is imported.
-  sb.materials=null;sb.conditionCodes=[];sb.maxMemberCount=null;sb.maxCableCount=null;sb.targetMaterialLength=null;sb.forcedFailure=null;sb.doubleVehicle=null;sb.axles=[];
+  sb.materials=null;sb.conditionCodes=[];sb.maxMemberCount=null;sb.maxCableCount=null;sb.materialLimits=null;sb.targetMaterialLength=null;sb.forcedFailure=null;sb.doubleVehicle=null;sb.axles=[];
   const state=$('#sandboxSiteState'),level=getGameLevel(levelId);if(state)state.textContent=level?`SITE // ${displayContractId(level)} · ${level.title}`:'SITE // EMPTY LAB';
 }
 
@@ -5844,13 +5988,42 @@ window.TRUSSLAB_DEV.config={export:()=>devGuard(devExportConfig,'EXPORT DEV CONF
 const localAiUI={
   dock:$('#localAiDock'),panel:$('#localAiPanel'),tab:$('#localAiTab'),close:$('#localAiCloseBtn'),clear:$('#localAiClearBtn'),
   endpoint:$('#localAiEndpointInput'),onlineCheck:$('#localAiOnlineCheckBtn'),status:$('#localAiStatusText'),
-  level:$('#localAiExplanationLevel'),device:$('#localAiDeviceText'),messages:$('#localAiMessages'),input:$('#localAiInput'),send:$('#localAiSendBtn')
+  level:$('#localAiExplanationLevel'),device:$('#localAiDeviceText'),messages:$('#localAiMessages'),quick:$('.localAiQuick'),input:$('#localAiInput'),send:$('#localAiSendBtn')
 };
 let localAiBusy=false,localAiHistory=[],localAiMarkdown=null;
 
+function localAiUpdateSuggestions(){
+  const mission=boothExperience?.currentMission();
+  let options;
+  if(tutorialMode){
+    options=[
+      ['삼각형이 필요한 이유','이 다리에서 삼각형은 어떤 역할을 하나요? 쉬운 말로 설명해 주세요.'],
+      ['다음에 연결할 위치','튜토리얼의 현재 다리를 보고 다음에 어느 점을 연결하면 좋을지 알려 주세요.']
+    ];
+  }else if(mission?.bridgeStyle==='underslung'){
+    options=[
+      ['하부 케이블 만드는 순서',mission.prompt],
+      ['케이블과 강철의 역할','강화 도로 가운데에서 아래로 강철 기둥을 내리고, 아래 끝을 양쪽 지지점에 케이블로 연결할 때 힘이 어떻게 전달되나요? 케이블의 인장과 강철의 압축을 쉽게 설명해 주세요.'],
+      ['자재 제한 안에서 개선','강화 도로 6개, 강철 1개 제한 안에서 하부 케이블 다리를 만들고 있어요. 현재 설계에서 다음에 연결하거나 옮길 위치를 쉬운 말로 알려 주세요.']
+    ];
+  }else{
+    const first=mission?['이 단계 설계 순서',mission.prompt]:['이 단계 설계 순서',(stage.goal||stage.title)+' 이 목표를 위한 설계 순서를 쉬운 말로 알려 주세요.'];
+    const specific=stage.ship?['선박 통과 공간 확보','현재 항로를 침범하지 않으면서 선박 위로 차량을 통과시키려면 도로와 강철을 어떻게 배치해야 하나요?']:
+      stage.snowfall||stage.weather==='rain'?['날씨 하중과 강철 보강','이 단계의 비와 눈, 차량 하중을 고려하면 어느 구간에 강철을 보강하면 좋을까요? 현재 설계를 보고 알려 주세요.']:
+      ['삼각형으로 보강하기','현재 다리에서 삼각형을 어디에 추가하면 하중을 나눌 수 있는지 연결 위치를 알려 주세요.'];
+    options=[first,specific,['현재 설계 진단','이 단계의 목표에 맞춰 현재 내 다리에서 가장 먼저 고칠 점을 쉬운 말로 알려 주세요.']];
+  }
+  const buttons=options.map(([label,prompt])=>{
+    const button=document.createElement('button');
+    button.type='button';button.dataset.localAiPrompt=prompt;
+    button.textContent=label;button.disabled=localAiBusy;
+    return button;
+  });
+  localAiUI.quick.replaceChildren(...buttons);
+}
 function localAiSetOpen(open,{restoreFocus=true}={}){
   if(open&&(currentGameScreen!==GAME_SCREEN.GAME||(document.body.classList.contains('tutorial-mode')&&!document.body.classList.contains('tutorial-ai'))))return;
-  if(open){localAiUI.dock.hidden=false;localAiUI.dock.inert=false;localAiUI.dock.setAttribute('aria-hidden','false')}
+  if(open){localAiUpdateSuggestions();localAiUI.dock.hidden=false;localAiUI.dock.inert=false;localAiUI.dock.setAttribute('aria-hidden','false')}
   const panelFocused=localAiUI.panel.contains(document.activeElement);
   localAiUI.dock?.classList.toggle('open',!!open);
   localAiUI.tab?.setAttribute('aria-expanded',open?'true':'false');
@@ -5878,6 +6051,7 @@ function localAiSetStatus(text,tone=''){
 }
 function localAiSetBusy(busy){
   localAiBusy=!!busy;
+  localAiUI.quick.querySelectorAll('button').forEach(button=>button.disabled=localAiBusy);
   if(localAiUI.send)localAiUI.send.disabled=localAiBusy;
   localAiUI.clear.disabled=localAiBusy;localAiUI.level.disabled=localAiBusy;localAiUI.endpoint.disabled=localAiBusy;localAiUI.onlineCheck.disabled=localAiBusy;
 }
@@ -6058,7 +6232,13 @@ function initLocalAiBridgeChat(){
   localAiUI.level.addEventListener('change',()=>localStorage.setItem('trusslab-ai-explanation-level',localAiUI.level.value));
   localAiUI.tab?.addEventListener('click',()=>localAiSetOpen(!localAiUI.dock.classList.contains('open')));localAiUI.close?.addEventListener('click',()=>localAiSetOpen(false));localAiUI.clear?.addEventListener('click',localAiResetChat);
   localAiUI.onlineCheck?.addEventListener('click',localAiCheckOnline);localAiUI.send?.addEventListener('click',()=>localAiSend());
-  localAiUI.input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();localAiSend()}});$$('[data-local-ai-prompt]').forEach(b=>b.addEventListener('click',()=>localAiSend(b.dataset.localAiPrompt||'')));
+  localAiUI.input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();localAiSend()}});
+  localAiUI.quick.addEventListener('click',event=>{
+    const button=event.target.closest('[data-local-ai-prompt]');
+    if(!button||button.disabled)return;
+    localAiUI.input.value=button.dataset.localAiPrompt;
+    localAiUI.input.focus({preventScroll:true});
+  });
   localAiUI.endpoint?.addEventListener('change',()=>{const e=localAiNormalizeEndpoint(localAiUI.endpoint.value);localAiUI.endpoint.value=e;localStorage.setItem('trusslab-ai-endpoint',e)});
   localAiSyncTutorialVisibility();
   new MutationObserver(localAiSyncTutorialVisibility).observe(document.body,{attributes:true,attributeFilter:['class','data-game-screen']});
@@ -6181,9 +6361,9 @@ if(boothMode)boothExperience=createBridgeBooth({
   previewDeck:mission=>mission?makeDeckFromSite(mission.site):TUTORIAL_STAGE.deck,
   reducedMotion:motionReduced,
   formatTime:formatStageTime,
-  startMission(mission,draft){
+  startMission(mission,draft,totalStages){
     stopBoothPlay();currentCampaignLevelId=null;currentLevelStageOverride=null;
-    const runtime=runtimeStageForLevel(mission,{difficulty:false});runtime.name=`체험 ${mission.number} / 4`;
+    const runtime=runtimeStageForLevel(mission,{difficulty:false});runtime.name=`체험 ${mission.number} / ${totalStages}`;
     if(mission.number===2)runtime.boothForestIndex=1;
     stages[mission.stageIndex]=runtime;STAGE_BASE[mission.stageIndex]={budget:runtime.budget,load:runtime.load,maxDefl:runtime.maxDefl};
     applyDifficultyProfile();resetStage(mission.stageIndex);
@@ -6197,14 +6377,15 @@ if(boothMode)boothExperience=createBridgeBooth({
     }
     changeGameScreen(GAME_SCREEN.GAME,{resumeClock:true});
   },
+  captureBridge:()=>({nodes:nodes.map(({id,x,y})=>({id,x,y})),members:members.map(({a,b,mat})=>({a,b,mat})),deck:stage.deck.map(point=>[...point])}),
   capture:()=>({design:captureState(),buildTimeMs:Math.round(getBuildElapsed()),stageTimeMs:Math.round(getStageElapsed())}),
   stop:stopBoothPlay,
   resume:()=>changeGameScreen(GAME_SCREEN.GAME,{resumeClock:true}),
   info:()=>({screen:currentGameScreen,tutorial:tutorialMode,stageIndex}),
-  openAI(prompt){
+  openAI(){
     if(currentGameScreen===GAME_SCREEN.RESULT)$('#closeResult').click();
     if(currentGameScreen!==GAME_SCREEN.GAME)return;
-    localAiSetOpen(true);localAiUI.input.value=prompt;localAiUI.input.focus();
+    localAiSetOpen(true);
   },
 });
 function stopBoothPlay(){

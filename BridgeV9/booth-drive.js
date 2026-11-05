@@ -5,7 +5,8 @@ function boothEnvironment(index,mission){
     {sky:[79,126,135],horizon:[243,222,167],ground:'#627755',shoulder:'#a19372',road:'#505b5d',treeDensity:3},
     {sky:[48,89,88],horizon:[191,210,170],ground:'#425f49',shoulder:'#7d8061',road:'#485958',treeDensity:5},
     {sky:[54,70,94],horizon:[185,196,218],ground:'#c2cdd5',shoulder:'#dde5e7',road:'#384952',treeDensity:5},
-    {sky:[77,131,146],horizon:[246,211,159],ground:'#a39570',shoulder:'#b9a780',road:'#4c5759',treeDensity:3}
+    {sky:[77,131,146],horizon:[246,211,159],ground:'#a39570',shoulder:'#b9a780',road:'#4c5759',treeDensity:3},
+    {sky:[79,89,113],horizon:[199,197,215],ground:'#bfcbd4',shoulder:'#dce3e7',road:'#3c4b55',treeDensity:4}
   ];
   return {...profiles[index],rain:mission?.weather==='rain',snow:!!mission?.snowfall,harbor:!!mission?.ship,
     grade:mission?.site.kind==='slope'?(mission.site.leftY-mission.site.rightY)/(mission.site.rightX-mission.site.leftX)*.36:0};

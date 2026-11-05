@@ -174,3 +174,25 @@ test('construction time ranks the full board, excludes missing times and shares 
   assert.deepEqual(board.timeBoard.entries.slice(0,3).map(entry=>entry.rank),[1,1,3]);
   assert.equal(board.timeBoard.entries[2].buildTimeMs,5000);
 });
+
+
+test('underslung cable booth mission has its own ranking board',()=>{
+  const api=server();
+  const response=api.post(record({levelId:'booth_v2_cable',cost:950,design:{nodes:[[0,0],[100,0]],members:[[0,1,'roadHeavy']]}}));
+  assert.equal(response.registered,true);
+  assert.equal(response.total,1);
+  assert.equal(api.get({levelId:'booth_v2_cable'}).total,1);
+  assert.equal(api.get({levelId:'booth_v2_harbor'}).total,0);
+});
+
+
+test('cable booth material limits are enforced by the ranking server',()=>{
+  const api=server();
+  for(const [material,count] of [['roadHeavy',7],['steel',2],['wood',1]]){
+    const design={nodes:Array.from({length:count+1},(_,i)=>[i*100,0]),members:Array.from({length:count},(_,i)=>[i,i+1,material])};
+    const response=api.post(record({levelId:'booth_v2_cable',design}));
+    assert.equal(response.ok,false);
+    assert.match(response.error,/자재/);
+  }
+  assert.equal(api.rows.length,1);
+});

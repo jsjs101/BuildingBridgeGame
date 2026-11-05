@@ -111,3 +111,16 @@ node --test BridgeV9/apps-script-ranking/ranking.test.cjs
 실제 Google 배포·권한·브라우저 간 통신은 위 ‘동작 확인’ 절차로 별도 확인해야 합니다.
 
 Google 공식 문서: [웹 앱 배포](https://developers.google.com/apps-script/guides/web), [JSON 응답과 리다이렉트](https://developers.google.com/apps-script/guides/content), [동시 쓰기 잠금](https://developers.google.com/apps-script/reference/lock/), [서비스 한도](https://developers.google.com/apps-script/guides/services/quotas).
+
+
+## 랭킹 페이지 직접 열기와 자동 갱신
+
+BridgeV9/ranking.html을 직접 열면 project-settings.json의 서버에서 현재 시즌 기록을 조회합니다. 계약과 난이도를 선택할 수 있으며, 열린 화면은 10초 간격으로 자동 갱신합니다. 다른 탭에서 등록한 기록은 해당 탭으로 돌아오거나 새로고침하면 즉시 조회합니다.
+
+## 스프레드시트가 비어 보일 때
+
+게임에 연결된 웹 앱은 스크립트 속성 SPREADSHEET_ID에 저장된 스프레드시트의 Rankings 탭에 기록을 씁니다. 다른 스프레드시트나 기본 시트 탭을 보고 있으면 기록이 보이지 않을 수 있습니다.
+
+Apps Script 편집기에 최신 Code.gs를 저장한 뒤 함수 목록에서 checkRankingConnection을 실행하세요. 실행 로그에 rankingSpreadsheet와 records가 표시됩니다. rankingSpreadsheet 주소의 Rankings 탭을 확인하세요. sameSpreadsheet가 false이면 현재 편집기에 연결된 문서와 랭킹 저장 대상이 다릅니다. 저장 대상을 바꾸려면 기록을 보관한 뒤 원하는 시트에 연결된 스크립트에서 setupRanking을 실행하고, 게임의 webAppUrl이 그 프로젝트의 웹 앱 배포인지 확인하세요.
+
+checkRankingConnection은 연결 상태만 확인합니다. 기록 조회에는 공개 웹 앱을 사용하며, 실제 등록 성공 여부는 계약 완료 창의 등록 결과로 표시합니다.

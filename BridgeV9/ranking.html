@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>설계 랭킹 · TRUSS LAB</title>
-  <link rel="stylesheet" href="ranking.css?v=bc36bc62a013">
-  <script src="ranking.js?v=61af65ff6587" defer></script>
+  <link rel="stylesheet" href="ranking.css?v=8bec2ad37f50">
+  <script src="ranking.js?v=3cba355396ae" defer></script>
 </head>
 <body>
   <main id="rankingPage" class="rankingPage">
@@ -15,9 +15,14 @@
         <h1>설계 랭킹</h1>
         <p id="rankingContract"></p>
       </div>
-      <a id="rankingBack" href="Bridge.html">← 게임으로 돌아가기</a>
+      <a id="rankingBack" href="bridge.html">← 게임으로 돌아가기</a>
     </header>
-    <p id="rankingEmpty" class="rankingEmptyPage">계약 완료 화면에서 기록을 등록하면 이곳에서 순위를 볼 수 있습니다.</p>
+    <div class="rankingFilters">
+      <label>계약<select id="rankingLevel" aria-label="계약 선택"></select></label>
+      <label>난이도<select id="rankingDifficulty" aria-label="난이도 선택"><option value="easy">쉬움</option><option value="hard">어려움</option></select></label>
+      <button id="rankingRefresh" type="button">새로고침</button>
+    </div>
+    <p id="rankingEmpty" role="status" class="rankingEmptyPage">최신 랭킹을 불러오는 중입니다…</p>
     <div id="rankingContent" class="rankingPageGrid" hidden>
       <aside class="rankingPageSummary" aria-label="내 기록">
         <div class="rankingStanding">

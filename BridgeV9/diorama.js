@@ -273,7 +273,7 @@ function buildDiorama(level,index,fullscreen){
   for(const letter of level.id)seed=Math.imul(seed^letter.charCodeAt(0),16777619)>>>0;
   const random=()=>((seed=(Math.imul(1664525,seed)+1013904223)>>>0)/4294967296);
   const boothPalettes=[palettes[0],[[139,180,134],[127,113,95],[51,130,148],[48,103,81]],
-    [[188,202,216],[128,130,151],[78,135,170],[102,142,150]],[[209,180,126],[146,115,99],[65,151,164],[83,130,103]]];
+    [[188,202,216],[128,130,151],[78,135,170],[102,142,150]],[[209,180,126],[146,115,99],[65,151,164],[83,130,103]],[[199,207,216],[133,132,151],[78,135,170],[102,142,150]]];
   const [grass,stone,water,leaf]=fullscreen?boothPalettes[index]:palettes[(index+level.setNumber-1)%palettes.length];
   const faces=[],foundation=[],trees=[];
   const tint=(color,amount)=>color.map(c=>Math.max(0,Math.min(255,c+amount)));
@@ -393,7 +393,7 @@ function buildDiorama(level,index,fullscreen){
     }
   }
   return {foundation:foundation.map(cacheDioramaFace),terrain:faces.map(cacheDioramaFace),trees,road,leaf,halfGap,vehicle:level.vehicle,wind:level.wind,
-    water,fullscreen,phase:index,snowfall:level.snowfall,steel:level.materials?.includes('steel')};
+    water,fullscreen,phase:index,snowfall:level.snowfall,steel:level.materials?.includes('steel'),bridgeStyle:level.bridgeStyle};
 }
 
 function boxDiorama(faces,x,y,z,w,h,d,color){
@@ -451,7 +451,8 @@ function beamDiorama(add,ax,ay,bx,by,z,thickness,color){
 }
 
 function paintDiorama(ctx,model,x,y,scale,state){
-  const {warmth,time,animate,complete,clear}=state;
+  const {warmth,time,animate,complete:finished,clear}=state;
+  const complete=finished||model.bridgeStyle==='underslung';
   const faces=[], {road,halfGap}=model;
   const add=(vertices,color)=>faces.push({vertices,color});
   for(let i=0;i<15;i++){
@@ -506,8 +507,10 @@ function paintDiorama(ctx,model,x,y,scale,state){
         add([[a+1,ay+5.1,-.8],[mid,top-13.9,-.8],[mid,top-13.9,.8],[a+1,ay+5.1,.8]],[224,204,150]);
         for(const z of [-11,11]){
           beamDiorama(add,a,ay+4,b,by+4,z,3.5,metal);
-          beamDiorama(add,a,ay+5,mid,top,z,2.4,metal);
-          beamDiorama(add,mid,top,b,by+5,z,2.4,metal);
+          if(model.bridgeStyle!=='underslung'){
+            beamDiorama(add,a,ay+5,mid,top,z,2.4,metal);
+            beamDiorama(add,mid,top,b,by+5,z,2.4,metal);
+          }
           boxDiorama(faces,a-1.5,ay+3,z-2,3,4,4,model.steel?[105,130,137]:[224,204,162]);
           boxDiorama(faces,a-.65,ay+4.5,z+1.8,1.3,1.3,.7,[221,221,196]);
         }
@@ -516,6 +519,19 @@ function paintDiorama(ctx,model,x,y,scale,state){
         add([[a,ay+6,z],[b,by+6,z],[(a+b)/2,(ay+by)/2+20,z]],[176,138,91]);
       }
     }
+  }
+  if(model.bridgeStyle==='underslung'){
+    const [left,leftY]=road[0],[right,rightY]=road.at(-1),middle=(left+right)/2;
+    const deckY=(leftY+rightY)/2,foot=deckY-26;
+    for(const z of [-10,10]){
+      beamDiorama(add,middle,deckY+4,middle,foot,z,3.4,[159,182,191]);
+      beamDiorama(add,left,leftY+4,middle,foot,z,1.35,[205,188,117]);
+      beamDiorama(add,middle,foot,right,rightY+4,z,1.35,[205,188,117]);
+      for(const [x,y] of [[left,leftY+4],[middle,foot],[right,rightY+4]]){
+        boxDiorama(faces,x-1.7,y-1.7,z-1.7,3.4,3.4,3.4,[158,174,177]);
+      }
+    }
+    beamDiorama(add,left,8.2,right,8.2,12,1.2,model.water.map(c=>Math.round(c*.78)));
   }
   const carT=clear!==null?clear:animate?(time*.21)%1:.46;
   const carX=complete?-125+carT*250:-128+carT*(121-halfGap);
