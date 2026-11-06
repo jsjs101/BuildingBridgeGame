@@ -583,12 +583,12 @@
   <section class="localAiPanel" id="localAiPanel" aria-label="AI 대화 사이드바" aria-live="polite" aria-hidden="true" inert>
     <div class="localAiHead">
       <div class="localAiMark">AI</div>
-      <div class="localAiTitle"><b>SMART BRIDGE AI</b><span>ONLINE · GEMINI</span></div>
+      <div class="localAiTitle"><b>SMART BRIDGE AI</b><span>GEMINI · 오프라인 코치</span></div>
       <button class="localAiHeadBtn" id="localAiClearBtn" type="button" title="대화 지우기"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg></button>
       <button class="localAiHeadBtn" id="localAiCloseBtn" type="button" title="닫기"><svg class="uiGlyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     </div>
     <div class="localAiSetup">
-      <div class="localAiModeRow"><span class="localAiModeLabel">AI ENGINE</span><strong class="localAiProviderName">GEMINI</strong></div>
+      <div class="localAiExplanation"><label for="localAiConnectionMode">응답 모드</label><select id="localAiConnectionMode"><option value="auto">자동 · Gemini 우선</option><option value="offline">오프라인 코치</option></select></div>
       <div class="localAiExplanation"><label for="localAiExplanationLevel">설명 수준</label><select id="localAiExplanationLevel"><option value="easy">쉬움 · 쉬운 말로 짧게</option><option value="balanced">보통 · 원리와 근거</option><option value="technical">전문 · 구조 해석과 수치</option></select></div>
       <details class="localAiConnection"><summary>연결 설정</summary>
       <div class="localAiProviderPane" id="localAiOnlineControls">
@@ -609,22 +609,24 @@
         <textarea class="localAiInput" id="localAiInput" rows="3" maxlength="2000" placeholder="교량 구조, 현재 설계, 인장·압축, 처짐 등에 대해 질문하세요. (Enter 전송 · Shift+Enter 줄바꿈)"></textarea>
         <button class="localAiSend" id="localAiSendBtn" type="button">전송</button>
       </div>
-      <details class="localAiFoot"><summary>AI 이용 안내</summary><p>교육용 AI입니다. 실제 교량 안전 판정에는 사용할 수 없습니다. 질문·최근 대화·관절 좌표·부재 연결·재료·해석 결과를 서버를 통해 Google Gemini에 전송합니다. 해석이 없는 경우 강도는 판단하지 않습니다.</p></details>
+      <details class="localAiFoot"><summary>AI 이용 안내</summary><p>자동 모드에서는 질문·최근 대화·교량 설계·해석 결과를 Worker를 통해 Gemini에 보냅니다. 연결할 수 없으면 게임 내부의 규칙 기반 코치가 답합니다. 오프라인 모드를 선택하면 질문을 외부로 보내지 않습니다. 교육용 안내이며 실제 교량 안전 판정에는 사용할 수 없습니다.</p></details>
     </div>
   </section>
 </div>
 
 <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle"><div class="resultLayout"><div class="card" id="resultCard"></div></div></div>
 
-<script src="education.js"></script>
+<script src="booth-file-assets.js?v=4430b49d850f"></script>
+<script src="booth-offline-coach.js?v=f2e96c1bf436"></script>
+<script src="education.js?v=58e5ed538c3d"></script>
 <script src="environment.js?v=424a1d425773"></script>
 <script src="vendor/markdown-it/markdown-it.umd.min.js"></script>
 <script src="ranking.js?v=3cba355396ae"></script>
 <script src="booth-drive.js?v=bc9efa04ee17"></script>
 <script src="booth-forest.js?v=ee49684b46ba"></script>
-<script src="booth-ending.js?v=9cd7fcaeedf6"></script>
-<script src="bridge.js?v=dfc94b646fbd"></script>
+<script src="booth-ending.js?v=feb298e6f130"></script>
+<script src="bridge.js?v=978bbecd2578"></script>
 <script src="diorama.js?v=db3eabaeafc8"></script>
-<script src="script.js?v=38b1780d33d2"></script>
+<script src="script.js?v=640f252537a0"></script>
 </body>
 </html>

@@ -1,8 +1,13 @@
 'use strict';
 async function createTrussEducation({clamp,runLoadingSequence,onBack,onComplete,getContext}){
-const response=await fetch('education.html');
-if(!response.ok)throw new Error(`학습 화면을 불러오지 못했습니다: ${response.status}`);
-document.getElementById('educationMount').outerHTML=await response.text();
+let markup;
+if(document.body.dataset.experience==='booth'&&location.protocol==='file:')markup=readBoothFileAsset('education.html');
+else{
+  const response=await fetch('education.html');
+  if(!response.ok)throw new Error(`학습 화면을 불러오지 못했습니다: ${response.status}`);
+  markup=await response.text();
+}
+document.getElementById('educationMount').outerHTML=markup;
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const EDU_MODULE_NAMES=['하중이 가는 길','삼각형과 트러스','현수교','사장교','아치와 보','고장에 강한 구조와 재료','최종 퀴즈'];

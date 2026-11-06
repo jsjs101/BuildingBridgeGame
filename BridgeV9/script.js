@@ -7,6 +7,7 @@ let boothExperience=null;
 let projectContent,projectSettings;
 try{
   [projectContent,projectSettings]=await Promise.all(['campaign-content.json','project-settings.json'].map(async file=>{
+    if(boothMode&&location.protocol==='file:')return readBoothFileAsset(file);
     const response=await fetch(file,{cache:'no-store'}).catch(error=>{throw new Error(`${file}: 불러오지 못했습니다. HTTP 서버로 실행 중인지 확인하세요. (${error.message})`)});
     if(!response.ok)throw new Error(`${file}: HTTP ${response.status}`);
     try{return JSON.parse(await response.text())}catch(error){throw new Error(`${file}: JSON 문법 오류 · ${error.message}`)}
@@ -554,9 +555,13 @@ async function openChangelog(){
   changelogRequest=new AbortController();
   const request=changelogRequest;
   try{
-    const response=await fetch('changelog.json',{cache:'no-store',signal:request.signal});
-    if(!response.ok)throw new Error(`changelog.json: HTTP ${response.status}`);
-    const source=await response.json();
+    let source;
+    if(boothMode&&location.protocol==='file:')source=readBoothFileAsset('changelog.json');
+    else{
+      const response=await fetch('changelog.json',{cache:'no-store',signal:request.signal});
+      if(!response.ok)throw new Error(`changelog.json: HTTP ${response.status}`);
+      source=await response.json();
+    }
     if(!request.signal.aborted)renderChangelog(source);
   }catch(error){
     if(request.signal.aborted)return;
@@ -1292,7 +1297,7 @@ function toggleDevDebugOverlay(force){if(!devRequire('DEBUG OVERLAY'))return fal
 function updateDevDebugOverlay(){const el=$('#devDebugOverlay');if(!el||!DEV_STATE.debugOverlay||!devSessionActive())return;const c=devCurrentContext();el.innerHTML=`<b>TRUSS LAB // DEV DEBUG</b><br>SCREEN ${String(currentGameScreen).toUpperCase()}<br>FPS ${Math.round(DEV_STATE.fps)}<br>NODES ${nodes?.length||0} / MEMBERS ${members?.length||0}<br>SOLVER ${devSolverStatus()}<br>LEVEL ${c.level?.id||'—'}<br>SIM ${sim?.mode||'IDLE'}`}
 function devMonitorFrame(t){
 	updateEnvironmentFrame(t);
-	if(devSessionActive()){DEV_STATE.fpsFrames++;const elapsed=t-DEV_STATE.fpsSampleAt;if(elapsed>=500){DEV_STATE.fps=DEV_STATE.fpsFrames*1000/elapsed;DEV_STATE.fpsFrames=0;DEV_STATE.fpsSampleAt=t;devRefreshOverviewMetrics()}updateDevDebugOverlay()}
+	if(devSessionActive()){DEV_STATE.fpsFrames++;const elapsed=t-DEV_STATE.fpsSampleAt;if(elapsed>=500){DEV_STATE.fps=DEV_STATE.fpsFrames*1000/elapsed;DEV_STATE.fpsFrames=0;DEV_STATE.fpsSampleAt=t;devRefreshOverviewMetrics()}if(DEV_STATE.debugOverlay)updateDevDebugOverlay()}
 	requestAnimationFrame(devMonitorFrame);
 }
 
@@ -1379,6 +1384,15 @@ vehicleRetryUI.button.addEventListener('click',()=>{
   ui.test.focus({preventScroll:true});
 });
 let buildFx=[],screenShake={power:0,until:0};
+let buildFxFrame=0;
+let pointerDrawFrame=0;
+function requestPointerDraw(){
+  if(pointerDrawFrame)return;
+  pointerDrawFrame=requestAnimationFrame(()=>{
+    pointerDrawFrame=0;
+    draw();
+  });
+}
 let stageClock={elapsed:0,startedAt:0,running:false,finalMs:null,raf:0,pausedForResult:false,buildElapsed:0,buildStartedAt:null};
 function formatStageTime(ms){
   ms=Math.max(0,Number(ms)||0);
@@ -2007,11 +2021,17 @@ function updateStageButtons(){
     b.title=active?`${level?.type==='bonus'?'Bonus':'Contract'} ${displayContractId(level)} // solver template ${i+1}`:'Campaign contracts are selected from LEVEL SELECT';
   });
 }
-function animateBuildFx(){if(!buildFx.length)return;draw();requestAnimationFrame(animateBuildFx)}
-function triggerBuildFx(a,b,mat){if(motionReduced())return;const wasEmpty=!buildFx.length;buildFx.push({a:{x:a.x,y:a.y},b:{x:b.x,y:b.y},mat,start:performance.now(),life:360});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
-function triggerNodeFx(p){if(motionReduced())return;const wasEmpty=!buildFx.length;buildFx.push({node:{x:p.x,y:p.y},start:performance.now(),life:300});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(wasEmpty)requestAnimationFrame(animateBuildFx)}
+function animateBuildFx(){
+  buildFxFrame=0;
+  if(!buildFx.length||sim)return;
+  draw();
+  if(buildFx.length)buildFxFrame=requestAnimationFrame(animateBuildFx);
+}
+function triggerBuildFx(a,b,mat){if(motionReduced())return;buildFx.push({a:{x:a.x,y:a.y},b:{x:b.x,y:b.y},mat,start:performance.now(),life:360});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(!buildFxFrame)buildFxFrame=requestAnimationFrame(animateBuildFx)}
+function triggerNodeFx(p){if(motionReduced())return;buildFx.push({node:{x:p.x,y:p.y},start:performance.now(),life:300});if(buildFx.length>18)buildFx.splice(0,buildFx.length-18);if(!buildFxFrame)buildFxFrame=requestAnimationFrame(animateBuildFx)}
 function kickShake(power=5,ms=180){if(motionReduced())return;screenShake.power=Math.max(screenShake.power,power);screenShake.until=Math.max(screenShake.until,performance.now()+ms)}
 function drawBuildFx(){
+  if(!buildFx.length)return;
   const now=performance.now();buildFx=buildFx.filter(f=>now-f.start<f.life);
   for(const f of buildFx){const t=clamp((now-f.start)/f.life,0,1),fade=1-t;ctx.save();
     if(f.node){ctx.strokeStyle=`rgba(98,225,174,${fade*.9})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(f.node.x,f.node.y,8+24*t,0,Math.PI*2);ctx.stroke();ctx.fillStyle=`rgba(240,216,75,${fade*.35})`;ctx.beginPath();ctx.arc(f.node.x,f.node.y,5+8*t,0,Math.PI*2);ctx.fill()}
@@ -2038,7 +2058,7 @@ function drawInteractionReticle(){
   const label=`${kind} // ${Math.round(target.x)}, ${Math.round(target.y)}`;ctx.font='800 8px ui-monospace,monospace';const w=ctx.measureText(label).width+12;ctx.fillStyle='rgba(7,12,15,.78)';ctx.fillRect(target.x+14,target.y-24,w,16);ctx.fillStyle=valid?'rgba(171,239,210,.88)':'rgba(247,153,166,.92)';ctx.fillText(label,target.x+20,target.y-13);ctx.restore();
 }
 
-function updateTestTelemetry(){
+function updateTestTelemetry(deckMetrics){
   const panel=$('#testTelemetry'),frame=$('#testDangerFrame');
   if(!panel||!frame)return;
   if(!sim||tutorialMode){panel.hidden=true;frame.style.opacity='0';frame.classList.remove('danger');return}
@@ -2050,7 +2070,7 @@ function updateTestTelemetry(){
     const v=sim.physics.vehicle;
     if(v){const x0=stage.deck[0][0],x1=stage.deck.at(-1)[0];progress=clamp((v.x-x0)/Math.max(1,x1-x0),0,1);contact=v.attached?'도로 접촉':'공중 이탈'}
     defl=Math.max(defl,sim.physics.maxDrop||0);
-    const dm=collapseDeckMetrics(sim.physics);deckDefl=Math.max(deckDefl,dm.deckDeflection);deckCurvature=Math.max(deckCurvature,dm.deckCurvature);
+    const dm=deckMetrics||collapseDeckMetrics(sim.physics);deckDefl=Math.max(deckDefl,dm.deckDeflection);deckCurvature=Math.max(deckCurvature,dm.deckCurvature);
   }else if(sim.last?.ok){ratio=Math.max(ratio,sim.last.maxRatio||0);defl=Math.max(defl,sim.last.maxDefl||0);deckDefl=sim.last.deckDeflection||deckDefl;deckCurvature=sim.last.deckCurvature||deckCurvature}
   const serviceLimit=Math.max(1,stage.maxDefl),collapseLimit=Math.max(serviceLimit,getCollapseDeflLimit(stage));
   const pPct=Math.round(progress*100),stressPct=Math.round(ratio*100),servicePct=defl/serviceLimit*100,collapsePct=defl/collapseLimit*100;
@@ -2731,8 +2751,8 @@ canvas.addEventListener('contextmenu',e=>{
 });
 canvas.addEventListener('pointermove',e=>{
   const p=screenToWorld(e.clientX,e.clientY);pointerWorld=p;
-  if(dragging){let q=snapPoint(p);if(canPlace(q)&&nodeMoveKeepsClear(dragging,q)){dragging.x=q.x;dragging.y=q.y;currentAnalysis=null;updateHUD();}hoverNode=dragging;hoverMember=null;updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);draw();return;}
-  hoverNode=findNode(p);hoverMember=hoverNode?null:findMember(p);updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);draw();
+  if(dragging){const q=snapPoint(p);if((dragging.x!==q.x||dragging.y!==q.y)&&canPlace(q)&&nodeMoveKeepsClear(dragging,q)){dragging.x=q.x;dragging.y=q.y;currentAnalysis=null;updateHUD();}hoverNode=dragging;hoverMember=null;updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);requestPointerDraw();return;}
+  hoverNode=findNode(p);hoverMember=hoverNode?null:findMember(p);updateInspector(e.clientX,e.clientY,p);updateCanvasCursor(p);requestPointerDraw();
 });
 canvas.addEventListener('pointerup',e=>{if(dragging){dragging=null;canvas.releasePointerCapture?.(e.pointerId);updateHUD();updateCanvasCursor(pointerWorld);draw();toast('관절 위치를 변경했습니다')}});
 canvas.addEventListener('pointercancel',()=>{dragging=null});
@@ -2946,13 +2966,7 @@ function assemble(loadX,broken=new Set(),selfWeightScale=1){
   if(devSessionActive())for(const [id,f] of DEV_STATE.nodeForces){const ii=index.get(Number(id));if(ii!=null){F[2*ii]+=Number(f.fx)||0;F[2*ii+1]+=Number(f.fy)||0}}
   const fixed=new Set(); nodes.forEach((n,i)=>{if(n.support==='pin'){fixed.add(2*i);fixed.add(2*i+1)}if(n.support==='roller')fixed.add(2*i+1);if(!activeIds.has(n.id)){fixed.add(2*i);fixed.add(2*i+1)}});
   const free=[];for(let i=0;i<dof;i++)if(!fixed.has(i))free.push(i);
-  const A=new Array(free.length),b=new Float64Array(free.length);
-  for(let i=0;i<free.length;i++){
-    const source=K[free[i]],row=new Float64Array(free.length);
-    for(let j=0;j<free.length;j++)row[j]=source[free[j]];
-    A[i]=row;b[i]=F[free[i]];
-  }
-  const x=solve(A,b);if(!x)return {ok:false,reason:'solver-instability',loadX};
+  const x=solveMovingLoad(K,free,F,sim);if(!x)return {ok:false,reason:'solver-instability',loadX};
   const U=new Float64Array(dof);free.forEach((d,i)=>U[d]=x[i]);
   const roadDemands=roadMemberDemands(U,index,roadBending,axleLoads,broken,selfWeightScale);
   const forces=new Map();let maxRatio=0,worst=null,maxDefl=0,shapeScale=1;
@@ -3004,7 +3018,11 @@ function globalBucklingMode(K,free,index,forces){
   if(!compressed)return null;
   const positions=new Int32Array(K.length).fill(-1);
   free.forEach((dof,i)=>positions[dof]=i);
-  const tangent=free.map(i=>Float64Array.from(free,j=>K[i][j]));
+  const tangent=free.map((dof,i)=>{
+    const source=K[dof],row=new Float64Array(i+1);
+    for(let j=0;j<=i;j++)row[j]=source[free[j]];
+    return row;
+  });
   for(const member of members){
     const info=forces.get(member.id);if(!info)continue;
     const a=nodeById(member.a),b=nodeById(member.b),L=dist(a,b),nx=-(b.y-a.y)/L,ny=(b.x-a.x)/L;
@@ -3012,14 +3030,23 @@ function globalBucklingMode(K,free,index,forces){
     const geometric=info.force/L;
     for(let r=0;r<4;r++)for(let c=0;c<4;c++){
       const i=positions[dofs[r]],j=positions[dofs[c]];
-      if(i>=0&&j>=0)tangent[i][j]+=geometric*q[r]*q[c];
+      if(j>=0&&i>=j)tangent[i][j]+=geometric*q[r]*q[c];
     }
   }
   // Loss of positive tangent stiffness detects a whole compressed span buckling,
   // including road joints and the actual restraint supplied by connected braces.
-  for(let i=0;i<free.length;i++)for(let j=0;j<=i;j++){
-    let pivot=tangent[i][j];
-    for(let k=0;k<j;k++)pivot-=tangent[i][k]*tangent[j][k];
+  const firstColumn=new Int32Array(free.length);
+  for(let i=0;i<free.length;i++){
+    const row=tangent[i];
+    let first=0;
+    while(first<i&&row[first]===0)first++;
+    firstColumn[i]=first;
+  }
+  // Cholesky elimination cannot fill entries before a row's first nonzero.
+  for(let i=0;i<free.length;i++)for(let j=firstColumn[i];j<=i;j++){
+    const row=tangent[i],other=tangent[j];
+    let pivot=row[j];
+    for(let k=Math.max(firstColumn[i],firstColumn[j]);k<j;k++)pivot-=row[k]*other[k];
     if(i!==j){tangent[i][j]=pivot/tangent[j][j];continue}
     if(pivot>Math.max(1,Math.abs(K[free[i]][free[i]]))*1e-10){tangent[i][i]=Math.sqrt(pivot);continue}
     const mode=new Float64Array(free.length),shape=new Float64Array(K.length);mode[i]=1;
@@ -3039,20 +3066,59 @@ function globalBucklingMode(K,free,index,forces){
   return null;
 }
 function solve(A,b){
-  const n=b.length;if(!n)return null;
+  return solveFactored(factorStiffness(A),b);
+}
+function factorStiffness(A){
+  const n=A.length;if(!n)return null;
   let stiffnessScale=0;for(let i=0;i<n;i++)stiffnessScale=Math.max(stiffnessScale,Math.abs(A[i][i]));
   // A disconnected mechanism can leave tiny round-off pivots at large stiffness scales.
   const pivotFloor=Math.max(1e-7,stiffnessScale*1e-10);
+  const pivots=new Int32Array(n),multipliers=new Array(n);
   for(let k=0;k<n;k++){
     let piv=k,max=Math.abs(A[k][k]);for(let i=k+1;i<n;i++){const v=Math.abs(A[i][k]);if(v>max){max=v;piv=i}}
     if(max<pivotFloor)return null;
-    if(piv!==k){[A[k],A[piv]]=[A[piv],A[k]];const tb=b[k];b[k]=b[piv];b[piv]=tb}
-    const pivotRow=A[k];
-    for(let i=k+1;i<n;i++){const row=A[i],f=row[k]/pivotRow[k];if(Math.abs(f)<1e-18)continue;row[k]=0;for(let j=k+1;j<n;j++)row[j]-=f*pivotRow[j];b[i]-=f*b[k]}
+    pivots[k]=piv;
+    if(piv!==k)[A[k],A[piv]]=[A[piv],A[k]];
+    const pivotRow=A[k],step=multipliers[k]=new Float64Array(n-k-1);
+    for(let i=k+1;i<n;i++){
+      const row=A[i],f=row[k]/pivotRow[k];
+      if(Math.abs(f)<1e-18)continue;
+      step[i-k-1]=f;
+      row[k]=0;
+      for(let j=k+1;j<n;j++)row[j]-=f*pivotRow[j];
+    }
+  }
+  return {A,pivots,multipliers};
+}
+function solveFactored(factor,b){
+  if(!factor)return null;
+  const {A,pivots,multipliers}=factor,n=b.length;
+  for(let k=0;k<n;k++){
+    const pivot=pivots[k],step=multipliers[k];
+    if(pivot!==k){const value=b[k];b[k]=b[pivot];b[pivot]=value}
+    for(let i=k+1;i<n;i++)if(step[i-k-1]!==0)b[i]-=step[i-k-1]*b[k];
   }
   const x=new Float64Array(n);for(let i=n-1;i>=0;i--){const row=A[i];let s=b[i];for(let j=i+1;j<n;j++)s-=row[j]*x[j];x[i]=s/row[i]}return x;
 }
 
+function solveMovingLoad(K,free,F,simulation){
+  const b=Float64Array.from(free,dof=>F[dof]);
+  const cached=simulation?.stiffnessFactor;
+  // Compare actual coefficients so edits, fractures and tuning changes invalidate the factor.
+  if(cached&&cached.matrix.length===free.length){
+    let same=true;
+    for(let i=0;i<free.length&&same;i++){
+      const source=K[free[i]],previous=cached.matrix[i];
+      for(let j=0;j<free.length;j++)if(source[free[j]]!==previous[j]){same=false;break}
+    }
+    if(same)return solveFactored(cached.factor,b);
+  }
+  const matrix=free.map(dof=>Float64Array.from(free,column=>K[dof][column]));
+  if(!simulation)return solve(matrix,b);
+  const factor=factorStiffness(matrix.map(row=>row.slice()));
+  simulation.stiffnessFactor={matrix,factor};
+  return solveFactored(factor,b);
+}
 
 /* ===== REAL-TIME COLLAPSE PHYSICS =====
    Position Based Dynamics (PBD) approximation used only when the linear
@@ -3800,7 +3866,7 @@ function tickCollapse(now){
     if(vc.collision){s.vesselCollision=true;s.vesselPass=false;s.failReason='vessel-collision'}
     if(s.shipProgress>=.999&&!s.vesselCollision)s.vesselPass=true;
   }
-  draw();updateTestTelemetry();
+  draw();updateTestTelemetry(deckMetrics);
   const vehicleGone=s.physics.vehicle.y>H+150;
   const vehicleExited=s.physics.vehicle.attached&&s.physics.vehicle.x>=vehiclePoseAt(1,null,0).x;
   if(vehicleGone||vehicleExited){
@@ -4396,6 +4462,7 @@ ui.result.addEventListener('keydown',event=>{
 });
 
 function draw(){
+  if(pointerDrawFrame){cancelAnimationFrame(pointerDrawFrame);pointerDrawFrame=0}
   lastEnvironmentDraw=performance.now();
   const r=canvas.getBoundingClientRect();scaleX=r.width/W;scaleY=r.height/H;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);ctx.save();ctx.scale(scaleX,scaleY);applyCamera();
   if(screenShake.until>performance.now()){const k=(screenShake.until-performance.now())/180;ctx.translate(Math.sin(anim*2.71)*screenShake.power*k,Math.cos(anim*3.17)*screenShake.power*k)}else screenShake.power=0;
@@ -4419,12 +4486,13 @@ function draw(){
     drawMemberVisual(m,pa,pb,analysis);
   }
 
-  nodes.filter(n=>n.visible||n.user).forEach(n=>{
+  for(const n of nodes){
+    if(!n.visible&&!n.user)continue;
     let p={x:n.x,y:n.y};
     if(physics){const q=collapseParticle(physics,n.id);if(q)p={x:q.x,y:q.y}}
     else if(analysis){const i=analysis.index.get(n.id);p={x:n.x+analysis.U[2*i]*deformScale,y:n.y+analysis.U[2*i+1]*deformScale}}
     drawNodeVisual(n,p);
-  });
+  }
   drawBuildFx();drawRepairReview();
 
   if(!physics){
@@ -4723,20 +4791,28 @@ function drawSiteEnvironmentOverlay(){
 }
 
 
+let gridRenderCache=null;
 function drawGridOverlay(){
   const grid=constructionGrid(),zoom=camera.zoom;
-  const left=camera.x-W/(2*zoom),right=camera.x+W/(2*zoom);
-  const top=camera.y-H/(2*zoom),bottom=camera.y+H/(2*zoom);
-  ctx.save();
-  for(const [axis,min,max] of [[grid.x,left,right],[grid.y,top,bottom]]){
-    for(const {coordinate,major} of gridAxisLines(axis,min,max)){
-      ctx.strokeStyle=major?'rgba(148,188,198,.15)':'rgba(186,213,219,.07)';
-      ctx.lineWidth=(major?1:.65)/zoom;
-      ctx.beginPath();
-      if(axis===grid.x){ctx.moveTo(coordinate,top);ctx.lineTo(coordinate,bottom)}
-      else{ctx.moveTo(left,coordinate);ctx.lineTo(right,coordinate)}
-      ctx.stroke();
+  if(gridRenderCache?.grid!==grid||gridRenderCache.x!==camera.x||gridRenderCache.y!==camera.y||gridRenderCache.zoom!==zoom){
+    const left=camera.x-W/(2*zoom),right=camera.x+W/(2*zoom);
+    const top=camera.y-H/(2*zoom),bottom=camera.y+H/(2*zoom);
+    const lines=[];
+    for(const [axis,min,max] of [[grid.x,left,right],[grid.y,top,bottom]]){
+      for(const {coordinate,major} of gridAxisLines(axis,min,max)){
+        lines.push(axis===grid.x?[coordinate,top,coordinate,bottom,major]:[left,coordinate,right,coordinate,major]);
+      }
     }
+    gridRenderCache={grid,x:camera.x,y:camera.y,zoom,lines};
+  }
+  ctx.save();
+  for(const [x1,y1,x2,y2,major] of gridRenderCache.lines){
+    ctx.strokeStyle=major?'rgba(148,188,198,.15)':'rgba(186,213,219,.07)';
+    ctx.lineWidth=(major?1:.65)/zoom;
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();
   }
   ctx.restore();
 }
@@ -5948,7 +6024,7 @@ bindDevConsoleDynamicActions=function(){bindDevConsoleDynamicActionsStep2();
 	$('#devEventSearch')?.addEventListener('input',e=>{DEV_STATE.eventSearch=e.target.value;renderDevConsole()});$('#devEventFilter')?.addEventListener('change',e=>{DEV_STATE.eventFilter=e.target.value;renderDevConsole()});$$('[data-dev-a11y]').forEach(b=>b.onclick=()=>devToggleA11y(b.dataset.devA11y));
 };
 const drawStep2=draw;
-draw=function(){const t0=performance.now();withNodeLookup(drawStep2);DEV_PERF.renderMs=DEV_PERF.renderMs*.82+(performance.now()-t0)*.18;const physics=sim?.mode==='collapse'?sim.physics:null,analysis=physics?null:(sim?.last?.ok?sim.last:lastFullAnalysis?.ok?lastFullAnalysis:null);ctx.save();const r=canvas.getBoundingClientRect();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.scale(r.width/W,r.height/H);applyCamera();drawDevCanvasDiagnostics(analysis,physics);ctx.restore()};
+draw=function(){const t0=performance.now();withNodeLookup(drawStep2);DEV_PERF.renderMs=DEV_PERF.renderMs*.82+(performance.now()-t0)*.18;if(!Object.values(DEV_STATE.canvasDebug).some(Boolean)||!devSessionActive())return;const physics=sim?.mode==='collapse'?sim.physics:null,analysis=physics?null:(sim?.last?.ok?sim.last:lastFullAnalysis?.ok?lastFullAnalysis:null);ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.scale(scaleX,scaleY);applyCamera();drawDevCanvasDiagnostics(analysis,physics);ctx.restore()};
 const stepCollapsePhysicsStep2=stepCollapsePhysics;
 stepCollapsePhysics=function(physics,dt){const t0=performance.now(),wasAttached=!!physics?.vehicle?.attached;const r=withNodeLookup(()=>stepCollapsePhysicsStep2(physics,dt));DEV_PERF.physicsMs=DEV_PERF.physicsMs*.8+(performance.now()-t0)*.2;if(wasAttached&&physics?.vehicle&&!physics.vehicle.attached)devLogEvent('WARNING','SIMULATION','VEHICLE_CONTACT_LOST',{x:physics.vehicle.x,y:physics.vehicle.y});return r};
 const devMonitorFrameStep2=devMonitorFrame;
@@ -6092,7 +6168,7 @@ function localAiResetChat(){
   localAiHistory=[];
   localAiUI.messages.replaceChildren();localAiSetStatus('');
 }
-function localAiBridgeContext(){
+function localAiBridgeContext(forNetwork=true){
   const physics=sim?.mode==='collapse'?sim.physics:null;
   // Build edits clear currentAnalysis; do not reuse an older test on a changed design.
   const analysis=physics?null:(sim?.mode==='static'?sim.last:(currentAnalysis?.ok?lastFullAnalysis:null));
@@ -6146,6 +6222,7 @@ function localAiBridgeContext(){
     test:{screen:currentGameScreen,mode:sim?.mode||'build',vehicle:physics?{x:number(physics.vehicle.x),y:number(physics.vehicle.y),attached:physics.vehicle.attached}:sim?{progress:number(sim.progress)}:null,failureReason:sim?.failReason||null,failureEvents:(sim?.failureEvents||[]).slice(-8)},
     omitted:{nodes:0,members:0,memberResults:0}
   };
+  if(!forNetwork)return context;
   const resultCount=context.analysis.memberResults.length;
   let serialized=JSON.stringify(context);
   // Preserve topology before individual result rows; report any omissions explicitly.
@@ -6175,13 +6252,15 @@ async function localAiRequestOnline(path,options={}){
   localStorage.setItem('trusslab-ai-endpoint',endpoint);
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),35000);
   try{
-    const response=await fetch(`${endpoint}${path}`,{...options,signal:controller.signal});
+    const response=await fetch(`${endpoint}${path}`,{credentials:'omit',...options,signal:controller.signal});
     let data;try{data=await response.json()}catch(error){if(controller.signal.aborted)throw error;throw new Error('AI 서버가 JSON 응답을 반환하지 않았습니다. Worker 주소를 확인하세요.')}
     if(!response.ok)throw new Error(typeof data?.error==='string'?data.error:`AI 서버 오류 (HTTP ${response.status})`);
     return data;
   }catch(error){
     if(controller.signal.aborted)throw new Error('AI 서버 응답 시간이 초과되었습니다. 다시 시도하세요.');
-    if(error instanceof TypeError)throw new Error(`AI 서버에 접근하지 못했습니다. Worker가 실행 중인지, 서버 주소가 맞는지 확인하세요. 서버의 ALLOWED_ORIGINS에 현재 게임 주소(${location.origin})도 등록해야 합니다.`);
+    if(error instanceof TypeError)throw new Error(location.protocol==='file:'
+      ?'Gemini Worker에 연결할 수 없습니다. 인터넷 연결과 Worker의 로컬 파일 허용 설정을 확인하세요.'
+      :`AI 서버에 접근하지 못했습니다. Worker 주소와 ALLOWED_ORIGINS의 현재 게임 주소(${location.origin})를 확인하세요.`);
     throw error;
   }finally{clearTimeout(timeout)}
 }
@@ -6191,32 +6270,48 @@ async function localAiCheckOnline(){
   try{
     const data=await localAiRequestOnline('/health');
     if(!data?.ok||data.provider!=='gemini')throw new Error('Gemini Worker의 /health 응답인지 확인하세요.');
+    if(localAiUI.device)localAiUI.device.textContent='ONLINE · GEMINI';
     localAiSetStatus(`서버 준비 완료 · ${data.model} · 실제 Gemini 응답은 질문 전송 시 확인합니다.`,'ok');localAiUI.tab?.classList.add('ready');return true;
   }catch(err){localAiUI.tab?.classList.remove('ready');localAiSetStatus(`온라인 AI에 연결하지 못했습니다: ${err?.message||String(err)}`,'bad');return false}
   finally{localAiSetBusy(false)}
 }
-async function localAiSendOnline(text,target){
+async function localAiSendOnline(text){
   const context=localAiBridgeContext();
-  const tutorialRequestRun=tutorialMode?tutorialRunId:null;
-  if(tutorialMode&&tutorialCurrentStep()?.key==='aiAsk'){tutorialFlags.aiAsked=true;tutorialHandleAction('aiAsk')}
-  const payload={message:text,context,explanationLevel:localAiUI.level.value,history:localAiHistory.slice(0,-1).slice(-10).map(entry=>({role:entry.role,content:entry.content.slice(0,4000)})),client:'truss-lab-github-pages'};
+  const history=localAiHistory.slice(0,-1).filter(entry=>!entry.localOnly).slice(-10)
+    .map(entry=>({role:entry.role,content:entry.content.slice(0,4000)}));
+  const payload={message:text,context,explanationLevel:localAiUI.level.value,history,client:'truss-lab-github-pages'};
   const data=await localAiRequestOnline('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const answer=String(data?.answer||'').trim();if(!answer)throw new Error('온라인 AI가 빈 답변을 반환했습니다.');
-  const readable=localAiReadableAnswer(answer,JSON.parse(context));
-  if(target)localAiRenderAnswer(target,readable);
-  if(tutorialMode&&tutorialRunId===tutorialRequestRun&&tutorialFlags.aiAsked){tutorialFlags.aiAnswered=true;renderStageTutorialStep()}
-  return readable;
+  return localAiReadableAnswer(answer,JSON.parse(context));
 }
 async function localAiSend(textOverride=''){
   const text=String(textOverride||localAiUI.input?.value||'').trim();if(!text||localAiBusy)return;
   if(text.length>2000){localAiSetStatus('질문은 2,000자 이내로 입력하세요.','bad');return}
   localAiSetOpen(true);if(localAiUI.input&&!textOverride)localAiUI.input.value='';
-  localAiAddMessage('user',text);localAiHistory.push({role:'user',content:text});
-  localAiSetBusy(true);const target=localAiAddMessage('assistant','온라인 구조 코치가 분석하는 중…');
+  localAiAddMessage('user',text);
+  const userEntry={role:'user',content:text};
+  localAiHistory.push(userEntry);
+  const offlineAvailable=boothMode&&typeof answerBoothOffline==='function';
+  const offlineOnly=offlineAvailable&&($('#localAiConnectionMode').value==='offline'||!navigator.onLine);
+  const tutorialRequestRun=tutorialMode?tutorialRunId:null;
+  if(tutorialMode&&tutorialCurrentStep()?.key==='aiAsk'){tutorialFlags.aiAsked=true;tutorialHandleAction('aiAsk')}
+  localAiSetBusy(true);const target=localAiAddMessage('assistant',offlineOnly?'오프라인 구조 코치가 분석하는 중…':'온라인 구조 코치가 분석하는 중…');
   try{
-    const answer=await localAiSendOnline(text,target);
-    localAiSetStatus('');
-    localAiHistory.push({role:'assistant',content:answer});if(localAiHistory.length>14)localAiHistory=localAiHistory.slice(-14);
+    let answer,offline=offlineOnly;
+    if(!offlineOnly){
+      try{answer=await localAiSendOnline(text)}
+      catch(error){if(!offlineAvailable)throw error;offline=true;localAiSetStatus(`Gemini 연결 실패 · 오프라인 코치로 답변합니다. ${error.message}`,'warn')}
+    }else localAiSetStatus('오프라인 구조 코치 · 질문을 외부로 보내지 않았습니다.','ok');
+    if(offline){
+      userEntry.localOnly=true;
+      answer=answerBoothOffline(text,localAiBridgeContext(false),localAiUI.level.value);
+    }
+    else localAiSetStatus('');
+    target.previousElementSibling.textContent=offline?'오프라인 코치':'GEMINI';
+    if(localAiUI.device)localAiUI.device.textContent=offline?'OFFLINE · LOCAL':'ONLINE · GEMINI';
+    localAiRenderAnswer(target,answer);
+    if(tutorialMode&&tutorialRunId===tutorialRequestRun&&tutorialFlags.aiAsked){tutorialFlags.aiAnswered=true;renderStageTutorialStep()}
+    localAiHistory.push({role:'assistant',content:answer,localOnly:offline});if(localAiHistory.length>14)localAiHistory=localAiHistory.slice(-14);
   }catch(err){
     console.error('[TRUSS LAB AI CHAT]',err);const msg=`답변 생성 중 오류가 발생했습니다: ${err?.message||String(err)}`;if(target)target.textContent=msg;else localAiAddMessage('system',msg);
     localAiSetStatus(`온라인 AI 오류 // ${err?.message||String(err)}`,'bad');

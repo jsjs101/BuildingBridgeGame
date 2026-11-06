@@ -2,10 +2,12 @@
 
 let boothCreditsRequest;
 function loadBoothCredits(){
-  if(!boothCreditsRequest)boothCreditsRequest=fetch('credits.json',{cache:'no-cache'}).then(response=>{
+  if(boothCreditsRequest)return boothCreditsRequest;
+  const source=location.protocol==='file:'?Promise.resolve().then(()=>readBoothFileAsset('credits.json')):fetch('credits.json',{cache:'no-cache'}).then(response=>{
     if(!response.ok)throw new Error('credits.json: HTTP '+response.status);
     return response.json();
-  }).then(credits=>{
+  });
+  boothCreditsRequest=source.then(credits=>{
     if(typeof credits.title!=='string'||typeof credits.subtitle!=='string'||typeof credits.message!=='string'||
       !Array.isArray(credits.sections)||credits.sections.some(section=>typeof section.title!=='string'||!Array.isArray(section.names)||section.names.some(name=>typeof name!=='string'))||
       !Array.isArray(credits.chapters)||credits.chapters.some(chapter=>typeof chapter.title!=='string'||typeof chapter.text!=='string')){
@@ -441,11 +443,32 @@ function createEndingRenderer(canvas){
   const program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);
   if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));
   gl.deleteShader(vertex);gl.deleteShader(fragment);gl.useProgram(program);
-  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+  const buffer=gl.createBuffer(),meshes=new Map();
   let vertices=new Float32Array(262144),length=0;
+  gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
   gl.bufferData(gl.ARRAY_BUFFER,vertices.byteLength,gl.DYNAMIC_DRAW);
-  for(const [name,offset] of [['position',0],['color',12]]){
-    const location=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,3,gl.FLOAT,false,24,offset);
+  const position=gl.getAttribLocation(program,'position'),color=gl.getAttribLocation(program,'color');
+  gl.enableVertexAttribArray(position);gl.enableVertexAttribArray(color);
+  function bind(meshBuffer){
+    gl.bindBuffer(gl.ARRAY_BUFFER,meshBuffer);
+    gl.vertexAttribPointer(position,3,gl.FLOAT,false,24,0);
+    gl.vertexAttribPointer(color,3,gl.FLOAT,false,24,12);
+  }
+  function writeFace(target,offset,points,color){
+    const red=color[0]/255,green=color[1]/255,blue=color[2]/255;
+    for(let i=1;i<points.length-1;i++)for(let corner=0;corner<3;corner++){
+      const point=points[corner===0?0:i+corner-1];
+      target[offset++]=point[0];target[offset++]=point[1];target[offset++]=point[2];
+      target[offset++]=red;target[offset++]=green;target[offset++]=blue;
+    }
+    return offset;
+  }
+  function paint(){
+    if(!length)return;
+    bind(buffer);
+    gl.bufferSubData(gl.ARRAY_BUFFER,0,vertices.subarray(0,length));
+    gl.drawArrays(gl.TRIANGLES,0,length/6);
+    length=0;
   }
   const uniforms=Object.fromEntries(['camera','right','up','forward','viewport','focal','clipDepth'].map(name=>[name,gl.getUniformLocation(program,name)]));
   const near=8,far=6000;
@@ -461,15 +484,28 @@ function createEndingRenderer(canvas){
       const needed=(points.length-2)*18;
       if(length+needed>vertices.length){
         const grown=new Float32Array(Math.max(vertices.length*2,length+needed));grown.set(vertices);vertices=grown;
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
         gl.bufferData(gl.ARRAY_BUFFER,vertices.byteLength,gl.DYNAMIC_DRAW);
       }
-      for(let i=1;i<points.length-1;i++)for(const point of [points[0],points[i],points[i+1]]){
-        vertices[length++]=point[0];vertices[length++]=point[1];vertices[length++]=point[2];
-        vertices[length++]=color[0]/255;vertices[length++]=color[1]/255;vertices[length++]=color[2]/255;
-      }
+      length=writeFace(vertices,length,points,color);
     },
-    paint(){gl.bufferSubData(gl.ARRAY_BUFFER,0,vertices.subarray(0,length));gl.drawArrays(gl.TRIANGLES,0,length/6)},
-    dispose(){gl.deleteBuffer(buffer);gl.deleteProgram(program);const release=gl.getExtension('WEBGL_lose_context');if(release)release.loseContext()}
+    mesh(faces){
+      paint(); // Keep the same draw order at shared edges and equal depths.
+      let mesh=meshes.get(faces);
+      if(!mesh){
+        const data=new Float32Array(faces.reduce((size,face)=>size+(face.vertices.length-2)*18,0));
+        let offset=0;
+        for(const face of faces)offset=writeFace(data,offset,face.vertices,face.color);
+        mesh={buffer:gl.createBuffer(),count:offset/6};
+        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+        meshes.set(faces,mesh);
+      }
+      bind(mesh.buffer);
+      gl.drawArrays(gl.TRIANGLES,0,mesh.count);
+    },
+    paint,
+    dispose(){for(const mesh of meshes.values())gl.deleteBuffer(mesh.buffer);meshes.clear();gl.deleteBuffer(buffer);gl.deleteProgram(program);const release=gl.getExtension('WEBGL_lose_context');if(release)release.loseContext()}
   };
 }
 
@@ -508,6 +544,10 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
   const events=new AbortController(),{signal}=events;
   const previousFocus=document.activeElement;
   const models=bridges.map(buildEndingBridge);
+  for(const model of models){
+    model.nearFaces=model.faces.filter(face=>face.lod!==2);
+    model.farFaces=model.faces.filter(face=>face.lod!==1);
+  }
   const landscape=buildEndingLandscape(models);
   const chapterSeconds=Math.max(4,Math.min(12,Number(credits.chapterSeconds)||7));
   const panoramaSeconds=Math.max(5,Math.min(15,Number(credits.panoramaSeconds)||9));
@@ -520,12 +560,21 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
   const vehicles=[buildEndingVehicle(),buildEndingVehicle(true)],travellers=[buildEndingTraveller(),buildEndingTraveller(true)],ferry=buildEndingFerry(),parcel=[];
   boxDiorama(parcel,-1.4,0,-1.3,2.8,2,2.6,[193,154,105]);
   boxDiorama(parcel,-.2,0,-1.36,.4,2.08,2.72,[230,213,172]);
+  const creditRollDuration=Math.max(16,credits.sections.length*4);
+  function scheduleEndingFrame(){
+    if(!frame&&!disposed&&!document.hidden)frame=requestAnimationFrame(draw);
+  }
+  function refreshEndingFrame(){
+    renderUntil=elapsed+.15;
+    if(!frame&&elapsed>0)lastTime=performance.now();
+    scheduleEndingFrame();
+  }
   function resize(){
     width=root.clientWidth;height=root.clientHeight;
     const ratio=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);
     if(renderer){atmosphere.width=canvas.width;atmosphere.height=canvas.height;ctx.setTransform(ratio,0,0,ratio,0,0)}
     creditDistance=Math.max(0,creditRoll.offsetHeight-creditWindow.clientHeight);
-    renderUntil=elapsed+.15;
+    refreshEndingFrame();
   }
   const observer=new ResizeObserver(resize);observer.observe(root);resize();
   function enterCredits(){
@@ -533,10 +582,16 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
     creditsPanel.classList.add('isVisible');caption.classList.add('isHidden');skipButton.hidden=true;
     creditsPanel.querySelector('.endingReturn').focus({preventScroll:true});
   }
-  function togglePause(){paused=!paused;pauseButton.textContent=paused?'계속 보기':'일시 정지';pauseButton.setAttribute('aria-pressed',String(paused))}
+  function togglePause(){
+    paused=!paused;
+    pauseButton.textContent=paused?'계속 보기':'일시 정지';
+    pauseButton.setAttribute('aria-pressed',String(paused));
+    if(!paused){lastTime=performance.now();scheduleEndingFrame()}
+  }
   pauseButton.addEventListener('click',togglePause,{signal});
-  cameraButton.addEventListener('click',()=>{cameraMotion=!cameraMotion;cameraButton.textContent=cameraMotion?'카메라 고정':'카메라 연출 켜기';cameraButton.setAttribute('aria-pressed',String(!cameraMotion));renderUntil=elapsed+.15},{signal});
-  skipButton.addEventListener('click',()=>{elapsed=creditsAt;enterCredits()},{signal});
+  cameraButton.addEventListener('click',()=>{cameraMotion=!cameraMotion;cameraButton.textContent=cameraMotion?'카메라 고정':'카메라 연출 켜기';cameraButton.setAttribute('aria-pressed',String(!cameraMotion));refreshEndingFrame()},{signal});
+  function skipToCredits(){elapsed=creditsAt;enterCredits();scheduleEndingFrame()}
+  skipButton.addEventListener('click',skipToCredits,{signal});
   const returnButton=root.querySelector('.endingReturn');
   let closing=false,fadeTimer;
   if(music){
@@ -579,9 +634,15 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
   returnButton.addEventListener('click',leaveEnding,{signal});
   creditWindow.addEventListener('wheel',event=>{creditManual=true;creditWindow.scrollTop+=event.deltaY;event.preventDefault()},{signal,passive:false});
   creditWindow.addEventListener('keydown',()=>creditManual=true,{signal});
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Escape')return;
+    event.preventDefault();
+    event.stopPropagation();
+    if(elapsed<creditsAt)skipToCredits();
+    else leaveEnding();
+  },{signal,capture:true});
   root.addEventListener('keydown',event=>{
     event.stopPropagation();
-    if(event.key==='Escape'){event.preventDefault();if(elapsed<creditsAt){elapsed=creditsAt;enterCredits()}else leaveEnding()}
     if(event.key===' '&&event.target===pauseButton){event.preventDefault();togglePause()}
     if(event.key==='Tab'){
       const focusable=[...root.querySelectorAll('button:not([hidden]),[tabindex="0"]')].filter(node=>node.getClientRects().length&&getComputedStyle(node).visibility!=='hidden');
@@ -591,15 +652,20 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
     }
   },{signal});
   root.addEventListener('keyup',event=>event.stopPropagation(),{signal});
-  document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden){cancelAnimationFrame(frame);frame=0}else if(!disposed)frame=requestAnimationFrame(draw)},{signal});
+  document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden){cancelAnimationFrame(frame);frame=0}else scheduleEndingFrame()},{signal});
   pauseButton.focus({preventScroll:true});
   function draw(now){
+    frame=0;
     if(disposed)return;
     const dt=lastTime?Math.max(0,(now-lastTime)/1000):0;lastTime=now;
     if(!paused)elapsed+=dt;
     if(elapsed>=creditsAt+4&&elapsed>renderUntil){
-      if(!creditManual&&!paused)creditWindow.scrollTop=creditDistance*smooth(clamp((elapsed-creditsAt-2)/Math.max(16,credits.sections.length*4)));
-      frame=requestAnimationFrame(draw);return;
+      if(!creditManual&&!paused){
+        const roll=clamp((elapsed-creditsAt-2)/creditRollDuration);
+        creditWindow.scrollTop=creditDistance*smooth(roll);
+        if(roll<1)scheduleEndingFrame();
+      }
+      return;
     }
     const current=Math.min(bridges.length,Math.floor(elapsed/chapterSeconds)),panorama=elapsed>=panoramaAt;
     const index=panorama?bridges.length-1:current,model=models[index];
@@ -634,6 +700,10 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
       if(points.some(p=>p[2]<8)||points.every(p=>p[0]<-40)||points.every(p=>p[0]>width+40)||points.every(p=>p[1]<-40)||points.every(p=>p[1]>height+40))return;
       packets.push({points,color,water,depth:points.reduce((sum,p)=>sum+p[2],0)/points.length});
     }
+    function submitMesh(faces){
+      if(renderer)renderer.mesh(faces);
+      else for(const face of faces)submit(face.vertices,face.color,face.water);
+    }
     function place(mesh,x,y,z,angle=0){
       const cos=Math.cos(angle),sin=Math.sin(angle);
       for(const face of mesh)submit(face.vertices.map(([vx,vy,vz])=>[x+vx*cos-vy*sin,y+vx*sin+vy*cos,z+vz]),face.color);
@@ -648,19 +718,22 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
       const sky=ctx.createLinearGradient(0,0,0,height);sky.addColorStop(0,'#263f51');sky.addColorStop(.57,'#7e9e9e');sky.addColorStop(1,'#a4ada0');ctx.fillStyle=sky;ctx.fillRect(0,0,width,height);
       const sun=ctx.createRadialGradient(width*.77,height*.19,3,width*.77,height*.19,height*.37);sun.addColorStop(0,'#f8e6b767');sun.addColorStop(1,'#e6d1a100');ctx.fillStyle=sun;ctx.fillRect(0,0,width,height);
     }
-    for(const face of landscape.mountains)submit(face.vertices,face.color);
-    if(camera[2]>260)for(const face of landscape.lake)submit(face.vertices,face.color,true);
+    submitMesh(landscape.mountains);
+    if(camera[2]>260){
+      if(renderer)renderer.mesh(landscape.lake);
+      else for(const face of landscape.lake)submit(face.vertices,face.color,true);
+    }
     for(const patch of landscape.patches){
       const distance=Math.max(patch.start-look[0],look[0]-patch.end,0);
       if(!panorama&&distance>740)continue;
-      for(const face of patch.faces)submit(face.vertices,face.color);
+      submitMesh(patch.faces);
       const scenery=camera[2]>620||distance>235?patch.silhouette:patch.detail;
-      for(const face of scenery)submit(face.vertices,face.color);
+      submitMesh(scenery);
     }
     for(const [islandIndex,island] of models.entries()){
       if(!panorama&&!reducedMotion&&Math.abs(island.offset-look[0])>740)continue;
       const distant=Math.abs(island.offset-look[0])>320||camera[2]>650;
-      for(const face of island.faces){if(distant&&face.lod===1||!distant&&face.lod===2)continue;submit(face.vertices,face.color,face.water)}
+      submitMesh(distant?island.farFaces:island.nearFaces);
       if(!distant)for(let ripple=0;ripple<16;ripple++){
         const x=-90+(ripple*37.7)%175,z=-65+((ripple*23.3+(reducedMotion?0:elapsed*1.6))%130);
         const light=12+Math.sin(elapsed*.8+ripple)*4;
@@ -711,10 +784,9 @@ function mountBoothEnding({bridges,credits,reducedMotion,close,music,musicStarte
     if(!panorama&&!reducedMotion)drawBoothPrecipitation(ctx,point=>project([point[0]+model.offset,point[1],point[2]-75]),model.entry.environment,elapsed,{width:330,depth:150,count:65,height:180,opacity:.38});
     for(let i=0;i<bars.length;i++)bars[i].style.transform='scaleX('+clamp(i===bridges.length?(elapsed-panoramaAt)/panoramaSeconds:(elapsed-i*chapterSeconds)/chapterSeconds)+')';
     if(elapsed>=creditsAt&&!creditManual&&!paused){
-      creditWindow.scrollTop=creditDistance*smooth(clamp((elapsed-creditsAt-2)/Math.max(16,credits.sections.length*4)));
+      creditWindow.scrollTop=creditDistance*smooth(clamp((elapsed-creditsAt-2)/creditRollDuration));
     }
-    frame=requestAnimationFrame(draw);
+    if(!paused)scheduleEndingFrame();
   }
-  frame=requestAnimationFrame(draw);
   return ()=>{disposed=true;clearInterval(fadeTimer);if(music)music.pause();cancelAnimationFrame(frame);events.abort();observer.disconnect();if(renderer)renderer.dispose();root.remove();siblings.forEach(node=>{if(node.isConnected)node.inert=false});if(previousFocus instanceof HTMLElement&&previousFocus.isConnected)previousFocus.focus({preventScroll:true});models.length=0};
 }

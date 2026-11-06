@@ -72,22 +72,45 @@ function createBridgeBooth(engine){
 
   const surfaces=[];
   const trim=[];
-  const road=(t,y=0,offset=0)=>[69*t*t+3.4*(1-t)**5+offset,y,4+43*t];
-  const deckWidth=2.9,bridgeEnd=1.6;
+  const roadSlope=t=>138*t-17*(1-t)**4;
+  function road(t,y=0,offset=0){
+    const x=69*t*t+3.4*(1-t)**5,z=4+43*t;
+    if(!offset)return [x,y,z];
+    const slope=roadSlope(t),length=Math.hypot(slope,43);
+    // Deck edges, traffic and towers use the same perpendicular road section.
+    return [x+offset*43/length,y,z-offset*slope/length];
+  }
+  const deckWidth=2.9,bridgeStart=-.075,bridgeEnd=2.35;
   function strip(from,to,low,high,left,right,colors,deckTop=false){
     const a=road(from,low,left),b=road(from,low,right),c=road(to,low,right),d=road(to,low,left);
     const e=road(from,high,left),f=road(from,high,right),g=road(to,high,right),h=road(to,high,left);
-    surfaces.push([[e,f,g,h],colors[0],deckTop],[[a,e,h,d],colors[1]],[[b,f,g,c],colors[2]]);
+    surfaces.push([[e,f,g,h],colors[0],deckTop,true],[[a,e,h,d],colors[1],false,true],
+      [[b,c,g,f],colors[2],false,true],[[a,d,c,b],colors[1],false,true]);
   }
   const deckColors=['#304447','#18292d','#23383b'];
   const curbColors=['#617777','#3b5053','#475e61'];
-  const deckSegments=60;
-  for(let i=0;i<Math.round(deckSegments*bridgeEnd);i++){
-    const from=i/deckSegments,to=(i+1)/deckSegments;
+  function roadBox(t,center,low,high,halfWidth,halfLength,colors){
+    const slope=roadSlope(t),norm=Math.hypot(slope,43);
+    const point=(x,y,z)=>{
+      const p=road(t,y,center+x);
+      return [p[0]+z*slope/norm,y,p[2]+z*43/norm];
+    };
+    const a=point(-halfWidth,low,-halfLength),b=point(halfWidth,low,-halfLength);
+    const c=point(halfWidth,low,halfLength),d=point(-halfWidth,low,halfLength);
+    const e=point(-halfWidth,high,-halfLength),f=point(halfWidth,high,-halfLength);
+    const g=point(halfWidth,high,halfLength),h=point(-halfWidth,high,halfLength);
+    surfaces.push([[e,f,g,h],colors[0]],[[a,b,f,e],colors[1]],[[c,d,h,g],colors[1]],
+      [[a,e,h,d],colors[2]],[[b,f,g,c],colors[2]],[[a,d,c,b],colors[2]]);
+  }
+  const deckSegments=Math.ceil(60*(bridgeEnd-bridgeStart));
+  for(let i=0;i<deckSegments;i++){
+    const from=bridgeStart+(bridgeEnd-bridgeStart)*i/deckSegments;
+    const to=bridgeStart+(bridgeEnd-bridgeStart)*(i+1)/deckSegments;
     strip(from,to,-.63,0,-deckWidth,deckWidth,deckColors,true);
     for(const side of [-1,1]){
       const edge=side*deckWidth;
       strip(from,to,0,.12,edge-.09,edge+.09,curbColors);
+      strip(from,to,-.57,-.44,edge-.035,edge+.045,['#607476','#354b4e','#40575b']);
       trim.push([road(from,.56,edge),road(to,.56,edge),'#607676',.032]);
       if(i%2===0)trim.push([road(from,.1,edge),road(from,.56,edge),'#607676',.03]);
     }
@@ -96,36 +119,68 @@ function createBridgeBooth(engine){
       const edge=side*deckWidth;
       trim.push([road(from,.33,edge),road(to,.33,edge),'#3e575a',.042]);
       trim.push([road(from,.014,side*2.58),road(to,.014,side*2.58),'#6d8180',.025]);
+      if(i%2===0)trim.push([road(from,-.42,edge+side*.036),road(from,-.16,edge+side*.036),'#748685',.022]);
+      if(i%6===2){
+        roadBox(from,edge,.57,.67,.055,.075,['#bdc2a5','#778780','#687d78']);
+      }
     }
     if(i%3===0)trim.push([road(from,.017),road(Math.min(bridgeEnd,from+.022),.017),'#87928a',.028]);
   }
-  for(const [position,height] of [[.57,11],[.87,10],[1.17,10],[1.46,9.6]]){
-    for(const side of [-1,1]){
-      const foot=road(position,-3.1,side*3.12);
-      const crown=road(position,height,side*1.65);
-      const crossSection=(point,w,d)=>{
-        const cut=w*.28;
-        return [[-w+cut,-d],[w-cut,-d],[w,-d+cut],[w,d-cut],[w-cut,d],[-w+cut,d],[-w,d-cut],[-w,-d+cut]]
-          .map(([x,z])=>[point[0]+x,point[1],point[2]+z]);
-      };
-      const base=crossSection(foot,.54,.78),top=crossSection(crown,.19,.31);
-      for(let i=0;i<base.length;i++){
-        const next=(i+1)%base.length;
-        surfaces.push([[base[i],base[next],top[next],top[i]],['#516467','#65797a','#34494d','#3d5357','#294044','#395154','#43595c','#576e70'][i]]);
+  const towerPositions=[.49,.95],height=10.9,towerOffset=3.74;
+  const towerColors=['#91a4a0','#657d7f','#40595e'];
+  const shades=['#829995','#91a4a0','#5e777a','#50696d','#455e64','#597277','#6a8385','#78908f'];
+  for(const position of towerPositions){
+    const slope=roadSlope(position),norm=Math.hypot(slope,43);
+    const crossSection=(y,offset,w,d)=>{
+      const cut=w*.28;
+      return [[-w+cut,-d],[w-cut,-d],[w,-d+cut],[w,d-cut],[w-cut,d],[-w+cut,d],[-w,d-cut],[-w,-d+cut]]
+        .map(([x,z])=>{
+          const point=road(position,y,offset+x);
+          return [point[0]+z*slope/norm,y,point[2]+z*43/norm];
+        });
+    };
+    function towerSection(levels){
+      const rings=levels.map(level=>crossSection(...level));
+      for(let band=1;band<rings.length;band++){
+        const low=rings[band-1],high=rings[band];
+        for(let i=0;i<low.length;i++){
+          const next=(i+1)%low.length;
+          surfaces.push([[low[i],low[next],high[next],high[i]],shades[i]]);
+        }
       }
-      surfaces.push([top,'#748785']);
+      surfaces.push([rings.at(-1),towerColors[0]]);
+    }
+    for(const side of [-1,1]){
+      const offset=side*towerOffset;
+      towerSection([[-3.1,offset,.58,.78],[.1,offset,.48,.62],
+        [height,offset,.28,.36]]);
+      roadBox(position,offset,-3.35,-2.92,.69,.91,towerColors);
       for(const direction of [-1,1]){
-        for(let index=1;index<=8;index++){
-          const t=position+direction*(.022+index*.014);
-          const anchor=road(t,.18,side*2.62);
-          const stay=road(position,height-.35-index*.28,side*(1.69+index*.03));
-          trim.push([anchor,stay,side===-1?'#a3bbb8':'#708c8e',.024+index*.0016]);
-          trim.push([road(t-.002,.15,side*2.62),road(t+.002,.15,side*2.62),'#a5b3a8',.17]);
+        for(let index=0;index<7;index++){
+          const t=position+direction*(.057+index*.025);
+          const anchor=road(t,.22,side*2.99);
+          const stayY=height-2.6+index*.34;
+          const stay=road(position,stayY,offset);
+          const stayDepth=.62+(.36-.62)*(stayY-.1)/(height-.1);
+          stay[0]+=direction*stayDepth*slope/norm;
+          stay[2]+=direction*stayDepth*43/norm;
+          const color=side===-1?'#a5b8b4':'#80999a';
+          // Short draw segments keep the long stays correctly layered during the fly-through.
+          for(let section=0;section<6;section++){
+            const a=anchor.map((value,axis)=>value+(stay[axis]-value)*section/6);
+            const b=anchor.map((value,axis)=>value+(stay[axis]-value)*(section+1)/6);
+            trim.push([a,b,color,.025,true]);
+          }
+          roadBox(t,side*2.99,.07,.23,.085,.16,['#a1aca0','#657d7d','#4b6469']);
         }
       }
     }
-    strip(position-.009,position+.009,-.97,-.71,-3.6,3.6,curbColors);
-    strip(position-.014,position+.014,-1.25,-.97,-2.85,2.85,['#41575b','#263c40','#324b4e']);
+    roadBox(position,0,-1.24,-.74,3.94,.61,['#526d71','#344b50','#273f44']);
+    for(const side of [-1,1])roadBox(position,side*2.45,-.79,-.57,.26,.47,towerColors);
+  }
+  for(const t of [.12,.24,1.22,1.38,1.53,1.67,1.8,1.92,2.04,2.16]){
+    roadBox(t,0,-3.6,-.79,.46,.48,towerColors);
+    roadBox(t,0,-1.03,-.62,1.54,.58,towerColors);
   }
 
   function vehicleMesh(length,width,roof,paint,cargo){
@@ -170,7 +225,7 @@ function createBridgeBooth(engine){
     const angle=i*2*Math.PI/wheelSides;
     return [Math.cos(angle),Math.sin(angle)];
   });
-  const pathStart=-.066,pathEnd=bridgeEnd+.15;
+  const pathStart=bridgeStart,pathEnd=bridgeEnd+.15;
   const roadSamples=[0];
   const sampleCount=180;
   for(let i=1;i<=sampleCount;i++){
@@ -218,7 +273,7 @@ function createBridgeBooth(engine){
       if(opacity<=0)continue;
       const model=models[car.model];
       const [x,,z]=road(t,0,car.lane*1.34);
-      const slope=138*t-17*(1-t)**4;
+      const slope=roadSlope(t);
       const norm=Math.hypot(slope,43),forwardX=slope/norm,forwardZ=43/norm;
       const lift=.012*Math.sin(car.travel*3.2);
       const vertex=([across,y,along])=>[x+across*forwardZ+along*forwardX,y,z-across*forwardX+along*forwardZ];
@@ -338,14 +393,35 @@ function createBridgeBooth(engine){
     ctx.fillStyle=shadow;ctx.globalAlpha=1-(view?.approach??0);ctx.fillRect(0,0,width,height);ctx.globalAlpha=1;
     if(reproject){
       projectedBridge=[];
-      for(const [face,color,deckTop] of surfaces){
+      const offscreen=points=>points.every(p=>p[0]<-20)||points.every(p=>p[0]>width+20)||
+        points.every(p=>p[1]<-20)||points.every(p=>p[1]>height+20);
+      for(const [face,color,deckTop,oneSided] of surfaces){
         const points=projectFace(face);
-        if(points.length>=3)projectedBridge.push({points,color,deckTop,depth:points.reduce((sum,p)=>sum+p[2],0)/points.length});
+        if(points.length<3||offscreen(points))continue;
+        if(oneSided){
+          const area=points.reduce((sum,p,i)=>{
+            const q=points[(i+1)%points.length];
+            return sum+p[0]*q[1]-p[1]*q[0];
+          },0);
+          if(area>=0)continue;
+        }
+        projectedBridge.push({points,color,deckTop,depth:points.reduce((sum,p)=>sum+p[2],0)/points.length});
       }
-      for(const [a,b,color,thickness] of trim){
+      for(const [a,b,color,thickness,cable] of trim){
         const points=projectFace([a,b]);
-        if(!points.length)continue;
+        if(!points.length||offscreen(points))continue;
         const depth=(points[0][2]+points[1][2])/2;
+        if(cable){
+          const [p,q]=points,dx=q[0]-p[0],dy=q[1]-p[1],length=Math.hypot(dx,dy);
+          if(length===0)continue;
+          const widthAt=point=>Math.min(18,Math.max(.52,focalX*thickness/point[2]))/2;
+          const edge=(point,side)=>{
+            const width=widthAt(point)*side/length;
+            return [point[0]-dy*width,point[1]+dx*width];
+          };
+          projectedBridge.push({points:[edge(p,-1),edge(q,-1),edge(q,1),edge(p,1)],color,depth});
+          continue;
+        }
         projectedBridge.push({points,color,depth,stroke:Math.min(18,Math.max(.52,focalX*thickness/depth))});
       }
     }
@@ -354,7 +430,9 @@ function createBridgeBooth(engine){
     geometry.sort((a,b)=>b.depth-a.depth);
     ctx.lineCap='round';
     for(const {points,color,stroke,depth,deckTop,alpha=1} of geometry){
-      ctx.globalAlpha=deckTop?1:alpha*(1-Math.min(.39,depth*.008)+(stroke?cameraX*.035:0));
+      const distanceFade=view?1-ease((depth-120)/130):1;
+      if(distanceFade===0)continue;
+      ctx.globalAlpha=distanceFade*(deckTop?1:alpha*(1-Math.min(.39,depth*.008)+(stroke?cameraX*.035:0)));
       ctx.beginPath();
       points.forEach(([x,y],index)=>index?ctx.lineTo(x,y):ctx.moveTo(x,y));
       if(stroke){ctx.strokeStyle=color;ctx.lineWidth=stroke;ctx.stroke()}
