@@ -289,6 +289,7 @@ function buildDiorama(level,index,fullscreen){
   }
   boxDiorama(foundation,-137,0,-84,274,8,168,water);
   for(const side of [-1,1]){
+    const ground=[];
     const end=side<0?road[0]:road.at(-1), top=end[1]-3;
     const boundary=Array.from({length:7},(_,i)=>{
       const z=-83+i*27.6;
@@ -307,10 +308,9 @@ function buildDiorama(level,index,fullscreen){
       const qFoot=feet?feet[i+1]:[q[0]-side*(6+random()*6),7,q[2]];
       if(ridge){
         const a=ridge[i],b=ridge[i+1];
-        face([p,q,a],tint(grass,random()*12-7));
-        face([q,b,a],tint(grass,random()*14-5));
-        face([a,b,pOuter],tint(grass,random()*13-6));
-        face([b,qOuter,pOuter],tint(grass,random()*15-8));
+        const facets=[[p,q,a],[q,b,a],[a,b,pOuter],[b,qOuter,pOuter]];
+        ground.push(...facets);
+        for(const facet of facets)face(facet,tint(grass,random()*17-8));
       }else{
         face([p,q,pOuter],tint(grass,random()*18-9));
         face([q,qOuter,pOuter],tint(grass,random()*20-10));
@@ -322,8 +322,9 @@ function buildDiorama(level,index,fullscreen){
         face([ps,pFoot,qs],tint(stone,random()*13-22));
         face([qs,pFoot,qFoot],tint(stone,random()*11-28));
         const seam=(upper,lower,t)=>upper.map((value,k)=>value+(lower[k]-value)*t);
-        for(const t of [.32,.67]){
-          const a=seam(p,ps,t),b=seam(q,qs,t),c=seam(q,qs,t+.045),d=seam(p,ps,t+.045);
+        for(const t of [.26+random()*.15,.59+random()*.17]){
+          const endDepth=t+(random()-.5)*.16;
+          const a=seam(p,ps,t),b=seam(q,qs,endDepth),c=seam(q,qs,endDepth+.035),d=seam(p,ps,t+.06);
           for(const v of [a,b,c,d])v[0]-=side*.12;
           face([a,b,c,d],tint(stone,t<.5?-13:15));
         }
@@ -341,34 +342,55 @@ function buildDiorama(level,index,fullscreen){
       }
     }
     const from=side<0?-132:halfGap,to=side<0?-halfGap:132;
-    edge(from,to,top+7,-12,24,[76,89,93]);
+    const approachY=top+(fullscreen?8:10);
+    edge(from,to,approachY-3,-12,24,[76,89,93]);
     if(fullscreen){
-      for(const z of [-10.6,9.7])face([[from,top+10.1,z],[to,top+10.1,z],[to,top+10.1,z+1],[from,top+10.1,z+1]],[181,186,172]);
-      for(let x=from+3;x+6<to;x+=12)face([[x,top+10.2,-.65],[x+6,top+10.2,-.65],[x+6,top+10.2,.65],[x,top+10.2,.65]],[221,196,128]);
+      for(const z of [-10.6,9.7])face([[from,approachY+.1,z],[to,approachY+.1,z],[to,approachY+.1,z+1],[from,approachY+.1,z+1]],[181,186,172]);
+      for(let x=from+3;x+6<to;x+=12)face([[x,approachY+.2,-.65],[x+6,approachY+.2,-.65],[x+6,approachY+.2,.65],[x,approachY+.2,.65]],[221,196,128]);
       for(let n=0;n<30;n++){
         const x=from+random()*(to-from),z=(random()-.5)*17,d=.28+random()*1.3;
-        face([[x,top+10.18,z],[x+d,top+10.18,z+.24],[x+d*.3,top+10.18,z+.5]],n%3?[87,101,105]:[101,114,115]);
+        face([[x,approachY+.18,z],[x+d,approachY+.18,z+.24],[x+d*.3,approachY+.18,z+.5]],n%3?[87,101,105]:[101,114,115]);
       }
     }else edge(side<0?-131:halfGap,side<0?-halfGap:131,top+10,-1.1,2.2,[212,198,156]);
-    for(let n=0;n<7;n++){
+    const terrainY=(x,z)=>{
+      for(const [[ax,ay,az],[bx,by,bz],[cx,cy,cz]] of ground){
+        const area=(bx-ax)*(cz-az)-(cx-ax)*(bz-az);
+        const u=((x-ax)*(cz-az)-(z-az)*(cx-ax))/area;
+        const v=((bx-ax)*(z-az)-(bz-az)*(x-ax))/area;
+        if(u>=0&&v>=0&&u+v<=1)return ay+(by-ay)*u+(cy-ay)*v;
+      }
+      return top+3;
+    };
+    for(let n=0;n<(fullscreen&&index===1?9:7);n++){
       const x=side*(halfGap+14+random()*(113-halfGap)),z=(random()<.55?-1:1)*(25+random()*47);
-      const h=13+random()*17;
-      trees.push({x,y:top+3,z,h,phase:random()*6,broad:fullscreen&&(index===0||index===3)&&n%3===0});
+      const h=13+random()*17+(fullscreen&&index===1?6:0);
+      trees.push({x,y:terrainY(x,z),z,h,phase:random()*6,broad:fullscreen&&(index===0||index===3)&&n%3===0});
     }
     for(let n=0;n<7;n++){
       const x=side*(halfGap+15+random()*(112-halfGap)),z=(random()<.5?-1:1)*(19+random()*57);
       const h=2+random()*5;
-      if(fullscreen)sculptDiorama(faces,x,top+3,z,h,h*1.45,tint(stone,9),random()*6,false);
+      if(fullscreen)sculptDiorama(faces,x,terrainY(x,z)-.7,z,h,h*1.45,tint(stone,level.snowfall?31:9),random()*6,false);
       else coneDiorama(faces,x,top+3,z,h,h*1.3,5,tint(stone,18));
     }
     if(fullscreen){
       for(let n=0;n<34;n++){
         const x=side*(halfGap+15+random()*(113-halfGap)),z=(random()<.5?-1:1)*(22+random()*52),h=2+random()*4;
+        const y=terrainY(x,z);
+        if(level.snowfall){
+          const radius=1.5+h*.7;
+          const rim=Array.from({length:5},(_,i)=>{
+            const angle=i*Math.PI*2/5+n,reach=radius*(.65+random()*.35);
+            const px=x+Math.cos(angle)*reach,pz=z+Math.sin(angle)*reach;
+            return [px,terrainY(px,pz)+.25,pz];
+          });
+          for(let i=0;i<rim.length;i++)face([[x,y+.85,z],rim[i],rim[(i+1)%rim.length]],tint(grass,22+i*3));
+          continue;
+        }
         for(let blade=0;blade<3;blade++){
           const offset=blade-1;
-          face([[x+offset-.6,top+4,z],[x+offset+.6,top+4,z+.4],[x+offset*1.65,top+4+h*(blade===1?1:.68),z+.7]],tint(grass,level.snowfall?24:-18-blade*5));
+          face([[x+offset-.6,y,z],[x+offset+.6,y,z+.4],[x+offset*1.65,y+h*(blade===1?1:.68),z+.7]],tint(grass,-18-blade*5));
         }
-        if(!level.snowfall&&n%5===0)face([[x-1,top+4+h,z],[x+1,top+4+h,z],[x+.5,top+4+h+.7,z+1],[x-.5,top+4+h+.7,z+1]],index===3?[242,205,132]:[242,229,191]);
+        if(n%5===0)face([[x-1,y+h,z],[x+1,y+h,z],[x+.5,y+h+.7,z+1],[x-.5,y+h+.7,z+1]],index===3?[242,205,132]:[242,229,191]);
       }
       for(let n=0;n<6;n++){
         const x=side*(halfGap+8+n*10);
@@ -536,15 +558,19 @@ function paintDiorama(ctx,model,x,y,scale,state){
   const carT=clear!==null?clear:animate?(time*.21)%1:.46;
   const carX=complete?-125+carT*250:-128+carT*(121-halfGap);
   let carY=carX<0?road[0][1]:road.at(-1)[1];
+  let grade=0;
   for(let i=1;i<road.length;i++){
     const [a,ay]=road[i-1],[b,by]=road[i];
-    if(carX>=a&&carX<=b){carY=ay+(by-ay)*(carX-a)/(b-a);break}
+    if(carX>=a&&carX<=b){grade=(by-ay)/(b-a);carY=ay+grade*(carX-a);break}
   }
   const long=model.vehicle==='CAR'?16:24, paint=model.vehicle==='TRUCK'?[222,157,86]:[216,119,94];
-  boxDiorama(faces,carX-long/2,carY+6,-6,long,5,12,paint);
-  boxDiorama(faces,carX-4,carY+11,-5,long-8,5,10,[115,160,176]);
-  for(const wheel of [-1,1])for(const z of [-7,5])boxDiorama(faces,carX+wheel*(long*.31)-2,carY+4,z,4,4,2,[40,55,61]);
-  boxDiorama(faces,carX+long/2-.4,carY+8,-5,1,2,2,[252,227,161]);
+  if(model.fullscreen)miniatureVehicle(add,carX,carY+5,grade,model.vehicle);
+  else{
+    boxDiorama(faces,carX-long/2,carY+6,-6,long,5,12,paint);
+    boxDiorama(faces,carX-4,carY+11,-5,long-8,5,10,[115,160,176]);
+    for(const wheel of [-1,1])for(const z of [-7,5])boxDiorama(faces,carX+wheel*(long*.31)-2,carY+4,z,4,4,2,[40,55,61]);
+    boxDiorama(faces,carX+long/2-.4,carY+8,-5,1,2,2,[252,227,161]);
+  }
   const projected=model.terrain.concat(faces.map(projectDioramaFace)).sort((a,b)=>a.depth-b.depth);
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
   for(const {points,color,worldX,path,lit,muted} of model.foundation.concat(projected)){
@@ -563,6 +589,45 @@ function paintDiorama(ctx,model,x,y,scale,state){
     ctx.closePath();ctx.fill();
   }
   ctx.restore();
+}
+
+function miniatureVehicle(add,x,y,grade,vehicle){
+  const car=vehicle==='CAR',truck=vehicle==='TRUCK',length=car?9:13;
+  const paint=truck?[207,153,89]:car?[97,161,182]:[217,143,100];
+  const glass=[54,91,109],tire=[36,48,54],hub=[166,181,184];
+  const angle=Math.atan(grade),cos=Math.cos(angle),sin=Math.sin(angle);
+  const place=([px,py,z])=>[x+px*cos-py*sin,y+px*sin+py*cos,z];
+  const panel=(vertices,color)=>add(vertices.map(place),color);
+  const shell=(rear,front,base,roofRear,roofFront,roof,halfWidth,upperWidth,color,sideColor)=>{
+    const profile=[[rear,base],[front,base],[roofFront,roof],[roofRear,roof]];
+    const edges=[-1,1].map(side=>profile.map(([px,py],i)=>[px,py,side*(i<2?halfWidth:upperWidth)]));
+    for(const edge of edges)panel(edge,sideColor);
+    for(let i=1;i<4;i++){
+      const shade=i===2?14:-14;
+      panel([edges[0][i],edges[1][i],edges[1][(i+1)%4],edges[0][(i+1)%4]],color.map(c=>Math.min(255,c+shade)));
+    }
+  };
+  shell(-length,length,2,-length+.9,length-.9,car?6:8,5.1,4.7,paint,paint);
+  if(truck){
+    shell(-12,-1,7,-11.7,-1.3,13,5,4.9,[147,156,146],[127,143,138]);
+    shell(0,11.8,7,1,8.5,12,4.7,4,paint,glass);
+  }else{
+    shell(-length+(car?3:1),length-(car?3:1),car?5.9:7.8,-length+(car?5:1.6),length-(car?5:2),car?10:13,4.6,3.8,glass,glass);
+  }
+  for(const side of [-1,1]){
+    const z=side*5.2;
+    for(const wheel of [-1,1]){
+      const center=wheel*length*.61;
+      for(const [radius,depth,color] of [[2.5,z,tire],[1.25,z+side*.12,hub]]){
+        panel(Array.from({length:8},(_,i)=>{
+          const theta=i*Math.PI/4;
+          return [center+radius*Math.cos(theta),2.5+radius*Math.sin(theta),depth];
+        }),color);
+      }
+    }
+    panel([[length-1.9,3.8,z],[length-.3,3.8,z],[length-.5,5,z],[length-1.9,5,z]],[243,224,164]);
+    panel([[-length+.2,3.8,z],[-length+1.2,3.8,z],[-length+1.2,5,z],[-length+.3,5,z]],[182,77,64]);
+  }
 }
 
 function drawDiorama(ctx,model,x,y,scale,state){
